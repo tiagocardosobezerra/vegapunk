@@ -140,9 +140,7 @@ Vegapunk cobre recursos de SQL Server 2016 até 2022, com anotações de versão
  
 ## Créditos
  
-**Criador:** Tiago Cardoso Bezerra
-**E-mail:** tiagocardosobezerra@gmail.com
-**GitHub:** [@tiagocardosobezerra](https://github.com/tiagocardosobezerra)
+**Criador:** Tiago Cardoso Bezerra | [tiagocardosobezerra](https://github.com/tiagocardosobezerra)
  
 Batizado em homenagem a Vegapunk, o engenheiro genial de One Piece, personagem reconhecido por dominar sistemas complexos e compartilhar conhecimento de forma clara e acessível.
  
