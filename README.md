@@ -1,5 +1,5 @@
 # Vegapunk
-
+ 
 **Não adivinha. Sabe.**
  
 ## Visão geral
@@ -22,33 +22,33 @@ Em vez de o Claude tentar adivinhar como um sistema nomeou as próprias tabelas,
 * **Suíte de regressão própria (Stella).** Gera sozinha uma fixture fictícia e valida, a cada mudança, que casos que já funcionavam continuam funcionando — cobrindo tanto o score/ranking do motor quanto o caminho `importar` → `detalhar` → JSON.
 ## Instalação
  
-Clone este repositório e copie a pasta `skills/vegapunk-community` para o seu diretório de skills.
+Clone este repositório e copie a pasta `skills/vegapunk` para o seu diretório de skills.
  
 ### Nível de usuário (todos os projetos)
  
 macOS/Linux:
 ```bash
-cp -r skills/vegapunk-community ~/.claude/skills/
+cp -r skills/vegapunk ~/.claude/skills/
 ```
  
 Windows (PowerShell):
 ```powershell
-Copy-Item -Recurse skills/vegapunk-community $HOME\.claude\skills\
+Copy-Item -Recurse skills/vegapunk $HOME\.claude\skills\
 ```
  
 ### Nível de projeto (projeto atual apenas)
  
 macOS/Linux:
 ```bash
-cp -r skills/vegapunk-community .claude/skills/
+cp -r skills/vegapunk .claude/skills/
 ```
  
 Windows (PowerShell):
 ```powershell
-Copy-Item -Recurse skills/vegapunk-community .claude\skills\
+Copy-Item -Recurse skills/vegapunk .claude\skills\
 ```
  
-> Se você já tiver uma skill privada chamada só `vegapunk`, pode instalar esta tranquilamente ao lado dela. O identificador aqui é `vegapunk-community`, escolhido de propósito para não colidir.
+> ⚠️ Se você já tiver, no mesmo ambiente, outra skill/plugin chamado `vegapunk` apontando para um schema real de terceiros (sistema licenciado, já com dados importados), **não instale este pacote por cima dela** — copie esta pasta com outro nome (ex.: `vegapunk-publico`) antes de continuar. Este pacote é o motor genérico e público: base vazia, nenhum conhecimento de sistema real embutido.
  
 ## Importando seus dados (obrigatório)
  
@@ -60,12 +60,12 @@ O `punk_records.db` publicado neste repositório vem **vazio**. Para a skill fun
 2. **Exporte cada conjunto para um CSV**, no formato abaixo, dentro de uma pasta (por exemplo, `./meus_csvs/`).
 3. **Rode o importador:**
 ```bash
-   python3 skills/vegapunk-community/scripts/nomi_nomi_no_mi.py importar --dir ./meus_csvs/
+   python3 skills/vegapunk/scripts/nomi_nomi_no_mi.py importar --dir ./meus_csvs/
 ```
    O comando cria e recalcula tudo sozinho (contagem de relacionamentos por tabela, score de relevância, ranking) a partir só do que está nos CSVs, e avisa no final — sem travar o import — se alguma FK de `relacionamentos.csv` apontar para uma tabela ou coluna que não existe em `tabelas.csv`/`colunas.csv`. Se `contextos/punk_records.db` já existir, use `--forcar` para sobrescrever.
 4. **Teste:**
 ```bash
-   python3 skills/vegapunk-community/scripts/nomi_nomi_no_mi.py buscar "seu pedido em português aqui"
+   python3 skills/vegapunk/scripts/nomi_nomi_no_mi.py buscar "seu pedido em português aqui"
 ```
 5. **Mantenha o banco importado fora do controle de versão.** Depois de importar, `contextos/punk_records.db` passa a conter metadados do seu sistema. Adicione-o ao `.gitignore` do seu projeto e nunca faça commit ou push dele para um repositório público.
 ### Formato dos 5 CSVs
@@ -80,19 +80,19 @@ O `punk_records.db` publicado neste repositório vem **vazio**. Para a skill fun
  
 As 4 consultas de exemplo ficam na raiz deste repositório, fora da pasta `skills/`. Elas servem só como referência de como extrair os dados de um ambiente real; adapte a lista de prefixos de tabela (`'A', 'G', 'P', 'V', 'Z'` nos exemplos) para os módulos do seu ambiente.
  
-Documentação completa, com o formato de cada CSV e a explicação de como o motor usa cada tabela, em [`skills/vegapunk-community/contextos/README.md`](skills/vegapunk-community/contextos/README.md).
+Documentação completa, com o formato de cada CSV e a explicação de como o motor usa cada tabela, em [`skills/vegapunk/contextos/README.md`](skills/vegapunk/contextos/README.md).
  
 ## Estrutura do Repositório
  
 ```
-vegapunk-community/
+vegapunk/
 ├── README.md                        # Este arquivo
 ├── Tabelas.sql                      # Exemplo de consulta para gerar tabelas.csv
 ├── Colunas.sql                      # Exemplo de consulta para gerar colunas.csv
 ├── Relacionamentos.sql              # Exemplo de consulta para gerar relacionamentos.csv
 ├── Sistemas.sql                     # Exemplo de consulta para gerar sistemas.csv
 └── skills/
-    └── vegapunk-community/
+    └── vegapunk/
         ├── SKILL.md                 # Definição principal e fluxos de trabalho
         ├── AVISO.md                 # Aviso sobre dados de terceiros
         ├── contextos/
@@ -131,9 +131,8 @@ Exemplo (nomes ilustrativos, os reais dependem do que você importou):
 python3 scripts/nomi_nomi_no_mi.py buscar "quais funcionários bateram ponto ontem"
 python3 scripts/nomi_nomi_no_mi.py detalhar R034FUN R038PON
 ```
-
+ 
 <img width="1260" height="820" alt="radar-descoberta-de-schema" src="https://github.com/user-attachments/assets/09e25475-f1c8-4473-81fc-c08ecf363b93" />
-
 ## Suporte a Versões SQL Server
  
 Vegapunk cobre recursos de SQL Server 2016 até 2022, com anotações de versão quando aplicável.
@@ -148,12 +147,12 @@ Batizado em homenagem a Vegapunk, o engenheiro gênio de *One Piece*, personagem
  
 ## Agradecimentos
  
-* [Bruna Cardoso Bezerra](https://github.com/brunacbezerra), por me ensinar tudo o que sei sobre o Claude Code.
-* [Hatem Mohamed](https://github.com/hmohamed01), por compartilhar as boas práticas de T-SQL que aplico no Vegapunk.
+* **Bruna Cardoso Bezerra**, por me ensinar tudo o que sei sobre o Claude Code.
+* **Hatem Mohamed** | https://github.com/hmohamed01, por compartilhar as boas práticas de T-SQL que aplico no Vegapunk.
 * **Você**, por usar Vegapunk!
 ## Aviso sobre dados de terceiros
  
-Este repositório **não contém, e nunca vai conter**, metadados de schema de nenhum sistema real. O que é distribuído aqui é só o motor (código genérico) e um banco de metadados **vazio**. Ao importar dados do seu próprio ambiente, você confirma que já tem acesso legítimo ou licenciado a ele, e manter esses dados fora de repositórios públicos é responsabilidade sua. Detalhes completos em [`skills/vegapunk-community/AVISO.md`](skills/vegapunk-community/AVISO.md).
+Este repositório **não contém, e nunca vai conter**, metadados de schema de nenhum sistema real. O que é distribuído aqui é só o motor (código genérico) e um banco de metadados **vazio**. Ao importar dados do seu próprio ambiente, você confirma que já tem acesso legítimo ou licenciado a ele, e manter esses dados fora de repositórios públicos é responsabilidade sua. Detalhes completos em [`skills/vegapunk/AVISO.md`](skills/vegapunk/AVISO.md).
  
 ## Licença
  
@@ -162,7 +161,6 @@ MIT License, veja [LICENSE](LICENSE) para detalhes.
 ---
  
 <p align="center"><strong>Vegapunk</strong>, não adivinha. sabe.</p>
-
 ```
                                                                  ░█▒▒▓▓▓▓█                          
                                                     █▓▓         ▓█▓▓▒▒▓▓▓░░                        
