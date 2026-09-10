@@ -142,8 +142,8 @@ python3 scripts/nomi_nomi_no_mi.py buscar "colaboradores com dados de folha de p
 python3 scripts/nomi_nomi_no_mi.py detalhar FCOLABORADOR FDADOSFOLHA
 ```
 
-<img width="100%" height="820" alt="radar-descoberta-de-schema" src="https://github.com/user-attachments/assets/91250194-64ca-401a-b65b-bbc112be850a" />
- 
+<img width="1260" height="820" alt="radar-descoberta-de-schema" src="https://github.com/user-attachments/assets/09e25475-f1c8-4473-81fc-c08ecf363b93" />![Uploading radar-
+
 ## Suporte a Versões SQL Server
  
 Vegapunk cobre recursos de SQL Server 2016 até 2022, com anotações de versão quando aplicável.
