@@ -141,6 +141,8 @@ Exemplo (nomes ilustrativos, os reais dependem do que você importou):
 python3 scripts/nomi_nomi_no_mi.py buscar "colaboradores com dados de folha de pagamento"
 python3 scripts/nomi_nomi_no_mi.py detalhar FCOLABORADOR FDADOSFOLHA
 ```
+
+<img width="100%" height="820" alt="radar-descoberta-de-schema" src="https://github.com/user-attachments/assets/91250194-64ca-401a-b65b-bbc112be850a" />
  
 ## Suporte a Versões SQL Server
  
