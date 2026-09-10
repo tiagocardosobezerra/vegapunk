@@ -151,9 +151,10 @@ Nomeado em homenagem a Vegapunk, o engenheiro gênio de *One Piece* — personag
  
 ## Agradecimentos
  
-* **Anthropic** — Claude API e plataforma Claude Code
-* **Comunidade SQL Server** — contribuidores Stack Overflow, MVPs e bloggers de performance cujos padrões informam estas diretrizes
-* **Você** — por usar Vegapunk
+* **Bruna Cardoso Bezerra**, por me ensinar tudo o que sei sobre o Claude Code.
+* **Hatem Mohamed** | https://github.com/hmohamed01, por compartilhar as boas práticas de T-SQL que aplico no Vegapunk.
+* **Você**, por usar Vegapunk!
+
 ## Aviso sobre dados de terceiros
  
 Este repositório **não contém e nunca vai conter** metadados de schema de nenhum sistema real. O que é distribuído aqui é só o motor (código genérico) e um banco de metadados **vazio**. Ao importar dados do seu próprio ambiente, você confirma que já tem acesso legítimo/licenciado a ele, e a responsabilidade por manter esses dados fora de repositórios públicos é sua. Detalhes completos em [`skills/vegapunk-community/AVISO.md`](skills/vegapunk-community/AVISO.md).
@@ -164,7 +165,7 @@ MIT License — veja [LICENSE](LICENSE) para detalhes.
  
 ---
  
-<p align="center"><strong>Vegapunk</strong> — não adivinha. sabe.</p>
+<p align="center"><strong>Vegapunk</strong>, não adivinha. sabe.</p>
  
 ```
                                                                  ░█▒▒▓▓▓▓█                          
