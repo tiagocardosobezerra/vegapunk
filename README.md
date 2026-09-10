@@ -3,13 +3,14 @@
 **Não adivinha. Sabe.**
  
 <img width="100%" height="842" alt="vegapunk-poster" src="https://github.com/user-attachments/assets/d95619a4-0e70-47d7-9db4-6d35e1f4bbb7" />
+
 ## Visão geral
  
 O Vegapunk é uma skill do Claude Code para desenvolvimento em T-SQL no Microsoft SQL Server. O diferencial dela é um motor de descoberta de schema por linguagem natural, plugável em qualquer banco de dados: você pergunta em português e recebe a query certa, já com os nomes reais de tabela e coluna do seu ambiente.
  
-Em vez de o Claude tentar adivinhar como um ERP nomeou as próprias tabelas (algo comum em sistemas como o TOTVS RM, onde os nomes costumam ser códigos como `FCOLABORADOR` ou `RCONTAB`), o Vegapunk consulta uma base de metadados local chamada **Punk Records**, através de um motor chamado **Nomi Nomi no Mi**. Essa base é populada por você, a partir do seu próprio ambiente.
+Em vez de o Claude tentar adivinhar como um ERP nomeou as próprias tabelas, o Vegapunk consulta uma base de metadados local chamada **Punk Records**, através de um motor chamado **Nomi Nomi no Mi**. Essa base é populada por você, a partir do seu próprio ambiente.
  
-### Antes vs. depois
+## Antes vs. depois
  
 | | Sem descoberta de schema | Com Vegapunk |
 |---|---|---|
@@ -65,8 +66,8 @@ O `punk_records.db` publicado neste repositório vem **vazio**. Para a skill fun
  
 ### Passo a passo
  
-1. **Extraia os metadados do seu ambiente.** Você precisa já ter acesso legítimo ou licenciado a ele. Rode consultas de introspecção contra o dicionário de dados e o catálogo de relacionamentos do seu sistema (nunca contra dados de negócio ou de cliente) para obter: lista de tabelas, colunas com descrição de negócio, relacionamentos (chaves estrangeiras), módulos/sistemas e, se fizer sentido, um dicionário de sinônimos (vocabulário coloquial → vocabulário do schema). Se o seu ambiente for TOTVS RM Linha, tem exemplos prontos logo abaixo.
-2. **Exporte cada conjunto para um CSV**, no formato descrito adiante, dentro de uma pasta (por exemplo, `./meus_csvs/`).
+1. **Extraia os metadados do seu ambiente.** Você precisa já ter acesso legítimo ou licenciado a ele. Rode consultas de introspecção contra o dicionário de dados e o catálogo de relacionamentos do seu sistema (nunca contra dados de negócio ou de cliente) para obter: lista de tabelas, colunas com descrição de negócio, relacionamentos (chaves estrangeiras), módulos/sistemas e, se fizer sentido, um dicionário de sinônimos (vocabulário coloquial → vocabulário do schema).
+2. **Exporte cada conjunto para um CSV**, no formato abaixo, dentro de uma pasta (por exemplo, `./meus_csvs/`).
 3. **Rode o importador:**
 ```bash
    python3 skills/vegapunk-community/scripts/nomi_nomi_no_mi.py importar --dir ./meus_csvs/
@@ -79,180 +80,34 @@ O `punk_records.db` publicado neste repositório vem **vazio**. Para a skill fun
 5. **Mantenha o banco importado fora do controle de versão.** Depois de importar, `contextos/punk_records.db` passa a conter metadados do seu sistema. Adicione-o ao `.gitignore` do seu projeto e nunca faça commit ou push dele para um repositório público.
 ### Formato dos 5 CSVs
  
-| Arquivo | Colunas obrigatórias | Colunas opcionais | Observação | Exemplo (TOTVS RM Linha) |
+| Arquivo | Colunas obrigatórias | Colunas opcionais | Observação | Exemplo de consulta |
 |---|---|---|---|---|
-| `tabelas.csv` | `tabela` | `total_registros`, `descricao` | Uma linha por tabela. `score_relevancia`, `ranking`, `tabelas_filhas`, `tabelas_pais` e `conexoes_totais` são calculados pelo import, não vão neste CSV. | [![baixar tabelas.sql](https://img.shields.io/badge/baixar-tabelas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](skills/vegapunk-community/contextos/exemplos-totvs-rm/tabelas.sql) |
-| `colunas.csv` | `tabela`, `coluna` | `descricao` | Uma linha por coluna. A `descricao` (negócio, em PT-BR) é o que o motor usa pra casar com o pedido do usuário. | [![baixar colunas.sql](https://img.shields.io/badge/baixar-colunas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](skills/vegapunk-community/contextos/exemplos-totvs-rm/colunas.sql) |
-| `relacionamentos.csv` | `tabela_filha`, `campo_filho`, `tabela_mae`, `campo_mae` | — | Uma linha por FK; chave composta = uma linha por campo. | [![baixar relacionamentos.sql](https://img.shields.io/badge/baixar-relacionamentos.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](skills/vegapunk-community/contextos/exemplos-totvs-rm/relacionamentos.sql) |
-| `sistemas.csv` | `codsistema`, `nomesistema` | `descricao` | Uma linha por módulo. `codsistema` deve bater com o prefixo de 1 letra das tabelas desse módulo. | [![baixar sistemas.sql](https://img.shields.io/badge/baixar-sistemas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](skills/vegapunk-community/contextos/exemplos-totvs-rm/sistemas.sql) |
-| `sinonimos.csv` | `termo`, `sinonimo` | — | Uma linha por par (um termo com 3 sinônimos = 3 linhas). Cadeias funcionam. | Sem consulta associada. É vocabulário definido por você, não algo que exista pronto no dicionário de dados. |
+| `tabelas.csv` | `tabela` | `total_registros`, `descricao` | Uma linha por tabela. Não inclua score, ranking ou contagens: são calculados pelo import. | [![baixar Tabelas.sql](https://img.shields.io/badge/baixar-Tabelas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](Tabelas.sql) |
+| `colunas.csv` | `tabela`, `coluna` | `descricao` | Uma linha por coluna. A `descricao` (negócio, em PT-BR) é o que o motor usa pra casar com o pedido do usuário. | [![baixar Colunas.sql](https://img.shields.io/badge/baixar-Colunas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](Colunas.sql) |
+| `relacionamentos.csv` | `tabela_filha`, `campo_filho`, `tabela_mae`, `campo_mae` | — | Uma linha por FK; chave composta = uma linha por campo. | [![baixar Relacionamentos.sql](https://img.shields.io/badge/baixar-Relacionamentos.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](Relacionamentos.sql) |
+| `sistemas.csv` | `codsistema`, `nomesistema` | `descricao` | Uma linha por módulo. `codsistema` deve bater com o prefixo de 1 letra das tabelas desse módulo. | [![baixar Sistemas.sql](https://img.shields.io/badge/baixar-Sistemas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](Sistemas.sql) |
+| `sinonimos.csv` | `termo`, `sinonimo` | — | Uma linha por par (um termo com 3 sinônimos = 3 linhas). Cadeias funcionam. | Sem consulta associada. É vocabulário definido por você. |
  
-### De onde vêm os dados, no TOTVS RM Linha
+As 4 consultas de exemplo ficam na raiz deste repositório, fora da pasta `skills/`. Elas servem só como referência de como extrair os dados de um ambiente real; adapte a lista de prefixos de tabela (`'A', 'G', 'P', 'V', 'Z'` nos exemplos) para os módulos do seu ambiente.
  
-As consultas abaixo foram usadas contra o TOTVS RM Linha e mostram, na prática, como gerar cada CSV a partir das tabelas de dicionário de dados do sistema (`GDIC`, `GLINKSREL`, `GSISTEMA`). A lista de prefixos usada nos exemplos (`'A', 'G', 'P', 'V', 'Z'`) é só ilustrativa: troque pelos módulos que você realmente usa no seu ambiente.
- 
-#### tabelas.csv
- 
-<details>
-<summary>Ver consulta completa</summary>
-```sql
-;WITH GDIC_Filtrada AS
-(
-    SELECT DISTINCT
-        UPPER(TABELA) AS TABELA
-    FROM GDIC WITH (NOLOCK)
-    WHERE TABELA IS NOT NULL
-      AND (
-            TABELA LIKE 'A%'
-         OR TABELA LIKE 'G%'
-         OR TABELA LIKE 'P%'
-         OR TABELA LIKE 'V%'
-         OR TABELA LIKE 'Z%'
-      )
-),
-DescricaoTabela AS
-(
-    SELECT UPPER(TABELA) AS TABELA, DESCRICAO
-    FROM GDIC WITH (NOLOCK)
-    WHERE COLUNA = '#'
-),
-ContagemFilhos AS
-(
-    SELECT UPPER(MASTERTABLE) AS TABELA, COUNT(DISTINCT CHILDTABLE) AS QT_FILHOS
-    FROM GLINKSREL WITH (NOLOCK)
-    GROUP BY UPPER(MASTERTABLE)
-),
-ContagemPais AS
-(
-    SELECT UPPER(CHILDTABLE) AS TABELA, COUNT(DISTINCT MASTERTABLE) AS QT_PAIS
-    FROM GLINKSREL WITH (NOLOCK)
-    GROUP BY UPPER(CHILDTABLE)
-),
-Volumetria AS
-(
-    SELECT UPPER(t.name) AS TABELA, SUM(p.rows) AS QT_REGISTROS
-    FROM sys.tables t
-    INNER JOIN sys.partitions p ON t.object_id = p.object_id
-    WHERE p.index_id IN (0,1) AND t.schema_id = SCHEMA_ID('dbo')
-    GROUP BY UPPER(t.name)
-)
-SELECT
-    f.TABELA,
-    d.DESCRICAO,
-    ISNULL(v.QT_REGISTROS,0) AS QT_REGISTROS
-FROM GDIC_Filtrada f
-LEFT JOIN DescricaoTabela d ON f.TABELA = d.TABELA
-LEFT JOIN Volumetria v ON f.TABELA = v.TABELA
-ORDER BY f.TABELA;
-```
- 
-*(a consulta completa, com o cálculo de score e ranking incluído, está no arquivo para download abaixo)*
- 
-</details>
-A consulta original devolve mais colunas do que o `tabelas.csv` realmente precisa, porque ela já calcula `RANKING` e `SCORE_RELEVANCIA` para você conferir os números antes de importar. Para o CSV, use só estas três:
- 
-| Coluna da consulta | Coluna do CSV |
-|---|---|
-| `TABELA` | `tabela` |
-| `DESCRICAO` (vem de `GDIC`, linha com `COLUNA = '#'`) | `descricao` |
-| `QT_REGISTROS` (vem de `sys.tables` / `sys.partitions`) | `total_registros` |
- 
-As demais colunas do resultado (`RANKING`, `SCORE_RELEVANCIA`, `TABELAS_FILHAS`, `TABELAS_PAIS`, `CONEXOES_TOTAIS`) servem só para conferência manual. O comando `importar` recalcula todas elas sozinho a partir do CSV, então não precisam ser exportadas.
- 
-[![baixar tabelas.sql](https://img.shields.io/badge/baixar-tabelas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](skills/vegapunk-community/contextos/exemplos-totvs-rm/tabelas.sql)
- 
-#### colunas.csv
- 
-```sql
-SELECT
-    TABELA,
-    COLUNA,
-    DESCRICAO
-FROM GDIC
-WHERE UPPER(LEFT(TABELA, 1)) IN ('A', 'G', 'P', 'V', 'Z')
-```
- 
-Mapeamento direto, as 3 colunas do resultado já batem com o CSV:
- 
-| Coluna da consulta | Coluna do CSV |
-|---|---|
-| `TABELA` | `tabela` |
-| `COLUNA` | `coluna` |
-| `DESCRICAO` | `descricao` |
- 
-Essas são, aliás, todas as colunas de `GDIC` que o Vegapunk realmente usa: `TABELA`, `COLUNA` e `DESCRICAO`. O dicionário de dados do TOTVS RM tem várias outras colunas (tipo, tamanho, nome físico etc.), mas nenhuma delas entra no motor; só nome de tabela, nome de coluna e descrição de negócio.
- 
-[![baixar colunas.sql](https://img.shields.io/badge/baixar-colunas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](skills/vegapunk-community/contextos/exemplos-totvs-rm/colunas.sql)
- 
-#### relacionamentos.csv
- 
-```sql
-SELECT
-    MASTERTABLE,
-    MASTERFIELD,
-    CHILDTABLE,
-    CHILDFIELD
-FROM GLINKSREL
-WHERE UPPER(LEFT(MASTERTABLE, 1)) IN ('A', 'G', 'P', 'V', 'Z')
-```
- 
-Aqui os nomes não são iguais aos do CSV, preste atenção no mapeamento:
- 
-| Coluna da consulta | Coluna do CSV |
-|---|---|
-| `MASTERTABLE` | `tabela_mae` |
-| `MASTERFIELD` | `campo_mae` |
-| `CHILDTABLE` | `tabela_filha` |
-| `CHILDFIELD` | `campo_filho` |
- 
-Se uma FK for composta, o `GLINKSREL` já traz uma linha por campo, então não precisa agrupar nada.
- 
-[![baixar relacionamentos.sql](https://img.shields.io/badge/baixar-relacionamentos.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](skills/vegapunk-community/contextos/exemplos-totvs-rm/relacionamentos.sql)
- 
-#### sistemas.csv
- 
-```sql
-SELECT
-    CODSISTEMA,
-    NOMESISTEMA,
-    DESCRICAO
-FROM GSISTEMA
-WHERE CODSISTEMA IN ('A', 'G', 'P', 'V', 'Z')
-```
- 
-Mapeamento direto:
- 
-| Coluna da consulta | Coluna do CSV |
-|---|---|
-| `CODSISTEMA` | `codsistema` |
-| `NOMESISTEMA` | `nomesistema` |
-| `DESCRICAO` | `descricao` |
- 
-[![baixar sistemas.sql](https://img.shields.io/badge/baixar-sistemas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](skills/vegapunk-community/contextos/exemplos-totvs-rm/sistemas.sql)
- 
-#### sinonimos.csv
- 
-Não existe uma consulta de extração para este CSV. Sinônimos são vocabulário definido por você (por exemplo, "colaborador" → "funcionário"), a partir de padrões que você observa nas descrições reais do seu schema. Não é algo que já exista pronto no dicionário de dados.
- 
-Documentação completa, com o formato de cada CSV explicado a fundo e como o motor usa cada tabela, em [`skills/vegapunk-community/contextos/README.md`](skills/vegapunk-community/contextos/README.md).
+Documentação completa, com o formato de cada CSV e a explicação de como o motor usa cada tabela, em [`skills/vegapunk-community/contextos/README.md`](skills/vegapunk-community/contextos/README.md).
  
 ## Estrutura do Repositório
  
 ```
 vegapunk-community/
 ├── README.md                        # Este arquivo
+├── Tabelas.sql                      # Exemplo de consulta para gerar tabelas.csv
+├── Colunas.sql                      # Exemplo de consulta para gerar colunas.csv
+├── Relacionamentos.sql              # Exemplo de consulta para gerar relacionamentos.csv
+├── Sistemas.sql                     # Exemplo de consulta para gerar sistemas.csv
 └── skills/
     └── vegapunk-community/
         ├── SKILL.md                 # Definição principal e fluxos de trabalho
         ├── AVISO.md                 # Aviso sobre dados de terceiros
         ├── contextos/
         │   ├── punk_records.db      # Base de metadados (SQLite), vazia até você importar
-        │   ├── README.md            # Arquitetura do motor, formato de import, limitações
-        │   └── exemplos-totvs-rm/   # Consultas de exemplo para extrair os 5 CSVs do TOTVS RM Linha
-        │       ├── tabelas.sql
-        │       ├── colunas.sql
-        │       ├── relacionamentos.sql
-        │       └── sistemas.sql
+        │   └── README.md            # Arquitetura do motor, formato de import, limitações
         ├── referencias/
         │   ├── patterns.md          # Padrões de query: CTEs, paginação, PIVOT, MERGE, window functions
         │   ├── performance.md       # Planos de execução, indexação, estatísticas de espera
