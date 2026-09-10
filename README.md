@@ -19,7 +19,7 @@ Em vez de o Claude tentar adivinhar como um sistema nomeou as próprias tabelas,
 * **Detecção de anti-padrões de performance.** Identifica predicados não SARGable, conversões implícitas, índices faltando e outras ineficiências no plano de execução.
 * **Boas práticas de segurança.** Prevenção de SQL injection, queries parametrizadas, cuidado com SQL dinâmico e gerenciamento de permissões.
 * **Referências abrangentes.** Cinco documentos cobrindo padrões de query, otimização de performance, segurança, tipos de dados e transações.
-* **Suíte de regressão própria (Stella).** Gera sozinha uma fixture fictícia e valida, a cada mudança, que casos que já funcionavam continuam funcionando — cobrindo tanto o score/ranking do motor quanto o caminho `importar` → `detalhar` → JSON.
+* **Suíte de regressão própria (Stella).** Gera sozinha uma fixture fictícia e valida, a cada mudança, que casos que já funcionavam continuam funcionando, cobrindo tanto o score/ranking do motor quanto o caminho `importar` → `detalhar` → JSON.
 ## Instalação
  
 Clone este repositório e copie a pasta `skills/vegapunk` para o seu diretório de skills.
@@ -48,7 +48,7 @@ Windows (PowerShell):
 Copy-Item -Recurse skills/vegapunk .claude\skills\
 ```
  
-> ⚠️ Se você já tiver, no mesmo ambiente, outra skill/plugin chamado `vegapunk` apontando para um schema real de terceiros (sistema licenciado, já com dados importados), **não instale este pacote por cima dela** — copie esta pasta com outro nome (ex.: `vegapunk-publico`) antes de continuar. Este pacote é o motor genérico e público: base vazia, nenhum conhecimento de sistema real embutido.
+> ⚠️ Se você já tiver, no mesmo ambiente, outra skill/plugin chamado `vegapunk` apontando para um schema real de terceiros (sistema licenciado, já com dados importados), **não instale este pacote por cima dela**, copie esta pasta com outro nome (ex.: `vegapunk-publico`) antes de continuar. Este pacote é o motor genérico e público: base vazia, nenhum conhecimento de sistema real embutido.
  
 ## Importando seus dados (obrigatório)
  
@@ -62,7 +62,7 @@ O `punk_records.db` publicado neste repositório vem **vazio**. Para a skill fun
 ```bash
    python3 skills/vegapunk/scripts/nomi_nomi_no_mi.py importar --dir ./meus_csvs/
 ```
-   O comando cria e recalcula tudo sozinho (contagem de relacionamentos por tabela, score de relevância, ranking) a partir só do que está nos CSVs, e avisa no final — sem travar o import — se alguma FK de `relacionamentos.csv` apontar para uma tabela ou coluna que não existe em `tabelas.csv`/`colunas.csv`. Se `contextos/punk_records.db` já existir, use `--forcar` para sobrescrever.
+   O comando cria e recalcula tudo sozinho (contagem de relacionamentos por tabela, score de relevância, ranking) a partir só do que está nos CSVs, e avisa no final, sem travar o import, se alguma FK de `relacionamentos.csv` apontar para uma tabela ou coluna que não existe em `tabelas.csv`/`colunas.csv`. Se `contextos/punk_records.db` já existir, use `--forcar` para sobrescrever.
 4. **Teste:**
 ```bash
    python3 skills/vegapunk/scripts/nomi_nomi_no_mi.py buscar "seu pedido em português aqui"
@@ -78,7 +78,7 @@ O `punk_records.db` publicado neste repositório vem **vazio**. Para a skill fun
 | `sistemas.csv` | `codigo_sistema`, `nome_sistema` | `descricao` | Uma linha por módulo. `codigo_sistema` deve bater com o prefixo de 1 letra das tabelas desse módulo, quando esse padrão fizer sentido no seu ambiente. | [![baixar sistemas.sql](https://img.shields.io/badge/baixar-sistemas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](sql/sistemas.sql) |
 | `sinonimos.csv` | `termo`, `sinonimo` | — | Uma linha por par (um termo com 3 sinônimos = 3 linhas). Cadeias funcionam. | Sem consulta associada. É vocabulário definido por você. |
  
-As 4 consultas de exemplo ficam na raiz deste repositório, fora da pasta `skills/`. Elas servem só como referência de como extrair os dados de um ambiente real; adapte a lista de prefixos de tabela (`'A', 'G', 'P', 'V', 'Z'` nos exemplos) para os módulos do seu ambiente.
+As 4 consultas de exemplo ficam na pasta `sql/`, na raiz deste repositório, fora da pasta `skills/`. Elas servem só como referência de como extrair os dados de um ambiente real; adapte a lista de prefixos de tabela (`'A', 'G', 'P', 'V', 'Z'` nos exemplos) para os módulos do seu ambiente.
  
 Documentação completa, com o formato de cada CSV e a explicação de como o motor usa cada tabela, em [`skills/vegapunk/contextos/README.md`](skills/vegapunk/contextos/README.md).
  
@@ -87,26 +87,26 @@ Documentação completa, com o formato de cada CSV e a explicação de como o mo
 ```
 vegapunk/
 ├── README.md                        # Este arquivo
-├── Tabelas.sql                      # Exemplo de consulta para gerar tabelas.csv
-├── Colunas.sql                      # Exemplo de consulta para gerar colunas.csv
-├── Relacionamentos.sql              # Exemplo de consulta para gerar relacionamentos.csv
-├── Sistemas.sql                     # Exemplo de consulta para gerar sistemas.csv
-└── skills/
-    └── vegapunk/
-        ├── SKILL.md                 # Definição principal e fluxos de trabalho
-        ├── AVISO.md                 # Aviso sobre dados de terceiros
-        ├── contextos/
-        │   ├── punk_records.db      # Base de metadados (SQLite), vazia até você importar
-        │   └── README.md            # Arquitetura do motor, formato de import, limitações
-        ├── referencias/
-        │   ├── patterns.md          # Padrões de query: CTEs, paginação, PIVOT, MERGE, window functions
-        │   ├── performance.md       # Planos de execução, indexação, estatísticas de espera
-        │   ├── security.md          # Prevenção SQL injection, SQL dinâmico, permissões
-        │   ├── data-types.md        # Seleção de tipos, collation, otimização de armazenamento
-        │   └── transactions.md      # Níveis de isolamento, deadlocks, transações distribuídas
-        └── scripts/
-            ├── nomi_nomi_no_mi.py       # Motor de descoberta de schema + comando `importar`
-            └── stella.py                # Suíte de regressão (gera fixture fictícia própria)
+├── LICENSE                          # MIT License
+├── sql/
+│   ├── tabelas.sql                  # Exemplo de consulta para gerar tabelas.csv
+│   ├── colunas.sql                  # Exemplo de consulta para gerar colunas.csv
+│   ├── relacionamentos.sql          # Exemplo de consulta para gerar relacionamentos.csv
+│   └── sistemas.sql                 # Exemplo de consulta para gerar sistemas.csv
+├── SKILL.md                         # Definição principal e fluxos de trabalho
+├── AVISO.md                         # Aviso sobre dados de terceiros
+├── contextos/
+│   ├── punk_records.db              # Base de metadados (SQLite), vazia até você importar
+│   └── README.md                    # Arquitetura do motor, formato de import, limitações
+├── referencias/
+│   ├── patterns.md                  # Padrões de query: CTEs, paginação, PIVOT, MERGE, window functions
+│   ├── performance.md               # Planos de execução, indexação, estatísticas de espera
+│   ├── security.md                  # Prevenção SQL injection, SQL dinâmico, permissões
+│   ├── data-types.md                # Seleção de tipos, collation, otimização de armazenamento
+│   └── transactions.md              # Níveis de isolamento, deadlocks, transações distribuídas
+└── scripts/
+    ├── nomi_nomi_no_mi.py           # Motor de descoberta de schema + comando `importar`
+    └── stella.py                    # Suíte de regressão (gera fixture fictícia própria)
 ```
  
 ## Uso
@@ -133,6 +133,7 @@ python3 scripts/nomi_nomi_no_mi.py detalhar R034FUN R038PON
 ```
  
 <img width="1260" height="820" alt="radar-descoberta-de-schema" src="https://github.com/user-attachments/assets/09e25475-f1c8-4473-81fc-c08ecf363b93" />
+
 ## Suporte a Versões SQL Server
  
 Vegapunk cobre recursos de SQL Server 2016 até 2022, com anotações de versão quando aplicável.
@@ -143,12 +144,12 @@ Vegapunk cobre recursos de SQL Server 2016 até 2022, com anotações de versão
 **E-mail:** tiagocardosobezerra@gmail.com
 **GitHub:** [@tiagocardosobezerra](https://github.com/tiagocardosobezerra)
  
-Batizado em homenagem a Vegapunk, o engenheiro gênio de *One Piece*, personagem conhecido por dominar sistemas complexos e destilar conhecimento.
+Batizado em homenagem a Vegapunk, o engenheiro genial de One Piece, personagem reconhecido por dominar sistemas complexos e compartilhar conhecimento de forma clara e acessível.
  
 ## Agradecimentos
  
-* **Bruna Cardoso Bezerra**, por me ensinar tudo o que sei sobre o Claude Code.
-* **Hatem Mohamed** | https://github.com/hmohamed01, por compartilhar as boas práticas de T-SQL que aplico no Vegapunk.
+* **Bruna Cardoso Bezerra** | [brunacbezerra](https://github.com/brunacbezerra), por me ensinar tudo o que sei sobre o Claude Code.
+* **Hatem Mohamed** | [hmohamed01](https://github.com/hmohamed01), por compartilhar as boas práticas de T-SQL que aplico no Vegapunk.
 * **Você**, por usar Vegapunk!
 ## Aviso sobre dados de terceiros
  
@@ -161,6 +162,7 @@ MIT License, veja [LICENSE](LICENSE) para detalhes.
 ---
  
 <p align="center"><strong>Vegapunk</strong>, não adivinha. sabe.</p>
+
 ```
                                                                  ░█▒▒▓▓▓▓█                          
                                                     █▓▓         ▓█▓▓▒▒▓▓▓░░                        
