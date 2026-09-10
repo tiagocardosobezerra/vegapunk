@@ -6,20 +6,20 @@
  
 O Vegapunk é uma skill do Claude Code para desenvolvimento em T-SQL no Microsoft SQL Server. O diferencial dela é um motor de descoberta de schema por linguagem natural, plugável em qualquer banco de dados: você pergunta em português e recebe a query certa, já com os nomes reais de tabela e coluna do seu ambiente.
  
-Em vez de o Claude tentar adivinhar como um ERP nomeou as próprias tabelas, o Vegapunk consulta uma base de metadados local chamada **Punk Records**, através de um motor chamado **Nomi Nomi no Mi**. Essa base é populada por você, a partir do seu próprio ambiente.
+Em vez de o Claude tentar adivinhar como um sistema nomeou as próprias tabelas, o Vegapunk consulta uma base de metadados local chamada **Punk Records**, através de um motor chamado **Nomi Nomi no Mi**. Essa base é populada por você, a partir do seu próprio ambiente.
   
 <img width="100%" height="842" alt="vegapunk-poster" src="https://github.com/user-attachments/assets/d95619a4-0e70-47d7-9db4-6d35e1f4bbb7" />
  
 ## Recursos
  
 * **Descoberta de schema por linguagem natural.** Você descreve o que precisa em português e o motor Nomi Nomi no Mi busca as tabelas e colunas correspondentes, já trazendo os relacionamentos de chave estrangeira prontos para montar os JOINs. Isso elimina boa parte da adivinhação de nomenclatura.
-* **Comando de importação embutido.** Basta exportar 5 CSVs do seu ambiente (formato abaixo); o motor calcula sozinho os campos derivados, como contagem de relacionamentos, score de relevância e ranking. Você não precisa calcular nada na mão.
+* **Comando de importação embutido.** Basta exportar 5 CSVs do seu ambiente (formato abaixo); o motor calcula sozinho os campos derivados, como contagem de relacionamentos, score de relevância e ranking, e avisa (sem travar o import) se alguma FK do `relacionamentos.csv` apontar para uma tabela ou coluna que não existe. Você não precisa calcular nada na mão.
 * **Verificação de documentação ao vivo.** A skill valida a sintaxe T-SQL contra a documentação oficial da Microsoft usando WebFetch, com fallback para WebSearch quando o recurso é específico de versão (SQL Server 2016 a 2022).
 * **Fluxos de trabalho estruturados.** Guias para desenvolvimento de queries, otimização de procedures e gerenciamento de transações, com padrões de tratamento de erro já definidos.
 * **Detecção de anti-padrões de performance.** Identifica predicados não SARGable, conversões implícitas, índices faltando e outras ineficiências no plano de execução.
 * **Boas práticas de segurança.** Prevenção de SQL injection, queries parametrizadas, cuidado com SQL dinâmico e gerenciamento de permissões.
 * **Referências abrangentes.** Cinco documentos cobrindo padrões de query, otimização de performance, segurança, tipos de dados e transações.
-* **Suíte de testes de regressão.** Gera sozinha uma fixture fictícia e valida que mudanças no motor não pioram casos que já funcionavam.
+* **Suíte de regressão própria (Stella).** Gera sozinha uma fixture fictícia e valida, a cada mudança, que casos que já funcionavam continuam funcionando — cobrindo tanto o score/ranking do motor quanto o caminho `importar` → `detalhar` → JSON.
 ## Instalação
  
 Clone este repositório e copie a pasta `skills/vegapunk-community` para o seu diretório de skills.
@@ -62,7 +62,7 @@ O `punk_records.db` publicado neste repositório vem **vazio**. Para a skill fun
 ```bash
    python3 skills/vegapunk-community/scripts/nomi_nomi_no_mi.py importar --dir ./meus_csvs/
 ```
-   O comando cria e recalcula tudo sozinho (contagem de relacionamentos por tabela, score de relevância, ranking) a partir só do que está nos CSVs. Se `contextos/punk_records.db` já existir, use `--forcar` para sobrescrever.
+   O comando cria e recalcula tudo sozinho (contagem de relacionamentos por tabela, score de relevância, ranking) a partir só do que está nos CSVs, e avisa no final — sem travar o import — se alguma FK de `relacionamentos.csv` apontar para uma tabela ou coluna que não existe em `tabelas.csv`/`colunas.csv`. Se `contextos/punk_records.db` já existir, use `--forcar` para sobrescrever.
 4. **Teste:**
 ```bash
    python3 skills/vegapunk-community/scripts/nomi_nomi_no_mi.py buscar "seu pedido em português aqui"
@@ -74,8 +74,8 @@ O `punk_records.db` publicado neste repositório vem **vazio**. Para a skill fun
 |---|---|---|---|---|
 | `tabelas.csv` | `tabela` | `total_registros`, `descricao` | Uma linha por tabela. Não inclua score, ranking ou contagens: são calculados pelo import. | [![baixar tabelas.sql](https://img.shields.io/badge/baixar-tabelas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](sql/tabelas.sql) |
 | `colunas.csv` | `tabela`, `coluna` | `descricao` | Uma linha por coluna. A `descricao` (negócio, em PT-BR) é o que o motor usa pra casar com o pedido do usuário. | [![baixar colunas.sql](https://img.shields.io/badge/baixar-colunas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](sql/colunas.sql) |
-| `relacionamentos.csv` | `tabela_filha`, `campo_filho`, `tabela_mae`, `campo_mae` | — | Uma linha por FK; chave composta = uma linha por campo. | [![baixar relacionamentos.sql](https://img.shields.io/badge/baixar-relacionamentos.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](sql/relacionamentos.sql) |
-| `sistemas.csv` | `codsistema`, `nomesistema` | `descricao` | Uma linha por módulo. `codsistema` deve bater com o prefixo de 1 letra das tabelas desse módulo. | [![baixar sistemas.sql](https://img.shields.io/badge/baixar-sistemas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](sql/sistemas.sql) |
+| `relacionamentos.csv` | `tabela_filha`, `campo_filho`, `tabela_mae`, `campo_mae` | — | Uma linha por FK; chave composta = uma linha por campo. O `importar` confere se essas tabelas/colunas existem e avisa (sem travar) se alguma FK estiver com typo. | [![baixar relacionamentos.sql](https://img.shields.io/badge/baixar-relacionamentos.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](sql/relacionamentos.sql) |
+| `sistemas.csv` | `codigo_sistema`, `nome_sistema` | `descricao` | Uma linha por módulo. `codigo_sistema` deve bater com o prefixo de 1 letra das tabelas desse módulo, quando esse padrão fizer sentido no seu ambiente. | [![baixar sistemas.sql](https://img.shields.io/badge/baixar-sistemas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](sql/sistemas.sql) |
 | `sinonimos.csv` | `termo`, `sinonimo` | — | Uma linha por par (um termo com 3 sinônimos = 3 linhas). Cadeias funcionam. | Sem consulta associada. É vocabulário definido por você. |
  
 As 4 consultas de exemplo ficam na raiz deste repositório, fora da pasta `skills/`. Elas servem só como referência de como extrair os dados de um ambiente real; adapte a lista de prefixos de tabela (`'A', 'G', 'P', 'V', 'Z'` nos exemplos) para os módulos do seu ambiente.
@@ -106,7 +106,7 @@ vegapunk-community/
         │   └── transactions.md      # Níveis de isolamento, deadlocks, transações distribuídas
         └── scripts/
             ├── nomi_nomi_no_mi.py       # Motor de descoberta de schema + comando `importar`
-            └── testes_regressao.py     # Suíte de testes (gera fixture fictícia própria)
+            └── stella.py                # Suíte de regressão (gera fixture fictícia própria)
 ```
  
 ## Uso
@@ -128,8 +128,8 @@ Ao trabalhar com uma base cadastrada (depois de importada), a skill usa o motor 
 3. **Escrever Query:** compõe T-SQL usando exclusivamente os nomes de schema descobertos, nunca por suposição.
 Exemplo (nomes ilustrativos, os reais dependem do que você importou):
 ```bash
-python3 scripts/nomi_nomi_no_mi.py buscar "colaboradores com dados de folha de pagamento"
-python3 scripts/nomi_nomi_no_mi.py detalhar FCOLABORADOR FDADOSFOLHA
+python3 scripts/nomi_nomi_no_mi.py buscar "quais funcionários bateram ponto ontem"
+python3 scripts/nomi_nomi_no_mi.py detalhar R034FUN R038PON
 ```
 
 <img width="1260" height="820" alt="radar-descoberta-de-schema" src="https://github.com/user-attachments/assets/09e25475-f1c8-4473-81fc-c08ecf363b93" />
@@ -148,8 +148,8 @@ Batizado em homenagem a Vegapunk, o engenheiro gênio de *One Piece*, personagem
  
 ## Agradecimentos
  
-* **Bruna Cardoso Bezerra**, por me ensinar tudo o que sei sobre o Claude Code.
-* **Hatem Mohamed** | https://github.com/hmohamed01, por compartilhar as boas práticas de T-SQL que aplico no Vegapunk.
+* [Bruna Cardoso Bezerra](https://github.com/brunacbezerra), por me ensinar tudo o que sei sobre o Claude Code.
+* [Hatem Mohamed](https://github.com/hmohamed01), por compartilhar as boas práticas de T-SQL que aplico no Vegapunk.
 * **Você**, por usar Vegapunk!
 ## Aviso sobre dados de terceiros
  
