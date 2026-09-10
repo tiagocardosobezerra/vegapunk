@@ -170,6 +170,7 @@ MIT License, veja [LICENSE](LICENSE) para detalhes.
 ---
  
 <p align="center"><strong>Vegapunk</strong>, não adivinha. sabe.</p>
+
 ```
                                                                  ░█▒▒▓▓▓▓█                          
                                                     █▓▓         ▓█▓▓▒▒▓▓▓░░                        
@@ -225,5 +226,5 @@ MIT License, veja [LICENSE](LICENSE) para detalhes.
                             ░▒▒▒█▒▒▒                  ▓▓██▓▓▓▓▓▓▓▓▓▒▒░                              
                            ░▒▒▓▓▓▒                    ░▓▓▓▓▓▓▓▓▓▓▓▒░                                
                            ▒▓▓▒▒▒▒                     ▒▒▓▓▓▓▓▓▒▒░                                  
-                           █▒▒▒▒░                       ░░░░░░░░                                    
+                           █▒▒▒▒░                       ░░░░░░░░
 ```
