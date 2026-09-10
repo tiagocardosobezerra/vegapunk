@@ -2,8 +2,6 @@
  
 **Não adivinha. Sabe.**
  
-<img width="100%" height="842" alt="vegapunk-poster" src="https://github.com/user-attachments/assets/d95619a4-0e70-47d7-9db4-6d35e1f4bbb7" />
-
 ## Visão geral
  
 O Vegapunk é uma skill do Claude Code para desenvolvimento em T-SQL no Microsoft SQL Server. O diferencial dela é um motor de descoberta de schema por linguagem natural, plugável em qualquer banco de dados: você pergunta em português e recebe a query certa, já com os nomes reais de tabela e coluna do seu ambiente.
@@ -12,13 +10,7 @@ Em vez de o Claude tentar adivinhar como um ERP nomeou as próprias tabelas, o V
  
 ## Antes vs. depois
  
-| | Sem descoberta de schema | Com Vegapunk |
-|---|---|---|
-| 1 | Adivinhar a tabela | Perguntar, em português |
-| 2 | Relacionamento errado | Receber tabela e colunas certas |
-| 3 | Consulta quebrada | Escrever o SQL de primeira |
-| 4 | Corrigir e repetir | — |
-| **Resultado** | **~20–30 min perdidos** | **~2–3 min** |
+<img width="100%" height="842" alt="vegapunk-poster" src="https://github.com/user-attachments/assets/d95619a4-0e70-47d7-9db4-6d35e1f4bbb7" />
  
 ## Recursos
  
@@ -82,10 +74,10 @@ O `punk_records.db` publicado neste repositório vem **vazio**. Para a skill fun
  
 | Arquivo | Colunas obrigatórias | Colunas opcionais | Observação | Exemplo de consulta |
 |---|---|---|---|---|
-| `tabelas.csv` | `tabela` | `total_registros`, `descricao` | Uma linha por tabela. Não inclua score, ranking ou contagens: são calculados pelo import. | [![baixar Tabelas.sql](https://img.shields.io/badge/baixar-Tabelas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](Tabelas.sql) |
-| `colunas.csv` | `tabela`, `coluna` | `descricao` | Uma linha por coluna. A `descricao` (negócio, em PT-BR) é o que o motor usa pra casar com o pedido do usuário. | [![baixar Colunas.sql](https://img.shields.io/badge/baixar-Colunas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](Colunas.sql) |
-| `relacionamentos.csv` | `tabela_filha`, `campo_filho`, `tabela_mae`, `campo_mae` | — | Uma linha por FK; chave composta = uma linha por campo. | [![baixar Relacionamentos.sql](https://img.shields.io/badge/baixar-Relacionamentos.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](Relacionamentos.sql) |
-| `sistemas.csv` | `codsistema`, `nomesistema` | `descricao` | Uma linha por módulo. `codsistema` deve bater com o prefixo de 1 letra das tabelas desse módulo. | [![baixar Sistemas.sql](https://img.shields.io/badge/baixar-Sistemas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](Sistemas.sql) |
+| `tabelas.csv` | `tabela` | `total_registros`, `descricao` | Uma linha por tabela. Não inclua score, ranking ou contagens: são calculados pelo import. | [![baixar Tabelas.sql](https://img.shields.io/badge/baixar-Tabelas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](sql/tabelas.sql) |
+| `colunas.csv` | `tabela`, `coluna` | `descricao` | Uma linha por coluna. A `descricao` (negócio, em PT-BR) é o que o motor usa pra casar com o pedido do usuário. | [![baixar Colunas.sql](https://img.shields.io/badge/baixar-Colunas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](sql/colunas.sql) |
+| `relacionamentos.csv` | `tabela_filha`, `campo_filho`, `tabela_mae`, `campo_mae` | — | Uma linha por FK; chave composta = uma linha por campo. | [![baixar Relacionamentos.sql](https://img.shields.io/badge/baixar-Relacionamentos.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](sql/relacionamentos.sql) |
+| `sistemas.csv` | `codsistema`, `nomesistema` | `descricao` | Uma linha por módulo. `codsistema` deve bater com o prefixo de 1 letra das tabelas desse módulo. | [![baixar Sistemas.sql](https://img.shields.io/badge/baixar-Sistemas.sql-2ea44f?style=flat-square&logo=download&logoColor=white)](sql/sistemas.sql) |
 | `sinonimos.csv` | `termo`, `sinonimo` | — | Uma linha por par (um termo com 3 sinônimos = 3 linhas). Cadeias funcionam. | Sem consulta associada. É vocabulário definido por você. |
  
 As 4 consultas de exemplo ficam na raiz deste repositório, fora da pasta `skills/`. Elas servem só como referência de como extrair os dados de um ambiente real; adapte a lista de prefixos de tabela (`'A', 'G', 'P', 'V', 'Z'` nos exemplos) para os módulos do seu ambiente.
