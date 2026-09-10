@@ -6,8 +6,8 @@ Uma skill do Claude Code para desenvolvimento em Microsoft SQL Server, com um mo
  
 > 📦 Esta é a edição **community**: o motor e a estrutura são genéricos e não vêm com nenhum schema pré-carregado. Você importa os metadados do **seu próprio** ambiente (ao qual já precisa ter acesso legítimo) antes de usar — ver [Instalação](#instalação) e [Importando seus dados](#importando-seus-dados-obrigatório) abaixo.
  
-<img width="100%" alt="produtividade-vegapunk_3" src="https://github.com/user-attachments/assets/5a00b2d7-a25f-479d-aecd-31862ca2f0dc" />
- 
+<img width="100%" height="842" alt="vegapunk-poster" src="https://github.com/user-attachments/assets/550db0ec-7f89-4f1c-88ad-77923e342b68" />
+
 ## Visão Geral
  
 Vegapunk não adivinha nomes de tabela e coluna de um ERP com nomenclatura em código — sabe. Em vez de o Claude tatear até acertar, a skill consulta uma base de metadados local (**Punk Records**) através do motor **Nomi Nomi no Mi**, que você mesmo popula a partir do seu ambiente.
