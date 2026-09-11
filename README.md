@@ -1,7 +1,5 @@
 # Vegapunk
  
-**Não adivinha. Sabe.**
- 
 ## Visão geral
  
 O Vegapunk é uma skill do Claude Code para desenvolvimento em T-SQL no Microsoft SQL Server. O diferencial dela é um motor de descoberta de schema por linguagem natural, plugável em qualquer banco de dados: você pergunta em português e recebe a query certa, já com os nomes reais de tabela e coluna do seu ambiente.
