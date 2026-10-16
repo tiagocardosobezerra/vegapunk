@@ -51,7 +51,7 @@ _EXT_TEXTO = ('.py', '.json', '.md', '.txt', '.jsonl')
 TAMANHO_TRECHO = 12
 
 # Superfície distribuível, por regra (ver `_superficie_distribuivel`).
-_EXT_SUPERFICIE = ('.py', '.md', '.json', '.txt', '.sql')
+_EXT_SUPERFICIE = ('.py', '.md', '.json', '.txt', '.sql', '.svg')
 # Pastas de instância local: nada delas é distribuível.
 _PASTAS_INSTANCIA = ('egghead',)
 # Arquivos sem extensão de texto que também saem, pelo nome: a licença, os

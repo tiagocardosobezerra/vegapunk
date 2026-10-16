@@ -7,16 +7,18 @@
 ![SQL Server 2016–2022](https://img.shields.io/badge/SQL%20Server-2016%E2%80%932022-CC2927?style=flat-square&logo=microsoftsqlserver&logoColor=white)
 ![MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue?style=flat-square)
 
+<img width="100%" alt="Vegapunk: SQL com nomes reais e fórmulas sem invenção" src="assets/vegapunk-banner.svg" />
+
 O Vegapunk é uma skill do Claude Code para quem trabalha com Microsoft SQL Server, especialmente em sistemas que dão às tabelas nomes em código (`T000123` em vez de `FUNCIONARIOS`). Em vez de o Claude adivinhar esses nomes, o Vegapunk consulta um mapa do **seu** banco, guardado só no seu computador, e responde com o que existe de verdade.
 
 ## O que ele faz por você
 
-* 🔎 **Acha as tabelas certas.** Você descreve o que quer ("salário dos funcionários por seção") e ele encontra as tabelas e colunas que guardam esse dado, pela descrição de negócio de cada coluna.
-* 🔗 **Entrega o JOIN pronto, e só quando tem prova.** A ligação entre tabelas vem da constraint do banco, do dicionário do seu sistema ou da chave da tabela mãe, inclusive em chave composta. Sem prova, ele avisa em vez de chutar.
-* 🧮 **Escreve fórmulas de sistema sem inventar.** Cria, corrige, valida e explica fórmulas usando só funções e sintaxe documentadas. O que não tem suporte documentado aparece como lacuna, com o motivo.
-* 🧩 **Resolve pedidos com várias partes.** "Some as horas extras do mês e mostre de qual tabela vem": ele separa cada parte, resolve uma a uma e diz o que você ainda precisa preencher.
-* 🛡️ **Nunca toca nos seus dados.** Do banco entra só a estrutura: nomes, descrições, tipos e ligações. Nenhuma linha de cadastro, nenhum valor.
-* ⚡ **Sabe T-SQL de verdade.** Otimização, planos de execução, índices, CTEs, window functions, PIVOT/MERGE/APPLY, transações e segurança, com conferência na documentação oficial da Microsoft quando o recurso depende da versão.
+* **Acha as tabelas certas.** Você descreve o que quer ("salário dos funcionários por seção") e ele encontra as tabelas e colunas que guardam esse dado, pela descrição de negócio de cada coluna.
+* **Entrega o JOIN pronto, e só quando tem prova.** A ligação entre tabelas vem da constraint do banco, do dicionário do seu sistema ou da chave da tabela mãe, inclusive em chave composta. Sem prova, ele avisa em vez de chutar.
+* **Escreve fórmulas de sistema sem inventar.** Cria, corrige, valida e explica fórmulas usando só funções e sintaxe documentadas. O que não tem suporte documentado aparece como lacuna, com o motivo.
+* **Resolve pedidos com várias partes.** "Some as horas extras do mês e mostre de qual tabela vem": ele separa cada parte, resolve uma a uma e diz o que você ainda precisa preencher.
+* **Nunca toca nos seus dados.** Do banco entra só a estrutura: nomes, descrições, tipos e ligações. Nenhuma linha de cadastro, nenhum valor.
+* **Sabe T-SQL de verdade.** Otimização, planos de execução, índices, CTEs, window functions, PIVOT/MERGE/APPLY, transações e segurança, com conferência na documentação oficial da Microsoft quando o recurso depende da versão.
 
 ## Como fica na prática
 
@@ -145,19 +147,7 @@ python3 satelites/york.py ingerir --pacote punk_records/pacotes/publico/<pacote>
 
 ## Como funciona por dentro
 
-```mermaid
-flowchart LR
-    A["Seu pedido em português"] --> B["Stella"]
-    B --> C["Nomi Nomi no Mi<br/>acha as tabelas"]
-    C --> D["Detalhar<br/>colunas, tipos e chaves"]
-    D --> E{"Ligação provada?"}
-    E -- "sim" --> F["JOIN pronto"]
-    E -- "não" --> G["Aviso, nunca palpite"]
-    F --> H["T-SQL com os nomes reais"]
-    G --> H
-    P[("Punk Records<br/>só a estrutura do seu banco")] -.-> C
-    P -.-> D
-```
+<img width="100%" alt="Como o Vegapunk encontra as tabelas e as funções certas" src="assets/vegapunk-sonar.svg" />
 
 | Peça | O que faz |
 |---|---|
@@ -192,6 +182,7 @@ vegapunk/
 ├── dominios/              # Schema, fórmulas e soluções
 ├── punk_records/          # Importação, migrações, consultas de extração e pacotes
 ├── referencias/           # Fluxos e guias de T-SQL
+├── assets/                # Banners do README
 ├── casos/                 # Casos e dados fictícios de teste
 └── testes/                # Suíte de testes
 ```
