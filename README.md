@@ -9,8 +9,6 @@
 
 O Vegapunk é uma skill do Claude Code para quem trabalha com Microsoft SQL Server, especialmente em sistemas que dão às tabelas nomes em código (`T000123` em vez de `FUNCIONARIOS`). Em vez de o Claude adivinhar esses nomes, o Vegapunk consulta um mapa do **seu** banco, guardado só no seu computador, e responde com o que existe de verdade.
 
-<img width="100%" height="842" alt="vegapunk-poster" src="https://github.com/user-attachments/assets/d95619a4-0e70-47d7-9db4-6d35e1f4bbb7" />
-
 ## O que ele faz por você
 
 * 🔎 **Acha as tabelas certas.** Você descreve o que quer ("salário dos funcionários por seção") e ele encontra as tabelas e colunas que guardam esse dado, pela descrição de negócio de cada coluna.
@@ -147,6 +145,20 @@ python3 satelites/york.py ingerir --pacote punk_records/pacotes/publico/<pacote>
 
 ## Como funciona por dentro
 
+```mermaid
+flowchart LR
+    A["Seu pedido em português"] --> B["Stella"]
+    B --> C["Nomi Nomi no Mi<br/>acha as tabelas"]
+    C --> D["Detalhar<br/>colunas, tipos e chaves"]
+    D --> E{"Ligação provada?"}
+    E -- "sim" --> F["JOIN pronto"]
+    E -- "não" --> G["Aviso, nunca palpite"]
+    F --> H["T-SQL com os nomes reais"]
+    G --> H
+    P[("Punk Records<br/>só a estrutura do seu banco")] -.-> C
+    P -.-> D
+```
+
 | Peça | O que faz |
 |---|---|
 | **Punk Records** | a base local com a estrutura do seu banco (`egghead/punk_records.db`) e os pacotes de conhecimento |
@@ -183,8 +195,6 @@ vegapunk/
 ├── casos/                 # Casos e dados fictícios de teste
 └── testes/                # Suíte de testes
 ```
-
-<img width="1260" height="820" alt="radar-descoberta-de-schema" src="https://github.com/user-attachments/assets/09e25475-f1c8-4473-81fc-c08ecf363b93" />
 
 ## Créditos
 
