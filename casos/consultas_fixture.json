@@ -1,0 +1,269 @@
+{
+ "_descricao": "Casos rotulados do domínio schema contra a fixture fictícia (casos/fixture_schema.py). Cada caso: pedido em PT-BR, tabelas aceitas como resposta certa, top-N e comentário. Grupos por papel metodológico: calibracao (pode ajustar pesos), heldout (generalização com ressalva) e validacao_cega (nunca usado para ajustar nada). Movidos sem alteração da antiga scripts/stella.py (fase 1 da v3); a ordem é a mesma.",
+ "calibracao": [
+  {
+   "pedido": "preciso da data de admissao dos colaboradores",
+   "esperadas": [
+    "F_FUNCIONARIO"
+   ],
+   "top": 3,
+   "comentario": "Testa que uma tabela hub muito conectada (N_EMPRESA) não vence por conexões sozinha."
+  },
+  {
+   "pedido": "quero saber o salario dos colaboradores",
+   "esperadas": [
+    "F_FUNCIONARIO"
+   ],
+   "top": 3,
+   "comentario": "Testa sinônimo 'salario'->'remuneracao'."
+  },
+  {
+   "pedido": "matricula do colaborador",
+   "esperadas": [
+    "F_FUNCIONARIO"
+   ],
+   "top": 3,
+   "comentario": "Termo 'matricula' aparece em várias tabelas (FK comum); teste de discriminação."
+  },
+  {
+   "pedido": "ferias dos colaboradores",
+   "esperadas": [
+    "F_FERIAS",
+    "F_PROVISAO_FERIAS",
+    "F_SALDO_FERIAS",
+    "F_SALDO_FERIAS_PERIODO"
+   ],
+   "top": 5,
+   "comentario": "Múltiplas tabelas legítimas de férias no dataset de exemplo."
+  },
+  {
+   "pedido": "dados do desligamento de contrato",
+   "esperadas": [
+    "F_DESLIGAMENTO"
+   ],
+   "top": 3,
+   "comentario": "Testa o termo 'desligamento' direto (sem precisar de sinônimo aqui)."
+  },
+  {
+   "pedido": "quero ver a demissao do colaborador",
+   "esperadas": [
+    "F_DESLIGAMENTO",
+    "F_MOTIVO_DESLIGAMENTO",
+    "F_TIPO_DESLIGAMENTO"
+   ],
+   "top": 5,
+   "comentario": "Testa sinônimo 'demissao'->'desligamento'."
+  },
+  {
+   "pedido": "cargo do colaborador",
+   "esperadas": [
+    "F_CARGO"
+   ],
+   "top": 3,
+   "comentario": "Termo curto e comum ('cargo'); teste de precisão."
+  },
+  {
+   "pedido": "empresas cadastradas no sistema",
+   "esperadas": [
+    "N_EMPRESA"
+   ],
+   "top": 3,
+   "comentario": "N_EMPRESA é a tabela hub mais conectada do dataset — aqui ELA é a resposta certa, então o teste confirma que o fix do log() não 'proibiu' hubs de vencer, só parou de deixá-los vencer por padrão."
+  },
+  {
+   "pedido": "unidades da empresa",
+   "esperadas": [
+    "N_UNIDADE"
+   ],
+   "top": 3,
+   "comentario": "Testa termo 'unidade' não sendo ofuscado por N_EMPRESA (o hub)."
+  },
+  {
+   "pedido": "usuarios com acesso ao sistema",
+   "esperadas": [
+    "N_USUARIO"
+   ],
+   "top": 3,
+   "comentario": "Módulo N (Núcleo), tabela de usuários."
+  },
+  {
+   "pedido": "abono lancado para o colaborador",
+   "esperadas": [
+    "T_ABONO"
+   ],
+   "top": 5,
+   "comentario": "Módulo T (Turno), termo composto."
+  },
+  {
+   "pedido": "visitante registrado na portaria",
+   "esperadas": [
+    "T_VISITANTE"
+   ],
+   "top": 5,
+   "comentario": "'portaria' é ambíguo em PT-BR (recepção vs. decreto administrativo) — caso-limite de ambiguidade léxica, não sempre no top."
+  },
+  {
+   "pedido": "pendencia de consolidacao do desligamento: motivo, tipo e observacao, do colaborador",
+   "esperadas": [
+    "F_DESLIGAMENTO",
+    "F_MOTIVO_DESLIGAMENTO",
+    "F_TIPO_DESLIGAMENTO"
+   ],
+   "top": 1,
+   "comentario": "Caso desenhado na auditoria pós-incidente real (setembro/2026): F_DESLIGAMENTO_STAGING_TEMP é uma tabela fictícia de staging, com 0 conexões E tem_dados=0, com colunas propositalmente ricas o bastante para bater TODOS os termos deste pedido — o mesmo padrão observado no incidente real (nomes de tabela/fornecedor não repetidos aqui). top-1 (não top-N) de propósito: sem PENALIDADE_TABELA_SEM_LASTRO_ESTRUTURAL este caso FALHA (a tabela de staging vence o 1º lugar por vocabulário); com a penalidade, uma das 3 tabelas reais vence."
+  }
+ ],
+ "heldout": [
+  {
+   "pedido": "beneficios do colaborador",
+   "esperadas": [
+    "F_BENEFICIO",
+    "S_BENEFICIO_VAGA"
+   ],
+   "top": 3,
+   "comentario": "Módulo F/S — mais de uma tabela legítima."
+  },
+  {
+   "pedido": "horario de trabalho cadastrado",
+   "esperadas": [
+    "T_HORARIO"
+   ],
+   "top": 5,
+   "comentario": "Tabela pequena/quase órfã do módulo T."
+  },
+  {
+   "pedido": "banco de horas do colaborador",
+   "esperadas": [
+    "T_BANCO_HORAS",
+    "T_SALDO_BANCO_HORAS"
+   ],
+   "top": 5,
+   "comentario": "Módulo T, tabela nova."
+  },
+  {
+   "pedido": "endereco cadastrado no sistema",
+   "esperadas": [
+    "N_ENDERECO"
+   ],
+   "top": 3,
+   "comentario": "Caso-limite: 'sistema'/'cadastrado' são termos genéricos que tendem a puxar tabelas maiores."
+  },
+  {
+   "pedido": "plano de treinamento do colaborador",
+   "esperadas": [
+    "S_TREINAMENTO"
+   ],
+   "top": 5,
+   "comentario": "Módulo S, tabela nova."
+  },
+  {
+   "pedido": "atestado medico do colaborador",
+   "esperadas": [
+    "S_ATESTADO"
+   ],
+   "top": 5,
+   "comentario": "Módulo S, tabela nova."
+  },
+  {
+   "pedido": "decimo terceiro salario",
+   "esperadas": [
+    "F_PROVISAO_DECIMO_TERCEIRO"
+   ],
+   "top": 5,
+   "comentario": "Testa normalização de ordinal por extenso ('décimo terceiro' -> '13'); tabela quase órfã."
+  },
+  {
+   "pedido": "atraso do colaborador no banco de horas",
+   "esperadas": [
+    "T_BANCO_HORAS",
+    "T_SALDO_BANCO_HORAS"
+   ],
+   "top": 5,
+   "comentario": "Multi-conceito: 'atraso' + 'banco de horas' + 'colaborador'."
+  },
+  {
+   "pedido": "matricula e cpf do colaborador",
+   "esperadas": [
+    "F_FUNCIONARIO"
+   ],
+   "top": 3,
+   "comentario": "Caso fácil de controle."
+  },
+  {
+   "pedido": "xpto123 inexistente blablabla",
+   "esperadas": [],
+   "top": 0,
+   "comentario": "Pedido sem sentido — deve devolver vazio, não lixo forçado."
+  }
+ ],
+ "validacao_cega": [
+  {
+   "pedido": "motivo do desligamento do colaborador",
+   "esperadas": [
+    "F_MOTIVO_DESLIGAMENTO"
+   ],
+   "top": 5,
+   "comentario": "Tabela nunca usada antes."
+  },
+  {
+   "pedido": "convenio medico da empresa",
+   "esperadas": [
+    "F_CONVENIO"
+   ],
+   "top": 5,
+   "comentario": "Módulo F, tabela nova."
+  },
+  {
+   "pedido": "exames periodicos do colaborador",
+   "esperadas": [
+    "S_EXAME"
+   ],
+   "top": 5,
+   "comentario": "Módulo S, tabela nova."
+  },
+  {
+   "pedido": "sindicato do colaborador",
+   "esperadas": [
+    "F_SINDICATO",
+    "F_SINDICATO_OPCAO"
+   ],
+   "top": 5,
+   "comentario": "Módulo F."
+  },
+  {
+   "pedido": "candidatos a vaga de emprego",
+   "esperadas": [
+    "S_CANDIDATO"
+   ],
+   "top": 5,
+   "comentario": "Módulo S, processo seletivo."
+  },
+  {
+   "pedido": "historico de vagas por funcao",
+   "esperadas": [
+    "S_HISTORICO_VAGA"
+   ],
+   "top": 5,
+   "comentario": "Módulo S, tabela nova."
+  },
+  {
+   "pedido": "data de nascimento do colaborador",
+   "esperadas": [
+    "F_DADOS_PESSOAIS",
+    "F_FUNCIONARIO"
+   ],
+   "top": 3,
+   "comentario": "Caso fácil de controle."
+  },
+  {
+   "pedido": "motivo de afastamento medico",
+   "esperadas": [
+    "F_DESLIGAMENTO",
+    "F_MOTIVO_DESLIGAMENTO",
+    "S_ATESTADO"
+   ],
+   "top": 5,
+   "comentario": "Query genuinamente ambígua — qualquer uma das três seria defensável."
+  }
+ ]
+}

@@ -1,0 +1,28 @@
+# Instância local (Egghead): a sua base, logs e cópias de segurança. Nunca versionar.
+egghead/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.csv
+**/meus_csvs/
+*.jsonl
+*.jsonl.*
+
+# Camada privada de pacotes: só a proteção e o README são versionados.
+punk_records/pacotes/privado/*
+!punk_records/pacotes/privado/.gitignore
+!punk_records/pacotes/privado/README.md
+
+# Num pacote público só fonte.json, pacote.json, dialeto.json, *.md, casos/ e
+# mapa/ fictício são versionáveis; o texto do fornecedor fica local.
+punk_records/pacotes/publico/*/*
+!punk_records/pacotes/publico/*/fonte.json
+!punk_records/pacotes/publico/*/pacote.json
+!punk_records/pacotes/publico/*/dialeto.json
+!punk_records/pacotes/publico/*/*.md
+!punk_records/pacotes/publico/*/mapa/
+!punk_records/pacotes/publico/*/casos/
+
+__pycache__/
+*.pyc

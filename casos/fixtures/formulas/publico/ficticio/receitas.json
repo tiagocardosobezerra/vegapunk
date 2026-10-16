@@ -1,0 +1,3 @@
+[{"id": "ficticio:receita:001", "nome": "Arredondar soma", "contexto": "BASE", "descricao": "arredondar a soma de dois valores",
+  "formula": "ARREDONDE(SOMA2(1, 2), 2)", "funcoes": ["ARREDONDE", "SOMA2"], "palavras_chave": ["arredondar", "soma"],
+  "origem": {"pacote": "ficticio", "url": "https://exemplo.invalid/receita1"}}]

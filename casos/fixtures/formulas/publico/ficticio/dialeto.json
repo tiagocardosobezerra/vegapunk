@@ -1,0 +1,95 @@
+{
+ "id": "ficticio",
+ "sensivel_a_caixa": false,
+ "separador_instrucoes": ";",
+ "delimitadores_texto": [
+  "\""
+ ],
+ "comentarios": [
+  [
+   "{",
+   "}"
+  ]
+ ],
+ "literais_booleanos": [
+  "TRUE",
+  "FALSE"
+ ],
+ "operadores": {
+  "aritmeticos": [
+   "+",
+   "-",
+   "*",
+   "/"
+  ],
+  "comparacao": [
+   "==",
+   "!=",
+   ">",
+   "<"
+  ],
+  "logicos": [
+   "AND"
+  ]
+ },
+ "operadores_nao_documentados": [
+  "OR"
+ ],
+ "estruturas": {
+  "condicional": {
+   "inicio": "IF",
+   "entao": "THEN",
+   "senao": "ELSE",
+   "fim": "END"
+  },
+  "repeticao": {
+   "inicio": "LOOP",
+   "fim": "UNTIL"
+  },
+  "declaracao": {
+   "palavra": "VAR",
+   "parenteses_opcionais": false
+  },
+  "atribuicao": {
+   "funcao": "LET",
+   "aridade": 2
+  }
+ },
+ "limites": {
+  "max_constantes": 5
+ },
+ "tipos_parametro": {
+  "data": [
+   "DATA"
+  ],
+  "texto": [
+   "TEXTO",
+   "CODIGO"
+  ],
+  "numero": [
+   "NUM"
+  ]
+ },
+ "tipos_retorno": {
+  "numero": [
+   "NUMERO"
+  ],
+  "texto": [
+   "TEXTO"
+  ],
+  "data": [
+   "DATA"
+  ]
+ },
+ "consulta": {
+  "executar": "EXECUTA",
+  "ler_campo": "CAMPO",
+  "avancar_registro": "PROXIMO",
+  "retorno_executar": "TRUE",
+  "leitura_exige_execucao": true,
+  "parametros_na_chamada": false
+ },
+ "evidencias": {
+  "consulta": "Fictício: EXECUTA, CAMPO e PROXIMO existem só no pacote extra casos/fixtures/formulas_consulta (avaliação de soluções do nível 3)."
+ }
+}

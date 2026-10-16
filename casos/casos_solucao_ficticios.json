@@ -1,0 +1,229 @@
+{
+ "_estado": "APROVADO pelo usuário em 16/10/2026: casos de solução fictícios (fixture), públicos",
+ "casos": [
+  {
+   "id": "F01",
+   "pedido": "somar dois valores e arredondar o resultado",
+   "contexto": "BASE",
+   "nivel": 1,
+   "fonte": "receita fictícia",
+   "intencoes": [
+    {
+     "id": "F01.1",
+     "texto": "somar dois números",
+     "dominio": "formulas",
+     "esperado": [
+      "SOMA2"
+     ],
+     "lacuna": false
+    },
+    {
+     "id": "F01.2",
+     "texto": "arredondar um número",
+     "dominio": "formulas",
+     "esperado": [
+      "ARREDONDE"
+     ],
+     "lacuna": false
+    }
+   ]
+  },
+  {
+   "id": "F02",
+   "pedido": "ano da data de hoje",
+   "contexto": "BASE",
+   "nivel": 1,
+   "fonte": "funções fictícias",
+   "intencoes": [
+    {
+     "id": "F02.1",
+     "texto": "data corrente",
+     "dominio": "formulas",
+     "esperado": [
+      "HOJE"
+     ],
+     "lacuna": false
+    },
+    {
+     "id": "F02.2",
+     "texto": "ano de uma data",
+     "dominio": "formulas",
+     "esperado": [
+      "ANODE"
+     ],
+     "lacuna": false
+    }
+   ]
+  },
+  {
+   "id": "F03",
+   "pedido": "valor da tabela de cálculo do módulo 1 pelo código",
+   "contexto": "MOD1",
+   "nivel": 1,
+   "fonte": "funções fictícias",
+   "intencoes": [
+    {
+     "id": "F03.1",
+     "texto": "valor de tabela de cálculo do módulo 1",
+     "dominio": "formulas",
+     "esperado": [
+      "VALOR_TABELA"
+     ],
+     "lacuna": false
+    }
+   ]
+  },
+  {
+   "id": "F04",
+   "pedido": "saldo acumulado do módulo 2 somado a outro valor",
+   "contexto": "MOD2",
+   "nivel": 1,
+   "fonte": "funções fictícias",
+   "intencoes": [
+    {
+     "id": "F04.1",
+     "texto": "saldo acumulado do módulo 2",
+     "dominio": "formulas",
+     "esperado": [
+      "SALDO_MOD2"
+     ],
+     "lacuna": false
+    },
+    {
+     "id": "F04.2",
+     "texto": "somar dois números",
+     "dominio": "formulas",
+     "esperado": [
+      "SOMA2"
+     ],
+     "lacuna": false
+    }
+   ]
+  },
+  {
+   "id": "F05",
+   "pedido": "mandar uma mensagem para o colaborador quando o saldo ficar negativo",
+   "contexto": "MOD2",
+   "nivel": 1,
+   "fonte": "lacuna fictícia",
+   "intencoes": [
+    {
+     "id": "F05.1",
+     "texto": "saldo acumulado do módulo 2",
+     "dominio": "formulas",
+     "esperado": [
+      "SALDO_MOD2"
+     ],
+     "lacuna": false
+    },
+    {
+     "id": "F05.2",
+     "texto": "enviar mensagem ao colaborador",
+     "dominio": "formulas",
+     "esperado": [],
+     "lacuna": true
+    }
+   ]
+  },
+  {
+   "id": "F06",
+   "pedido": "em que tabela ficam os cargos e as empresas",
+   "contexto": "BASE",
+   "nivel": 2,
+   "fonte": "schema fictício",
+   "intencoes": [
+    {
+     "id": "F06.1",
+     "texto": "cadastro de cargos dos colaboradores",
+     "dominio": "schema",
+     "esperado": [
+      "F_CARGO"
+     ],
+     "lacuna": false
+    },
+    {
+     "id": "F06.2",
+     "texto": "empresas do grupo",
+     "dominio": "schema",
+     "esperado": [
+      "N_EMPRESA"
+     ],
+     "lacuna": false
+    }
+   ]
+  },
+  {
+   "id": "F07",
+   "pedido": "consultar na tabela de cálculo do módulo 1 o valor de um código",
+   "contexto": "MOD1",
+   "nivel": 1,
+   "nivel_maximo": 1,
+   "fonte": "escada fictícia: VALOR_TABELA resolve sem consulta",
+   "intencoes": [
+    {
+     "id": "F07.1",
+     "texto": "valor de uma tabela de cálculo pelo código",
+     "dominio": "formulas",
+     "esperado": [
+      "VALOR_TABELA"
+     ],
+     "lacuna": false,
+     "proibido_no_top3": [
+      "EXECUTA",
+      "CAMPO",
+      "PROXIMO"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "F08",
+   "pedido": "percorrer o saldo de férias por período do funcionário e somar os dias",
+   "contexto": "BASE",
+   "nivel": 3,
+   "consulta_nova": true,
+   "fonte": "consulta nova fictícia: tabela F_SALDO_FERIAS_PERIODO + EXECUTA/CAMPO/PROXIMO",
+   "intencoes": [
+    {
+     "id": "F08.1",
+     "texto": "saldo de férias por período",
+     "dominio": "schema",
+     "esperado": [
+      "F_SALDO_FERIAS_PERIODO"
+     ],
+     "lacuna": false
+    },
+    {
+     "id": "F08.2",
+     "texto": "executar a consulta cadastrada",
+     "dominio": "formulas",
+     "esperado": [
+      "EXECUTA"
+     ],
+     "lacuna": false,
+     "essencial": "consulta"
+    },
+    {
+     "id": "F08.3",
+     "texto": "ler um campo da consulta",
+     "dominio": "formulas",
+     "esperado": [
+      "CAMPO"
+     ],
+     "lacuna": false,
+     "essencial": "consulta"
+    },
+    {
+     "id": "F08.4",
+     "texto": "avançar para o próximo registro da consulta",
+     "dominio": "formulas",
+     "esperado": [
+      "PROXIMO"
+     ],
+     "lacuna": false,
+     "essencial": "consulta"
+    }
+   ]
+  }
+ ]
+}

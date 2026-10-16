@@ -1,0 +1,6 @@
+[
+  {"id": "minha-empresa:receita:001", "nome": "Nome do padrão interno", "contexto": "FOP",
+   "descricao": "Quando usar este padrão", "formula": "ARREDONDA(RC * 1.1, 2)",
+   "funcoes": ["ARREDONDA", "RC"], "palavras_chave": ["reajuste"],
+   "origem": {"pacote": "minha-empresa", "fonte": "procedimento interno"}}
+]

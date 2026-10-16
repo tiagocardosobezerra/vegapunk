@@ -1,0 +1,18 @@
+{
+  "id": "pt-ficticio",
+  "observacao": "Dialeto FICTÍCIO em português para testar a ingestão sem depender de nenhum pacote real.",
+  "sensivel_a_caixa": false,
+  "separador_instrucoes": ";",
+  "delimitadores_texto": ["'", "\""],
+  "comentarios": [["/*", "*/"]],
+  "literais_booleanos": ["VERDADE", "FALSO"],
+  "operadores": {"aritmeticos": ["+", "-", "*", "/"], "comparacao": ["=", "<>", ">=", "<=", ">", "<"], "logicos": ["E"]},
+  "estruturas": {
+    "condicional": {"inicio": "SE", "entao": "ENTAO", "senao": "SENAO", "fim": "FIMSE"},
+    "repeticao": {"inicio": "REPITA", "fim": "ATE"},
+    "declaracao": {"palavra": "DECL", "parenteses_opcionais": true},
+    "atribuicao": {"funcao": "SETVAR", "aridade": 2}
+  },
+  "tipos_parametro": {"data": ["DATA"], "texto": ["STRING", "COD"], "numero": ["VALOR", "NUM"]},
+  "tipos_retorno": {"numero": ["VALOR"], "texto": ["STRING"], "data": ["DATA"]}
+}

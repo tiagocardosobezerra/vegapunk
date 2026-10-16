@@ -1,0 +1,6 @@
+# Fixture FICTÍCIA: o "*" simula a proteção exigida pelo verificador de
+# isolamento; as exceções abaixo mantêm a fixture versionada.
+*
+!.gitignore
+!empresa-ficticia/
+!empresa-ficticia/**

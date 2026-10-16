@@ -1,0 +1,105 @@
+[
+ {
+  "nome": "EXECUTA",
+  "contexto": "BASE",
+  "descricao": "Executa uma consulta cadastrada fictícia; devolve TRUE com pelo menos uma linha.",
+  "assinaturas": [
+   {
+    "texto": "EXECUTA(\"CODIGO\")",
+    "tem_parenteses": true,
+    "argumentos": [
+     "\"CODIGO\""
+    ]
+   }
+  ],
+  "aridades_documentadas": [
+   1
+  ],
+  "parametros": [
+   {
+    "posicao": 1,
+    "rotulo_documentado": "CODIGO",
+    "tipo": "texto",
+    "entre_aspas_na_documentacao": true
+   }
+  ],
+  "origens": [
+   {
+    "pacote": "ficticio-consulta",
+    "url": "https://exemplo.invalid/consulta"
+   }
+  ],
+  "confianca_extracao": "alta"
+ },
+ {
+  "nome": "CAMPO",
+  "contexto": "BASE",
+  "descricao": "Lê um campo da linha corrente do resultado da consulta fictícia.",
+  "assinaturas": [
+   {
+    "texto": "CAMPO(\"CODIGO\", \"CAMPO\")",
+    "tem_parenteses": true,
+    "argumentos": [
+     "\"CODIGO\"",
+     "\"CAMPO\""
+    ]
+   }
+  ],
+  "aridades_documentadas": [
+   2
+  ],
+  "parametros": [
+   {
+    "posicao": 1,
+    "rotulo_documentado": "CODIGO",
+    "tipo": "texto",
+    "entre_aspas_na_documentacao": true
+   },
+   {
+    "posicao": 2,
+    "rotulo_documentado": "CAMPO",
+    "tipo": "texto",
+    "entre_aspas_na_documentacao": true
+   }
+  ],
+  "origens": [
+   {
+    "pacote": "ficticio-consulta",
+    "url": "https://exemplo.invalid/consulta"
+   }
+  ],
+  "confianca_extracao": "alta"
+ },
+ {
+  "nome": "PROXIMO",
+  "contexto": "BASE",
+  "descricao": "Avança para o próximo registro da consulta fictícia; devolve FALSE no fim.",
+  "assinaturas": [
+   {
+    "texto": "PROXIMO(\"CODIGO\")",
+    "tem_parenteses": true,
+    "argumentos": [
+     "\"CODIGO\""
+    ]
+   }
+  ],
+  "aridades_documentadas": [
+   1
+  ],
+  "parametros": [
+   {
+    "posicao": 1,
+    "rotulo_documentado": "CODIGO",
+    "tipo": "texto",
+    "entre_aspas_na_documentacao": true
+   }
+  ],
+  "origens": [
+   {
+    "pacote": "ficticio-consulta",
+    "url": "https://exemplo.invalid/consulta"
+   }
+  ],
+  "confianca_extracao": "alta"
+ }
+]

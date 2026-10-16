@@ -1,0 +1,141 @@
+{
+  "id": "totvs-rm",
+  "nome": "TOTVS Linha RM — fórmulas (Globais, Folha de Pagamento, Ponto)",
+  "visibilidade": "publico",
+  "observacao_licenca": "Conteúdo derivado da documentação pública do TDN (TOTVS). O texto original pertence à TOTVS; para redistribuir, distribua este fonte.json e regenere bruto/ e funcoes.json com `york.py ingerir` em vez de copiar o material coletado.",
+  "conector": "confluence",
+  "base_url": "https://tdn.totvs.com",
+  "hosts_equivalentes": [
+    "tdn.totvs.com.br"
+  ],
+  "pausa_segundos": 0.2,
+  "limite_paginas": 3000,
+  "dialeto": "dialeto.json",
+  "sementes": [
+    {
+      "page_id": "381050508",
+      "contexto": "GLOBAL",
+      "descricao": "Fórmulas (RM Framework) — mãe de Funções Globais, Fórmulas Globais e Cadastro de Fórmulas"
+    },
+    {
+      "page_id": "381051703",
+      "contexto": "GLOBAL",
+      "descricao": "Funções Globais — válidas em qualquer módulo RM"
+    },
+    {
+      "page_id": "452718597",
+      "contexto": "FOP",
+      "descricao": "Fórmulas — Folha de Pagamento (Labore)"
+    },
+    {
+      "page_id": "452719330",
+      "contexto": "PTO",
+      "descricao": "Fórmulas — Ponto (Chronus)"
+    }
+  ],
+  "relevancia": {
+    "espacos_permitidos": [
+      "LRM"
+    ],
+    "padroes_titulo": [
+      "F[óo]rmula"
+    ],
+    "padroes_conteudo": [
+      "Sintaxe",
+      "Fun[çc][ãa]o de f[óo]rmula|f[óo]rmula"
+    ],
+    "minimo_padroes": 1,
+    "profundidade_links": 2
+  },
+  "contextos": {
+    "GLOBAL": {
+      "nome": "Funções Globais",
+      "herda": []
+    },
+    "FOP": {
+      "nome": "Folha de Pagamento",
+      "herda": [
+        "GLOBAL"
+      ]
+    },
+    "PTO": {
+      "nome": "Ponto",
+      "herda": [
+        "GLOBAL"
+      ]
+    }
+  },
+  "regras_restricao": [
+    {
+      "padrao": "n[ãa]o\\s+dev\\w*\\s+ser\\s+utilizad\\w*\\s+(?:para|em)\\s+f[óo]rmulas?\\s+de\\s+sele[çc][ãa]o",
+      "uso_proibido": "selecao",
+      "descricao": "Documentação: variáveis relativas à movimentação do funcionário não devem ser usadas em fórmula de seleção (retornam zero no momento da seleção)."
+    }
+  ],
+  "marcas": [
+    "TOTVS",
+    "TDN",
+    "totvs-rm",
+    "tdn.totvs",
+    "Linha RM",
+    "Labore",
+    "Chronus"
+  ],
+  "observacao_marcas": "Termos de terceiros que só podem aparecer DENTRO deste pacote (verificado por `shaka.py verificar-isolamento`).",
+  "excluir_page_ids": [
+    "66126694",
+    "88900688"
+  ],
+  "observacao_exclusoes": "Páginas de 2013 na árvore da semente-mãe: fórmulas em outra linguagem e filtro de relatório sem função (decisão do usuário, F3-doc).",
+  "paginas_aprovadas": [
+    "381050508",
+    "381051703",
+    "403746922",
+    "403746924",
+    "452718252",
+    "452718254",
+    "452718255",
+    "452718597",
+    "452718988",
+    "452718989",
+    "452718992",
+    "452718993",
+    "452718994",
+    "452719209",
+    "452719225",
+    "452719241",
+    "452719253",
+    "452719262",
+    "452719272",
+    "452719295",
+    "452719330",
+    "452719334",
+    "452719337",
+    "452719340",
+    "452719359",
+    "452719422",
+    "452719451",
+    "452719505",
+    "452719520",
+    "452719535",
+    "452719547",
+    "452719566",
+    "452719592",
+    "452719598",
+    "452719627",
+    "452719652",
+    "452719918",
+    "452719947",
+    "464958688",
+    "552598291",
+    "697707476",
+    "772040803",
+    "793805271",
+    "878909855",
+    "899187521",
+    "910025121",
+    "918402461",
+    "1039514917"
+  ],
+  "observacao_paginas_aprovadas": "Páginas da árvore das sementes aceitas pelo usuário. Página nova na árvore fica como \"nova_na_arvore\" no relatório e só entra quando o id for acrescentado aqui (ou em excluir_page_ids)."
+}

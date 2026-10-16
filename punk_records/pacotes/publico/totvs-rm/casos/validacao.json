@@ -1,0 +1,98 @@
+[
+ {
+  "formula": "ARREDONDA(RC * 1.1, 2)",
+  "contexto": "FOP",
+  "erros": []
+ },
+ {
+  "formula": "ARREDONDA(RC)",
+  "contexto": "FOP",
+  "erros": [
+   "aridade"
+  ]
+ },
+ {
+  "formula": "HADNOT('01/05/1999', '31/05/1999', '0')",
+  "contexto": "PTO",
+  "erros": []
+ },
+ {
+  "formula": "HADNOT('01/05/1999', '31/05/1999', '0')",
+  "contexto": "FOP",
+  "erros": [
+   "fora_do_contexto"
+  ]
+ },
+ {
+  "formula": "CALCULASALARIOLIQUIDO(RC)",
+  "contexto": "FOP",
+  "erros": [
+   "funcao_inexistente"
+  ]
+ },
+ {
+  "formula": "SE A('01') > 100 ENTAO 1 SENAO 0 FIMSE",
+  "contexto": "FOP",
+  "uso": "selecao",
+  "erros": [
+   "uso_proibido"
+  ]
+ },
+ {
+  "formula": "DECL X; SETVAR(X, RC * 2); X",
+  "contexto": "FOP",
+  "erros": []
+ },
+ {
+  "formula": "SETVAR('var1', 200)",
+  "contexto": "GLOBAL",
+  "erros": []
+ },
+ {
+  "formula": "TRUNCVALOR(24.83, 1)",
+  "contexto": "GLOBAL",
+  "erros": []
+ },
+ {
+  "formula": "SE (PROCESSO = 'A') OR (PROCESSO = 'B') ENTAO 1 SENAO 0 FIMSE",
+  "contexto": "FOP",
+  "erros": []
+ },
+ {
+  "formula": "SE RC > 1 AND RC < 9 ENTAO 1 FIMSE",
+  "contexto": "FOP",
+  "erros": [
+   "sintaxe"
+  ]
+ },
+ {
+  "formula": "DECL DEP,SOMADEP; SETVAR(DEP,1); SETVAR(SOMADEP,0); REPITA SE TABDEP ('INCASSISTMEDICA' ,'V', DEP)=1 ENTAO SE NDEPIDADE (DEP,HOJE)<=18 ENTAO SETVAR(SOMADEP,SOMADEP+121) SENAO 0 FIMSE FIMSE; SETVAR(DEP,DEP+1) ATE DEP=10; SOMADEP",
+  "contexto": "FOP",
+  "erros": []
+ },
+ {
+  "formula": "DECL (TOTVALES); SETVAR(TOTVALES, 1); TOTVALES",
+  "contexto": "FOP",
+  "erros": []
+ },
+ {
+  "formula": "SE RC > 1\nENTAO 1\nSENAO 0",
+  "contexto": "FOP",
+  "erros": [
+   "sintaxe"
+  ]
+ },
+ {
+  "formula": "A(‘01’)",
+  "contexto": "FOP",
+  "erros": [
+   "lexico",
+   "lexico"
+  ]
+ },
+ {
+  "formula": "VERDADE()",
+  "contexto": "GLOBAL",
+  "erros": []
+ }
+]

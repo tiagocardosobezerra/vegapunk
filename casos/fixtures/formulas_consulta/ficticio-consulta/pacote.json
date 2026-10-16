@@ -1,0 +1,6 @@
+{
+ "id": "ficticio-consulta",
+ "nome": "Consulta fictícia (só avaliação de soluções)",
+ "visibilidade": "privado",
+ "estende": "ficticio"
+}

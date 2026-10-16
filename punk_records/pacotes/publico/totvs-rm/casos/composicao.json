@@ -1,0 +1,47 @@
+[
+ {
+  "contexto": "FOP",
+  "plano": {
+   "se": {
+    "op": ">",
+    "esq": {
+     "chamar": "A",
+     "args": [
+      {
+       "texto": "01"
+      }
+     ]
+    },
+    "dir": {
+     "numero": 100
+    }
+   },
+   "entao": {
+    "chamar": "ARREDONDA",
+    "args": [
+     {
+      "op": "*",
+      "esq": {
+       "chamar": "RC"
+      },
+      "dir": {
+       "numero": 0.1
+      }
+     },
+     {
+      "numero": 2
+     }
+    ]
+   },
+   "senao": {
+    "numero": 0
+   }
+  },
+  "formula": "SE A('01') > 100 ENTAO\n  ARREDONDA(RC * 0.1, 2)\nSENAO\n  0\nFIMSE",
+  "componentes": [
+   "A",
+   "ARREDONDA",
+   "RC"
+  ]
+ }
+]

@@ -1,0 +1,1541 @@
+{
+ "avisos_base": [
+  "empresa-ficticia: ficticio:BASE:SOMA2 declara aridade [3] diferente da documentação pública [2] — mantida a pública; variante privada registrada em 'variantes_privadas'",
+  "empresa-ficticia: anotação para \"NAO_EXISTE\", que não existe no dicionário — ignorada"
+ ],
+ "buscar": {
+  "-::arredondar com duas casas decimais": {
+   "ambiguidade": false,
+   "aviso": null,
+   "avisos": [],
+   "contexto": null,
+   "fuzzy_aplicado": null,
+   "margem_top1_top2": null,
+   "pedido": "arredondar com duas casas decimais",
+   "receitas": [
+    {
+     "camada": "publico",
+     "contexto": "BASE",
+     "descricao": "arredondar a soma de dois valores",
+     "formula": "ARREDONDE(SOMA2(1, 2), 2)",
+     "funcoes": [
+      "ARREDONDE",
+      "SOMA2"
+     ],
+     "id": "ficticio:receita:001",
+     "nome": "Arredondar soma",
+     "origem": {
+      "pacote": "ficticio",
+      "url": "https://exemplo.invalid/receita1"
+     },
+     "pacote": "ficticio",
+     "palavras_chave": [
+      "arredondar",
+      "soma"
+     ],
+     "score": 0.25
+    }
+   ],
+   "resultados": [
+    {
+     "aridades_documentadas": [
+      2
+     ],
+     "assinaturas": [
+      "ARREDONDE(NUM [, NUM])"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Arredonda um número; casas decimais opcionais.",
+     "id": "ficticio:BASE:ARREDONDE",
+     "nome": "ARREDONDE",
+     "score": 15.065,
+     "termos_batidos": [
+      "arredonda",
+      "casa",
+      "decim"
+     ],
+     "tipo_retorno": "numero",
+     "url": "https://exemplo.invalid/arredonde",
+     "usos_proibidos": []
+    }
+   ],
+   "termos": [
+    "arredondar",
+    "duas",
+    "casas",
+    "decimais"
+   ]
+  },
+  "-::data": {
+   "ambiguidade": true,
+   "aviso": "Ambiguidade: \"ANODE\" e \"HOJE\" ficaram com scores próximos (diferença de 0%). Confirme com o usuário qual é a intenção antes de compor, em vez de assumir o 1º colocado.",
+   "avisos": [
+    "Ambiguidade: \"ANODE\" e \"HOJE\" ficaram com scores próximos (diferença de 0%). Confirme com o usuário qual é a intenção antes de compor, em vez de assumir o 1º colocado."
+   ],
+   "contexto": null,
+   "fuzzy_aplicado": null,
+   "margem_top1_top2": 0.0,
+   "pedido": "data",
+   "receitas": [],
+   "resultados": [
+    {
+     "aridades_documentadas": [
+      1
+     ],
+     "assinaturas": [
+      "ANODE(\"DATA\")"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Ano de uma data informada.",
+     "id": "ficticio:BASE:ANODE",
+     "nome": "ANODE",
+     "score": 5.898,
+     "termos_batidos": [
+      "data"
+     ],
+     "tipo_retorno": "numero",
+     "url": "https://exemplo.invalid/anode",
+     "usos_proibidos": []
+    },
+    {
+     "aridades_documentadas": [
+      0
+     ],
+     "assinaturas": [
+      "HOJE"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Data corrente do sistema.",
+     "id": "ficticio:BASE:HOJE",
+     "nome": "HOJE",
+     "score": 5.898,
+     "termos_batidos": [
+      "data"
+     ],
+     "tipo_retorno": "data",
+     "url": "https://exemplo.invalid/hoje",
+     "usos_proibidos": []
+    }
+   ],
+   "termos": [
+    "data"
+   ]
+  },
+  "-::quero uma formula": {
+   "ambiguidade": false,
+   "aviso": "Nenhuma função do dicionário corresponde ao pedido. Não invente: reformule com outros termos ou informe que não há suporte documentado.",
+   "avisos": [
+    "Nenhuma função do dicionário corresponde ao pedido. Não invente: reformule com outros termos ou informe que não há suporte documentado."
+   ],
+   "contexto": null,
+   "fuzzy_aplicado": null,
+   "margem_top1_top2": null,
+   "pedido": "quero uma formula",
+   "receitas": [],
+   "resultados": [],
+   "termos": []
+  },
+  "-::somar o valor do mes anterior com o valor do mes atual e arredondar o resultado para duas casas": {
+   "ambiguidade": false,
+   "aviso": "Termo(s) sem correspondência no dicionário; aplicada correção aproximada (fuzzy): \"somar\" -> \"soma\". Confirme se a interpretação faz sentido.",
+   "avisos": [
+    "Termo(s) sem correspondência no dicionário; aplicada correção aproximada (fuzzy): \"somar\" -> \"soma\". Confirme se a interpretação faz sentido."
+   ],
+   "contexto": null,
+   "fuzzy_aplicado": {
+    "somar": "soma"
+   },
+   "margem_top1_top2": 0.504,
+   "pedido": "somar o valor do mes anterior com o valor do mes atual e arredondar o resultado para duas casas",
+   "receitas": [
+    {
+     "camada": "publico",
+     "contexto": "BASE",
+     "descricao": "arredondar a soma de dois valores",
+     "formula": "ARREDONDE(SOMA2(1, 2), 2)",
+     "funcoes": [
+      "ARREDONDE",
+      "SOMA2"
+     ],
+     "id": "ficticio:receita:001",
+     "nome": "Arredondar soma",
+     "origem": {
+      "pacote": "ficticio",
+      "url": "https://exemplo.invalid/receita1"
+     },
+     "pacote": "ficticio",
+     "palavras_chave": [
+      "arredondar",
+      "soma"
+     ],
+     "score": 0.125
+    }
+   ],
+   "resultados": [
+    {
+     "aridades_documentadas": [
+      2
+     ],
+     "assinaturas": [
+      "ARREDONDE(NUM [, NUM])"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Arredonda um número; casas decimais opcionais.",
+     "id": "ficticio:BASE:ARREDONDE",
+     "nome": "ARREDONDE",
+     "score": 6.929,
+     "termos_batidos": [
+      "arredonda",
+      "casa"
+     ],
+     "tipo_retorno": "numero",
+     "url": "https://exemplo.invalid/arredonde",
+     "usos_proibidos": []
+    },
+    {
+     "aridades_documentadas": [
+      2
+     ],
+     "assinaturas": [
+      "SOMA2(NUM, NUM)"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Soma dois números quaisquer.",
+     "id": "ficticio:BASE:SOMA2",
+     "nome": "SOMA2",
+     "score": 3.437,
+     "termos_batidos": [
+      "soma"
+     ],
+     "tipo_retorno": "numero",
+     "url": "https://exemplo.invalid/soma2",
+     "usos_proibidos": []
+    }
+   ],
+   "termos": [
+    "somar",
+    "mes",
+    "anterior",
+    "mes",
+    "atual",
+    "arredondar",
+    "resultado",
+    "duas",
+    "casas"
+   ]
+  },
+  "-::xyzwq inexistente blablabla": {
+   "ambiguidade": false,
+   "aviso": "Nenhuma função do dicionário corresponde ao pedido. Não invente: reformule com outros termos ou informe que não há suporte documentado.",
+   "avisos": [
+    "Nenhuma função do dicionário corresponde ao pedido. Não invente: reformule com outros termos ou informe que não há suporte documentado."
+   ],
+   "contexto": null,
+   "fuzzy_aplicado": null,
+   "margem_top1_top2": null,
+   "pedido": "xyzwq inexistente blablabla",
+   "receitas": [],
+   "resultados": [],
+   "termos": [
+    "xyzwq",
+    "inexistente",
+    "blablabla"
+   ]
+  },
+  "BASE::Ano de uma data informada.": {
+   "ambiguidade": false,
+   "aviso": null,
+   "avisos": [],
+   "contexto": "BASE",
+   "fuzzy_aplicado": null,
+   "margem_top1_top2": 0.793,
+   "pedido": "Ano de uma data informada.",
+   "receitas": [],
+   "resultados": [
+    {
+     "aridades_documentadas": [
+      1
+     ],
+     "assinaturas": [
+      "ANODE(\"DATA\")"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Ano de uma data informada.",
+     "id": "ficticio:BASE:ANODE",
+     "nome": "ANODE",
+     "score": 19.554,
+     "termos_batidos": [
+      "ano",
+      "data",
+      "informada"
+     ],
+     "tipo_retorno": "numero",
+     "url": "https://exemplo.invalid/anode",
+     "usos_proibidos": []
+    },
+    {
+     "aridades_documentadas": [
+      0
+     ],
+     "assinaturas": [
+      "HOJE"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Data corrente do sistema.",
+     "id": "ficticio:BASE:HOJE",
+     "nome": "HOJE",
+     "score": 4.047,
+     "termos_batidos": [
+      "data"
+     ],
+     "tipo_retorno": "data",
+     "url": "https://exemplo.invalid/hoje",
+     "usos_proibidos": []
+    }
+   ],
+   "termos": [
+    "ano",
+    "data",
+    "informada"
+   ]
+  },
+  "BASE::Arredonda um número; casas decimais opcionais.": {
+   "ambiguidade": false,
+   "aviso": null,
+   "avisos": [],
+   "contexto": "BASE",
+   "fuzzy_aplicado": null,
+   "margem_top1_top2": 0.889,
+   "pedido": "Arredonda um número; casas decimais opcionais.",
+   "receitas": [
+    {
+     "camada": "publico",
+     "contexto": "BASE",
+     "descricao": "arredondar a soma de dois valores",
+     "formula": "ARREDONDE(SOMA2(1, 2), 2)",
+     "funcoes": [
+      "ARREDONDE",
+      "SOMA2"
+     ],
+     "id": "ficticio:receita:001",
+     "nome": "Arredondar soma",
+     "origem": {
+      "pacote": "ficticio",
+      "url": "https://exemplo.invalid/receita1"
+     },
+     "pacote": "ficticio",
+     "palavras_chave": [
+      "arredondar",
+      "soma"
+     ],
+     "score": 0.2
+    }
+   ],
+   "resultados": [
+    {
+     "aridades_documentadas": [
+      2
+     ],
+     "assinaturas": [
+      "ARREDONDE(NUM [, NUM])"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Arredonda um número; casas decimais opcionais.",
+     "id": "ficticio:BASE:ARREDONDE",
+     "nome": "ARREDONDE",
+     "score": 29.211,
+     "termos_batidos": [
+      "arredonda",
+      "casa",
+      "decim",
+      "numero",
+      "opcion"
+     ],
+     "tipo_retorno": "numero",
+     "url": "https://exemplo.invalid/arredonde",
+     "usos_proibidos": []
+    },
+    {
+     "aridades_documentadas": [
+      2
+     ],
+     "assinaturas": [
+      "SOMA2(NUM, NUM)"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Soma dois números quaisquer.",
+     "id": "ficticio:BASE:SOMA2",
+     "nome": "SOMA2",
+     "score": 3.236,
+     "termos_batidos": [
+      "numero"
+     ],
+     "tipo_retorno": "numero",
+     "url": "https://exemplo.invalid/soma2",
+     "usos_proibidos": []
+    }
+   ],
+   "termos": [
+    "arredonda",
+    "numero",
+    "casas",
+    "decimais",
+    "opcionais"
+   ]
+  },
+  "BASE::Data corrente do sistema.": {
+   "ambiguidade": false,
+   "aviso": null,
+   "avisos": [],
+   "contexto": "BASE",
+   "fuzzy_aplicado": null,
+   "margem_top1_top2": 0.793,
+   "pedido": "Data corrente do sistema.",
+   "receitas": [],
+   "resultados": [
+    {
+     "aridades_documentadas": [
+      0
+     ],
+     "assinaturas": [
+      "HOJE"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Data corrente do sistema.",
+     "id": "ficticio:BASE:HOJE",
+     "nome": "HOJE",
+     "score": 19.554,
+     "termos_batidos": [
+      "corrente",
+      "data",
+      "sistema"
+     ],
+     "tipo_retorno": "data",
+     "url": "https://exemplo.invalid/hoje",
+     "usos_proibidos": []
+    },
+    {
+     "aridades_documentadas": [
+      1
+     ],
+     "assinaturas": [
+      "ANODE(\"DATA\")"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Ano de uma data informada.",
+     "id": "ficticio:BASE:ANODE",
+     "nome": "ANODE",
+     "score": 4.047,
+     "termos_batidos": [
+      "data"
+     ],
+     "tipo_retorno": "numero",
+     "url": "https://exemplo.invalid/anode",
+     "usos_proibidos": []
+    }
+   ],
+   "termos": [
+    "data",
+    "corrente",
+    "sistema"
+   ]
+  },
+  "BASE::Função citada na documentação sem sintaxe.": {
+   "ambiguidade": false,
+   "aviso": null,
+   "avisos": [],
+   "contexto": "BASE",
+   "fuzzy_aplicado": null,
+   "margem_top1_top2": null,
+   "pedido": "Função citada na documentação sem sintaxe.",
+   "receitas": [],
+   "resultados": [
+    {
+     "aridades_documentadas": [],
+     "assinaturas": [],
+     "camada": "publico",
+     "confianca_extracao": "baixa",
+     "contexto": "BASE",
+     "descricao": "Função citada na documentação sem sintaxe.",
+     "id": "ficticio:BASE:SEM_SINTAXE",
+     "nome": "SEM_SINTAXE",
+     "score": 22.899,
+     "termos_batidos": [
+      "citada",
+      "documentacao",
+      "sintaxe"
+     ],
+     "tipo_retorno": "nao_documentado",
+     "url": "https://exemplo.invalid/sem_sintaxe",
+     "usos_proibidos": []
+    }
+   ],
+   "termos": [
+    "citada",
+    "documentacao",
+    "sintaxe"
+   ]
+  },
+  "BASE::Soma dois números quaisquer.": {
+   "ambiguidade": false,
+   "aviso": null,
+   "avisos": [],
+   "contexto": "BASE",
+   "fuzzy_aplicado": null,
+   "margem_top1_top2": 0.875,
+   "pedido": "Soma dois números quaisquer.",
+   "receitas": [
+    {
+     "camada": "publico",
+     "contexto": "BASE",
+     "descricao": "arredondar a soma de dois valores",
+     "formula": "ARREDONDE(SOMA2(1, 2), 2)",
+     "funcoes": [
+      "ARREDONDE",
+      "SOMA2"
+     ],
+     "id": "ficticio:receita:001",
+     "nome": "Arredondar soma",
+     "origem": {
+      "pacote": "ficticio",
+      "url": "https://exemplo.invalid/receita1"
+     },
+     "pacote": "ficticio",
+     "palavras_chave": [
+      "arredondar",
+      "soma"
+     ],
+     "score": 0.5
+    }
+   ],
+   "resultados": [
+    {
+     "aridades_documentadas": [
+      2
+     ],
+     "assinaturas": [
+      "SOMA2(NUM, NUM)"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Soma dois números quaisquer.",
+     "id": "ficticio:BASE:SOMA2",
+     "nome": "SOMA2",
+     "score": 24.383,
+     "termos_batidos": [
+      "dois",
+      "numero",
+      "quaisque",
+      "soma"
+     ],
+     "tipo_retorno": "numero",
+     "url": "https://exemplo.invalid/soma2",
+     "usos_proibidos": []
+    },
+    {
+     "aridades_documentadas": [
+      2
+     ],
+     "assinaturas": [
+      "ARREDONDE(NUM [, NUM])"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Arredonda um número; casas decimais opcionais.",
+     "id": "ficticio:BASE:ARREDONDE",
+     "nome": "ARREDONDE",
+     "score": 3.05,
+     "termos_batidos": [
+      "numero"
+     ],
+     "tipo_retorno": "numero",
+     "url": "https://exemplo.invalid/arredonde",
+     "usos_proibidos": []
+    }
+   ],
+   "termos": [
+    "soma",
+    "dois",
+    "numeros",
+    "quaisquer"
+   ]
+  },
+  "MOD1::Regra interna fictícia de bônus da empresa.": {
+   "ambiguidade": false,
+   "aviso": null,
+   "avisos": [],
+   "contexto": "MOD1",
+   "fuzzy_aplicado": null,
+   "margem_top1_top2": 0.914,
+   "pedido": "Regra interna fictícia de bônus da empresa.",
+   "receitas": [],
+   "resultados": [
+    {
+     "aridades_documentadas": [
+      1
+     ],
+     "assinaturas": [
+      "BONUS_INTERNO_XPTO(NUM)"
+     ],
+     "camada": "privado",
+     "confianca_extracao": "declarada",
+     "contexto": "MOD1",
+     "descricao": "Regra interna fictícia de bônus da empresa.",
+     "id": "ficticio:MOD1:BONUS_INTERNO_XPTO",
+     "nome": "BONUS_INTERNO_XPTO",
+     "score": 30.695,
+     "termos_batidos": [
+      "bonu",
+      "empresa",
+      "ficticia",
+      "interna",
+      "regra"
+     ],
+     "tipo_retorno": "numero",
+     "url": null,
+     "usos_proibidos": []
+    },
+    {
+     "aridades_documentadas": [
+      1
+     ],
+     "assinaturas": [
+      "VALOR_TABELA(\"CODIGO\")"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "MOD1",
+     "descricao": "Valor de uma tabela de cálculo do módulo 1 pelo código.",
+     "id": "ficticio:MOD1:VALOR_TABELA",
+     "nome": "VALOR_TABELA",
+     "score": 2.65,
+     "termos_batidos": [
+      "empresa",
+      "ficticia"
+     ],
+     "tipo_retorno": "numero",
+     "url": "https://exemplo.invalid/valor_tabela",
+     "usos_proibidos": [
+      "selecao"
+     ]
+    }
+   ],
+   "termos": [
+    "regra",
+    "interna",
+    "ficticia",
+    "bonus",
+    "empresa"
+   ]
+  },
+  "MOD1::Valor de uma tabela de cálculo do módulo 1 pelo código.": {
+   "ambiguidade": false,
+   "aviso": null,
+   "avisos": [],
+   "contexto": "MOD1",
+   "fuzzy_aplicado": null,
+   "margem_top1_top2": null,
+   "pedido": "Valor de uma tabela de cálculo do módulo 1 pelo código.",
+   "receitas": [],
+   "resultados": [
+    {
+     "aridades_documentadas": [
+      1
+     ],
+     "assinaturas": [
+      "VALOR_TABELA(\"CODIGO\")"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "MOD1",
+     "descricao": "Valor de uma tabela de cálculo do módulo 1 pelo código.",
+     "id": "ficticio:MOD1:VALOR_TABELA",
+     "nome": "VALOR_TABELA",
+     "score": 26.797,
+     "termos_batidos": [
+      "calculo",
+      "codigo",
+      "modulo",
+      "tabela"
+     ],
+     "tipo_retorno": "numero",
+     "url": "https://exemplo.invalid/valor_tabela",
+     "usos_proibidos": [
+      "selecao"
+     ]
+    }
+   ],
+   "termos": [
+    "tabela",
+    "calculo",
+    "modulo",
+    "codigo"
+   ]
+  },
+  "MOD2::Saldo acumulado do módulo 2.": {
+   "ambiguidade": false,
+   "aviso": null,
+   "avisos": [],
+   "contexto": "MOD2",
+   "fuzzy_aplicado": null,
+   "margem_top1_top2": null,
+   "pedido": "Saldo acumulado do módulo 2.",
+   "receitas": [],
+   "resultados": [
+    {
+     "aridades_documentadas": [
+      0
+     ],
+     "assinaturas": [
+      "SALDO_MOD2"
+     ],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "MOD2",
+     "descricao": "Saldo acumulado do módulo 2.",
+     "id": "ficticio:MOD2:SALDO_MOD2",
+     "nome": "SALDO_MOD2",
+     "score": 21.969,
+     "termos_batidos": [
+      "acumulado",
+      "modulo",
+      "saldo"
+     ],
+     "tipo_retorno": "numero",
+     "url": "https://exemplo.invalid/saldo_mod2",
+     "usos_proibidos": []
+    }
+   ],
+   "termos": [
+    "saldo",
+    "acumulado",
+    "modulo"
+   ]
+  }
+ },
+ "compor": [],
+ "detalhar": {
+  "-::ANODE": {
+   "dentro": [
+    {
+     "aceita_sem_parenteses": false,
+     "aridades_documentadas": [
+      1
+     ],
+     "assinaturas": [
+      {
+       "argumentos": [
+        "\"DATA\""
+       ],
+       "tem_parenteses": true,
+       "texto": "ANODE(\"DATA\")"
+      }
+     ],
+     "avisos_extracao": [],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Ano de uma data informada.",
+     "descricoes_alternativas": [],
+     "exemplos": [],
+     "id": "ficticio:BASE:ANODE",
+     "nao_documentado": [],
+     "nome": "ANODE",
+     "observacoes": [],
+     "origens": [
+      {
+       "camada": "publico",
+       "pacote": "ficticio",
+       "url": "https://exemplo.invalid/anode"
+      }
+     ],
+     "pacote": "ficticio",
+     "parametros": [
+      {
+       "entre_aspas_na_documentacao": true,
+       "obrigatorio": "nao_documentado",
+       "posicao": 1,
+       "rotulo_documentado": "DATA",
+       "tipo": "data"
+      }
+     ],
+     "relacionadas": [],
+     "tipo_retorno": "numero",
+     "usos_proibidos": []
+    }
+   ],
+   "fora": []
+  },
+  "-::ARREDONDE": {
+   "dentro": [
+    {
+     "aceita_sem_parenteses": false,
+     "aridades_documentadas": [
+      2
+     ],
+     "assinaturas": [
+      {
+       "argumentos": [
+        "NUM",
+        "[NUM]"
+       ],
+       "tem_parenteses": true,
+       "texto": "ARREDONDE(NUM [, NUM])"
+      }
+     ],
+     "avisos_extracao": [],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Arredonda um número; casas decimais opcionais.",
+     "descricoes_alternativas": [],
+     "exemplos": [],
+     "id": "ficticio:BASE:ARREDONDE",
+     "nao_documentado": [],
+     "nome": "ARREDONDE",
+     "observacoes": [],
+     "origens": [
+      {
+       "camada": "publico",
+       "pacote": "ficticio",
+       "url": "https://exemplo.invalid/arredonde"
+      }
+     ],
+     "pacote": "ficticio",
+     "parametros": [
+      {
+       "obrigatorio": "nao_documentado",
+       "posicao": 1,
+       "rotulo_documentado": "NUM",
+       "tipo": "numero"
+      },
+      {
+       "obrigatorio": false,
+       "posicao": 2,
+       "rotulo_documentado": "NUM",
+       "tipo": "numero"
+      }
+     ],
+     "relacionadas": [],
+     "tipo_retorno": "numero",
+     "usos_proibidos": []
+    }
+   ],
+   "fora": []
+  },
+  "-::HOJE": {
+   "dentro": [
+    {
+     "aceita_sem_parenteses": true,
+     "aridades_documentadas": [
+      0
+     ],
+     "assinaturas": [
+      {
+       "argumentos": [],
+       "tem_parenteses": false,
+       "texto": "HOJE"
+      }
+     ],
+     "avisos_extracao": [],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Data corrente do sistema.",
+     "descricoes_alternativas": [],
+     "exemplos": [],
+     "id": "ficticio:BASE:HOJE",
+     "nao_documentado": [],
+     "nome": "HOJE",
+     "observacoes": [],
+     "origens": [
+      {
+       "camada": "publico",
+       "pacote": "ficticio",
+       "url": "https://exemplo.invalid/hoje"
+      }
+     ],
+     "pacote": "ficticio",
+     "parametros": [],
+     "relacionadas": [],
+     "tipo_retorno": "data",
+     "usos_proibidos": []
+    }
+   ],
+   "fora": []
+  },
+  "-::SOMA2": {
+   "dentro": [
+    {
+     "aceita_sem_parenteses": false,
+     "aridades_documentadas": [
+      2
+     ],
+     "assinaturas": [
+      {
+       "argumentos": [
+        "NUM",
+        "NUM"
+       ],
+       "tem_parenteses": true,
+       "texto": "SOMA2(NUM, NUM)"
+      }
+     ],
+     "avisos_extracao": [],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Soma dois números quaisquer.",
+     "descricoes_alternativas": [],
+     "exemplos": [
+      {
+       "camada": "privado",
+       "codigo": "SOMA2(1, 2)",
+       "texto": "uso interno"
+      }
+     ],
+     "id": "ficticio:BASE:SOMA2",
+     "nao_documentado": [],
+     "nome": "SOMA2",
+     "observacoes": [],
+     "origens": [
+      {
+       "camada": "publico",
+       "pacote": "ficticio",
+       "url": "https://exemplo.invalid/soma2"
+      },
+      {
+       "camada": "privado",
+       "pacote": "empresa-ficticia"
+      }
+     ],
+     "pacote": "ficticio",
+     "parametros": [
+      {
+       "obrigatorio": "nao_documentado",
+       "posicao": 1,
+       "rotulo_documentado": "NUM",
+       "tipo": "numero"
+      },
+      {
+       "obrigatorio": "nao_documentado",
+       "posicao": 2,
+       "rotulo_documentado": "NUM",
+       "tipo": "numero"
+      }
+     ],
+     "relacionadas": [],
+     "tipo_retorno": "numero",
+     "usos_proibidos": [],
+     "variantes_privadas": [
+      {
+       "aceita_sem_parenteses": false,
+       "aridades_documentadas": [
+        3
+       ],
+       "assinaturas": [
+        {
+         "argumentos": [
+          "NUM",
+          "NUM",
+          "NUM"
+         ],
+         "tem_parenteses": true,
+         "texto": "SOMA2(NUM, NUM, NUM)"
+        }
+       ],
+       "avisos_extracao": [],
+       "camada": "privado",
+       "confianca_extracao": "declarada",
+       "contexto": "BASE",
+       "descricao": "variante privada",
+       "descricoes_alternativas": [],
+       "exemplos": [
+        {
+         "codigo": "SOMA2(1, 2)",
+         "texto": "uso interno"
+        }
+       ],
+       "id": "ficticio:BASE:SOMA2",
+       "nao_documentado": [],
+       "nome": "SOMA2",
+       "observacoes": [],
+       "origens": [
+        {
+         "camada": "privado",
+         "pacote": "empresa-ficticia"
+        }
+       ],
+       "pacote": "ficticio",
+       "parametros": [],
+       "relacionadas": [],
+       "texto_original": [],
+       "tipo_retorno": "nao_documentado",
+       "usos_proibidos": []
+      }
+     ]
+    }
+   ],
+   "fora": []
+  },
+  "BASE::ANODE": {
+   "dentro": [
+    {
+     "aceita_sem_parenteses": false,
+     "aridades_documentadas": [
+      1
+     ],
+     "assinaturas": [
+      {
+       "argumentos": [
+        "\"DATA\""
+       ],
+       "tem_parenteses": true,
+       "texto": "ANODE(\"DATA\")"
+      }
+     ],
+     "avisos_extracao": [],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Ano de uma data informada.",
+     "descricoes_alternativas": [],
+     "exemplos": [],
+     "id": "ficticio:BASE:ANODE",
+     "nao_documentado": [],
+     "nome": "ANODE",
+     "observacoes": [],
+     "origens": [
+      {
+       "camada": "publico",
+       "pacote": "ficticio",
+       "url": "https://exemplo.invalid/anode"
+      }
+     ],
+     "pacote": "ficticio",
+     "parametros": [
+      {
+       "entre_aspas_na_documentacao": true,
+       "obrigatorio": "nao_documentado",
+       "posicao": 1,
+       "rotulo_documentado": "DATA",
+       "tipo": "data"
+      }
+     ],
+     "relacionadas": [],
+     "tipo_retorno": "numero",
+     "usos_proibidos": []
+    }
+   ],
+   "fora": []
+  },
+  "BASE::ARREDONDE": {
+   "dentro": [
+    {
+     "aceita_sem_parenteses": false,
+     "aridades_documentadas": [
+      2
+     ],
+     "assinaturas": [
+      {
+       "argumentos": [
+        "NUM",
+        "[NUM]"
+       ],
+       "tem_parenteses": true,
+       "texto": "ARREDONDE(NUM [, NUM])"
+      }
+     ],
+     "avisos_extracao": [],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Arredonda um número; casas decimais opcionais.",
+     "descricoes_alternativas": [],
+     "exemplos": [],
+     "id": "ficticio:BASE:ARREDONDE",
+     "nao_documentado": [],
+     "nome": "ARREDONDE",
+     "observacoes": [],
+     "origens": [
+      {
+       "camada": "publico",
+       "pacote": "ficticio",
+       "url": "https://exemplo.invalid/arredonde"
+      }
+     ],
+     "pacote": "ficticio",
+     "parametros": [
+      {
+       "obrigatorio": "nao_documentado",
+       "posicao": 1,
+       "rotulo_documentado": "NUM",
+       "tipo": "numero"
+      },
+      {
+       "obrigatorio": false,
+       "posicao": 2,
+       "rotulo_documentado": "NUM",
+       "tipo": "numero"
+      }
+     ],
+     "relacionadas": [],
+     "tipo_retorno": "numero",
+     "usos_proibidos": []
+    }
+   ],
+   "fora": []
+  },
+  "BASE::HOJE": {
+   "dentro": [
+    {
+     "aceita_sem_parenteses": true,
+     "aridades_documentadas": [
+      0
+     ],
+     "assinaturas": [
+      {
+       "argumentos": [],
+       "tem_parenteses": false,
+       "texto": "HOJE"
+      }
+     ],
+     "avisos_extracao": [],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Data corrente do sistema.",
+     "descricoes_alternativas": [],
+     "exemplos": [],
+     "id": "ficticio:BASE:HOJE",
+     "nao_documentado": [],
+     "nome": "HOJE",
+     "observacoes": [],
+     "origens": [
+      {
+       "camada": "publico",
+       "pacote": "ficticio",
+       "url": "https://exemplo.invalid/hoje"
+      }
+     ],
+     "pacote": "ficticio",
+     "parametros": [],
+     "relacionadas": [],
+     "tipo_retorno": "data",
+     "usos_proibidos": []
+    }
+   ],
+   "fora": []
+  },
+  "BASE::SEM_SINTAXE": {
+   "dentro": [
+    {
+     "aceita_sem_parenteses": false,
+     "aridades_documentadas": [],
+     "assinaturas": [],
+     "avisos_extracao": [],
+     "camada": "publico",
+     "confianca_extracao": "baixa",
+     "contexto": "BASE",
+     "descricao": "Função citada na documentação sem sintaxe.",
+     "descricoes_alternativas": [],
+     "exemplos": [],
+     "id": "ficticio:BASE:SEM_SINTAXE",
+     "nao_documentado": [],
+     "nome": "SEM_SINTAXE",
+     "observacoes": [],
+     "origens": [
+      {
+       "camada": "publico",
+       "pacote": "ficticio",
+       "url": "https://exemplo.invalid/sem_sintaxe"
+      }
+     ],
+     "pacote": "ficticio",
+     "parametros": [],
+     "relacionadas": [],
+     "tipo_retorno": "nao_documentado",
+     "usos_proibidos": []
+    }
+   ],
+   "fora": []
+  },
+  "BASE::SOMA2": {
+   "dentro": [
+    {
+     "aceita_sem_parenteses": false,
+     "aridades_documentadas": [
+      2
+     ],
+     "assinaturas": [
+      {
+       "argumentos": [
+        "NUM",
+        "NUM"
+       ],
+       "tem_parenteses": true,
+       "texto": "SOMA2(NUM, NUM)"
+      }
+     ],
+     "avisos_extracao": [],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "BASE",
+     "descricao": "Soma dois números quaisquer.",
+     "descricoes_alternativas": [],
+     "exemplos": [
+      {
+       "camada": "privado",
+       "codigo": "SOMA2(1, 2)",
+       "texto": "uso interno"
+      }
+     ],
+     "id": "ficticio:BASE:SOMA2",
+     "nao_documentado": [],
+     "nome": "SOMA2",
+     "observacoes": [],
+     "origens": [
+      {
+       "camada": "publico",
+       "pacote": "ficticio",
+       "url": "https://exemplo.invalid/soma2"
+      },
+      {
+       "camada": "privado",
+       "pacote": "empresa-ficticia"
+      }
+     ],
+     "pacote": "ficticio",
+     "parametros": [
+      {
+       "obrigatorio": "nao_documentado",
+       "posicao": 1,
+       "rotulo_documentado": "NUM",
+       "tipo": "numero"
+      },
+      {
+       "obrigatorio": "nao_documentado",
+       "posicao": 2,
+       "rotulo_documentado": "NUM",
+       "tipo": "numero"
+      }
+     ],
+     "relacionadas": [],
+     "tipo_retorno": "numero",
+     "usos_proibidos": [],
+     "variantes_privadas": [
+      {
+       "aceita_sem_parenteses": false,
+       "aridades_documentadas": [
+        3
+       ],
+       "assinaturas": [
+        {
+         "argumentos": [
+          "NUM",
+          "NUM",
+          "NUM"
+         ],
+         "tem_parenteses": true,
+         "texto": "SOMA2(NUM, NUM, NUM)"
+        }
+       ],
+       "avisos_extracao": [],
+       "camada": "privado",
+       "confianca_extracao": "declarada",
+       "contexto": "BASE",
+       "descricao": "variante privada",
+       "descricoes_alternativas": [],
+       "exemplos": [
+        {
+         "codigo": "SOMA2(1, 2)",
+         "texto": "uso interno"
+        }
+       ],
+       "id": "ficticio:BASE:SOMA2",
+       "nao_documentado": [],
+       "nome": "SOMA2",
+       "observacoes": [],
+       "origens": [
+        {
+         "camada": "privado",
+         "pacote": "empresa-ficticia"
+        }
+       ],
+       "pacote": "ficticio",
+       "parametros": [],
+       "relacionadas": [],
+       "texto_original": [],
+       "tipo_retorno": "nao_documentado",
+       "usos_proibidos": []
+      }
+     ]
+    }
+   ],
+   "fora": []
+  },
+  "MOD1::BONUS_INTERNO_XPTO": {
+   "dentro": [
+    {
+     "aceita_sem_parenteses": false,
+     "aridades_documentadas": [
+      1
+     ],
+     "assinaturas": [
+      {
+       "argumentos": [
+        "NUM"
+       ],
+       "tem_parenteses": true,
+       "texto": "BONUS_INTERNO_XPTO(NUM)"
+      }
+     ],
+     "avisos_extracao": [],
+     "camada": "privado",
+     "confianca_extracao": "declarada",
+     "contexto": "MOD1",
+     "descricao": "Regra interna fictícia de bônus da empresa.",
+     "descricoes_alternativas": [],
+     "exemplos": [],
+     "id": "ficticio:MOD1:BONUS_INTERNO_XPTO",
+     "nao_documentado": [],
+     "nome": "BONUS_INTERNO_XPTO",
+     "observacoes": [],
+     "origens": [
+      {
+       "camada": "privado",
+       "fonte": "manual interno fictício",
+       "pacote": "empresa-ficticia"
+      }
+     ],
+     "pacote": "ficticio",
+     "parametros": [],
+     "relacionadas": [],
+     "tipo_retorno": "numero",
+     "usos_proibidos": []
+    }
+   ],
+   "fora": []
+  },
+  "MOD1::VALOR_TABELA": {
+   "dentro": [
+    {
+     "aceita_sem_parenteses": false,
+     "anotacoes": [
+      {
+       "camada": "privado",
+       "pacote_origem": "empresa-ficticia",
+       "texto": "Na empresa fictícia, a tabela padrão de comissão é a 777.",
+       "tipo": "uso_interno"
+      }
+     ],
+     "aridades_documentadas": [
+      1
+     ],
+     "assinaturas": [
+      {
+       "argumentos": [
+        "\"CODIGO\""
+       ],
+       "tem_parenteses": true,
+       "texto": "VALOR_TABELA(\"CODIGO\")"
+      }
+     ],
+     "avisos_extracao": [],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "MOD1",
+     "descricao": "Valor de uma tabela de cálculo do módulo 1 pelo código.",
+     "descricoes_alternativas": [],
+     "exemplos": [],
+     "id": "ficticio:MOD1:VALOR_TABELA",
+     "nao_documentado": [],
+     "nome": "VALOR_TABELA",
+     "observacoes": [],
+     "origens": [
+      {
+       "camada": "publico",
+       "pacote": "ficticio",
+       "url": "https://exemplo.invalid/valor_tabela"
+      }
+     ],
+     "pacote": "ficticio",
+     "parametros": [
+      {
+       "entre_aspas_na_documentacao": true,
+       "obrigatorio": "nao_documentado",
+       "posicao": 1,
+       "rotulo_documentado": "CODIGO",
+       "tipo": "texto"
+      }
+     ],
+     "relacionadas": [],
+     "tipo_retorno": "numero",
+     "usos_proibidos": [
+      {
+       "evidencia": "fictício: não usar em seleção",
+       "uso": "selecao"
+      }
+     ]
+    }
+   ],
+   "fora": []
+  },
+  "MOD2::SALDO_MOD2": {
+   "dentro": [
+    {
+     "aceita_sem_parenteses": true,
+     "aridades_documentadas": [
+      0
+     ],
+     "assinaturas": [
+      {
+       "argumentos": [],
+       "tem_parenteses": false,
+       "texto": "SALDO_MOD2"
+      }
+     ],
+     "avisos_extracao": [],
+     "camada": "publico",
+     "confianca_extracao": "alta",
+     "contexto": "MOD2",
+     "descricao": "Saldo acumulado do módulo 2.",
+     "descricoes_alternativas": [],
+     "exemplos": [],
+     "id": "ficticio:MOD2:SALDO_MOD2",
+     "nao_documentado": [],
+     "nome": "SALDO_MOD2",
+     "observacoes": [],
+     "origens": [
+      {
+       "camada": "publico",
+       "pacote": "ficticio",
+       "url": "https://exemplo.invalid/saldo_mod2"
+      }
+     ],
+     "pacote": "ficticio",
+     "parametros": [],
+     "relacionadas": [],
+     "tipo_retorno": "numero",
+     "usos_proibidos": []
+    }
+   ],
+   "fora": []
+  }
+ },
+ "validar_explicar": {
+  "BASE::-::ARREDONDE(SOMA2(1, 2), 2)": {
+   "explicar": {
+    "avisos": [],
+    "componentes": [
+     {
+      "aridades_documentadas": [
+       2
+      ],
+      "assinaturas": [
+       "ARREDONDE(NUM [, NUM])"
+      ],
+      "camada": "publico",
+      "confianca_extracao": "alta",
+      "contexto": "BASE",
+      "descricao": "Arredonda um número; casas decimais opcionais.",
+      "fontes": [
+       "https://exemplo.invalid/arredonde"
+      ],
+      "id": "ficticio:BASE:ARREDONDE",
+      "nome": "ARREDONDE",
+      "observacoes": [],
+      "tipo_retorno": "numero",
+      "url": "https://exemplo.invalid/arredonde",
+      "usos_proibidos": []
+     },
+     {
+      "aridades_documentadas": [
+       2
+      ],
+      "assinaturas": [
+       "SOMA2(NUM, NUM)"
+      ],
+      "camada": "publico",
+      "confianca_extracao": "alta",
+      "contexto": "BASE",
+      "descricao": "Soma dois números quaisquer.",
+      "fontes": [
+       "https://exemplo.invalid/soma2",
+       "empresa-ficticia"
+      ],
+      "id": "ficticio:BASE:SOMA2",
+      "nome": "SOMA2",
+      "observacoes": [],
+      "tipo_retorno": "numero",
+      "url": "https://exemplo.invalid/soma2",
+      "usos_proibidos": []
+     }
+    ],
+    "erros": [],
+    "formula": "ARREDONDE(SOMA2(1, 2), 2)",
+    "passo_a_passo": [
+     "• ARREDONDE(2 arg.): Arredonda um número; casas decimais opcionais. [retorno: numero]",
+     "    1. NUM:",
+     "      • SOMA2(2 arg.): Soma dois números quaisquer. [retorno: numero]",
+     "          1. NUM:",
+     "            • constante numero: 1",
+     "          2. NUM:",
+     "            • constante numero: 2",
+     "    2. NUM:",
+     "      • constante numero: 2"
+    ],
+    "valida": true
+   },
+   "validar": {
+    "avisos": [],
+    "contexto": "BASE",
+    "erros": [],
+    "formula": "ARREDONDE(SOMA2(1, 2), 2)",
+    "funcoes_usadas": [
+     {
+      "camada": "publico",
+      "contexto": "BASE",
+      "id": "ficticio:BASE:ARREDONDE",
+      "nome": "ARREDONDE",
+      "url": "https://exemplo.invalid/arredonde"
+     },
+     {
+      "camada": "publico",
+      "contexto": "BASE",
+      "id": "ficticio:BASE:SOMA2",
+      "nome": "SOMA2",
+      "url": "https://exemplo.invalid/soma2"
+     }
+    ],
+    "uso": null,
+    "valida": true,
+    "variaveis_declaradas": []
+   }
+  }
+ }
+}

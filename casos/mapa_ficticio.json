@@ -1,0 +1,32 @@
+{
+  "versao": 2,
+  "ficticio": true,
+  "observacao": "Mapa FICTÍCIO, coerente com o schema da fixture (casos/fixture_schema.py): exemplo do contrato do mapa para os testes e para a versão distribuível. Nenhuma tabela de sistema real.",
+  "cadastros": [
+    {
+      "cadastro": "cargo",
+      "tabela": "F_CARGO",
+      "chave": ["CODCARGO"],
+      "coluna_codigo": "CODCARGO",
+      "coluna_descricao": "DESCRICAOCARGO",
+      "rotulos_parametro": ["CÓDIGO DO CARGO", "COD CARGO"],
+      "funcoes": ["CARGODE"]
+    },
+    {
+      "cadastro": "empresa",
+      "tabela": "N_EMPRESA",
+      "chave": ["CODEMPRESA"],
+      "coluna_codigo": "CODEMPRESA",
+      "coluna_descricao": "RAZAOSOCIAL",
+      "rotulos_parametro": ["CÓDIGO DA EMPRESA"]
+    },
+    {
+      "cadastro": "unidade",
+      "tabela": "N_UNIDADE",
+      "chave": ["CODUNIDADE"],
+      "coluna_codigo": "CODUNIDADE",
+      "coluna_descricao": "NOMEUNIDADE",
+      "rotulos_parametro": ["CÓDIGO DA UNIDADE"]
+    }
+  ]
+}

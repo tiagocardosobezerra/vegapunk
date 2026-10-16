@@ -1,0 +1,190 @@
+{
+  "id": "totvs-rm",
+  "nome": "Linguagem de fórmulas TOTVS Linha RM",
+  "observacao": "Toda regra abaixo foi extraída de exemplos e textos da própria documentação (ver `evidencias`). Construções sem evidência documental NÃO entram aqui — o validador as trata como desconhecidas.",
+  "sensivel_a_caixa": false,
+  "separador_instrucoes": ";",
+  "delimitadores_texto": [
+    "'",
+    "\""
+  ],
+  "separador_decimal": ".",
+  "separador_argumentos": ",",
+  "comentarios": [
+    [
+      "/*",
+      "*/"
+    ]
+  ],
+  "literais_booleanos": [
+    "VERDADE",
+    "FALSO"
+  ],
+  "operadores": {
+    "aritmeticos": [
+      "+",
+      "-",
+      "*",
+      "/"
+    ],
+    "comparacao": [
+      "=",
+      "<>",
+      ">=",
+      "<=",
+      ">",
+      "<"
+    ],
+    "logicos": [
+      "OR",
+      "E"
+    ]
+  },
+  "estruturas": {
+    "condicional": {
+      "inicio": "SE",
+      "entao": "ENTAO",
+      "senao": "SENAO",
+      "fim": "FIMSE"
+    },
+    "repeticao": {
+      "inicio": "REPITA",
+      "fim": "ATE"
+    },
+    "declaracao": {
+      "palavra": "DECL",
+      "parenteses_opcionais": true
+    },
+    "atribuicao": {
+      "funcao": "SETVAR",
+      "aridade": 2,
+      "alvos": [
+        "identificador",
+        "texto"
+      ]
+    }
+  },
+  "funcoes_sem_parenteses": "permitido_quando_documentado",
+  "limites": {
+    "max_constantes": 50
+  },
+  "evidencias": {
+    "sensivel_a_caixa": "Cadastro de Fórmulas (pageId 403746924): 'Funções podem ser escritas com letras maiúsculas e/ou minúsculas.'",
+    "max_constantes": "Cadastro de Fórmulas (pageId 403746924): 'Na fórmula só poderão ser incluídas até 50 constantes.'",
+    "condicional": "Exemplos 'SE CHAPA = '00001' ENTAO TCASA FIMSE' (FOP T) e 'SE ... ENTAO ... SENAO ... FIMSE' (FOP F, FOP G, FOP P).",
+    "repeticao": "Exemplos 'REPITA ... ATE Linha = ''' (FOP L), 'REPITA ... ATE CONT = 7' (FOP N), 'REPITA ... ATE (DT=FPM+1)' (PTO H).",
+    "declaracao": "Exemplos 'DECL k, Linha, Res;' (FOP L) e 'DECL (TOTVALES);' (FOP H).",
+    "atribuicao": "Exemplos 'SETVAR(k, 1);' (FOP L, FOP N, PTO H) — variável declarada com DECL; e 'SETVAR('var1', 200)' (Funções Globais, pageId 381051703) — chave texto.",
+    "comentarios": "Exemplos '/* Primeiro dia do próximo mês */' (FOP D) e '/*13O SALARIO NAS FERIAS*/' (FOP E).",
+    "literais_booleanos": "Exemplos 'SE EXECSQL('H0005') = VERDADE' (FOP I) e 'ATE PROXREGSQL('H0005') = FALSO' (FOP I).",
+    "delimitadores_texto": "Aspas simples na maioria dos exemplos; aspas duplas em 'C(\"0084\")' (FOP G).",
+    "operadores.logicos": "Dois operadores lógicos aparecem em exemplos de fórmula documentados: OR em 'SE ((PROCESSO = 'PROVISAO') OR (PROCESSO = 'RESCISAO')) ENTAO ...' (FOP T, pageId 452718252) e E em 'Se PAR > 30 e PAR < 50 Entao verdade Senao falso Fimse' (FOP P, pageId 452719225). AND, OU e NAO não aparecem em nenhuma fórmula documentada (AND só aparece dentro de sentenças SQL) — o validador sinaliza seu uso como não documentado.",
+    "tipos_parametro": "Vocabulário dos RÓTULOS que a própria documentação usa nas sintaxes (ex.: 'ANODT( ' DATA ' )', 'ABS( NUM )', 'ACUMFF(MÊS, ANO, 'CÓD. DO ACUMULADOR')'). O tipo é inferido do rótulo; rótulo fora deste vocabulário = 'desconhecido'.",
+    "tipos_retorno": "Valores do campo 'Tipo de Retorno' encontrados na documentação (Valor, String, Data, Indefinido, Indeterminado, 'De acordo com o que for atribuído...').",
+    "operadores_nao_documentados": "Palavras que costumam ser tentadas como operador lógico mas não aparecem em nenhuma fórmula da documentação processada. Servem só para o validador dar uma mensagem mais clara; não habilitam nada.",
+    "consulta.retorno_executar": "Fórmulas Globais (pageId 403746922): 'Caso a execução tenha pelo menos uma linha de resultado, está variável retorna VERDADE.'",
+    "consulta.leitura_exige_execucao": "Exemplos 'Se (EXECSQL ('SQL1') = Verdade) Entao Repita Se RESULTSQL ('SQL1' , ...)' (FOP P, pageId 452719225) e 'SE EXECSQL('H0005') = VERDADE ... RESULTSQL ('H0005', ...)' (FOP I, pageId 452719547): a leitura vem sempre depois da execução da mesma consulta.",
+    "consulta.ler_campo": "Duas redações: 'Esta função lê uma linha do resultado da execução da SQL' (Fórmulas Globais, pageId 403746922) e 'Retorna o valor de um campo de um resultado da Consulta SQL.' (Funções Globais, pageId 381051703); a sintaxe nas duas é (código, campo): o campo da linha corrente.",
+    "consulta.parametros_na_chamada": "EXECSQL('código da consulta SQL') tem um único argumento em Fórmulas Globais (pageId 403746922) e em Funções Globais (pageId 381051703); nenhum exemplo passa parâmetro à consulta.",
+    "consulta.variantes.PROXREG": "FOP P (pageId 452719225): o título 'Função PROXREGSQL' traz a sintaxe 'PROXREG (String)' com a mesma descrição; nenhum exemplo usa PROXREG. Decisão (fase 4): PROXREG é grafia da mesma função; o motor escreve PROXREGSQL e avisa quando a fórmula usa PROXREG.",
+    "consulta.laco": "Padrão dos exemplos: REPITA ... ATE PROXREGSQL(código) = FALSO, com a leitura dentro do laço (FOP I, pageId 452719547; FOP P, pageId 452719225)."
+  },
+  "tipos_parametro": {
+    "data": [
+      "DATA",
+      "DATA1",
+      "DATA2",
+      "DT",
+      "DATAINICIO",
+      "DATAFIM"
+    ],
+    "texto": [
+      "STRING",
+      "TEXTO",
+      "CHAR",
+      "CARACTER",
+      "CAMPO",
+      "COD",
+      "CÓD",
+      "CODIGO",
+      "CÓDIGO",
+      "CHAVE",
+      "SIMBOLO",
+      "SÍMBOLO",
+      "CHAPA",
+      "CONJUNTO",
+      "TIPO"
+    ],
+    "numero": [
+      "VALOR",
+      "VALOR1",
+      "VALOR2",
+      "NUM",
+      "NÚMERO",
+      "NUMERO",
+      "INTEIRO",
+      "INTEIRO1",
+      "INTEIRO2",
+      "INTEIRO3",
+      "MÊS",
+      "MES",
+      "ANO",
+      "QUANTIDADE",
+      "QTD",
+      "DIA",
+      "FATOR",
+      "PERCENTUAL",
+      "DECIMAL",
+      "MESES"
+    ]
+  },
+  "tipos_retorno": {
+    "numero": [
+      "VALOR",
+      "DECIMAL",
+      "INTEIRO",
+      "NÚMERO",
+      "NUMERO",
+      "0 OU 1"
+    ],
+    "texto": [
+      "STRING",
+      "TEXTO",
+      "CARACTER",
+      "CARACTERES"
+    ],
+    "data": [
+      "DATA"
+    ],
+    "booleano": [
+      "VERDADE",
+      "FALSO",
+      "BOOLEANO",
+      "LÓGICO",
+      "LOGICO"
+    ],
+    "indefinido": [
+      "INDEFINIDO",
+      "INDETERMINADO",
+      "DE ACORDO"
+    ]
+  },
+  "operadores_nao_documentados": [
+    "AND",
+    "OU",
+    "NAO",
+    "NOT",
+    "XOR"
+  ],
+  "consulta": {
+    "executar": "EXECSQL",
+    "ler_campo": "RESULTSQL",
+    "avancar_registro": "PROXREGSQL",
+    "retorno_executar": "VERDADE",
+    "leitura_exige_execucao": true,
+    "parametros_na_chamada": false,
+    "variantes": {
+      "PROXREG": "PROXREGSQL"
+    }
+  }
+}

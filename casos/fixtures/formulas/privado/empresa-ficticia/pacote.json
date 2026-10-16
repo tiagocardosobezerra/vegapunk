@@ -1,0 +1,2 @@
+{"id": "empresa-ficticia", "nome": "Camada privada FICTÍCIA de teste", "visibilidade": "privado", "estende": "ficticio",
+ "contextos": {"MOD1": {"herda": ["BASE"]}}}

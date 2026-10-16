@@ -1,0 +1,27 @@
+{
+  "id": "ficticio",
+  "nome": "Pacote 100% fictício para testes do motor (dialeto em inglês, de propósito)",
+  "visibilidade": "publico",
+  "dialeto": "dialeto.json",
+  "contextos": {
+    "BASE": {
+      "nome": "Funções base",
+      "herda": []
+    },
+    "MOD1": {
+      "nome": "Módulo 1",
+      "herda": [
+        "BASE"
+      ]
+    },
+    "MOD2": {
+      "nome": "Módulo 2",
+      "herda": [
+        "BASE"
+      ]
+    }
+  },
+  "marcas": [
+    "MARCAFICTICIAZZ"
+  ]
+}

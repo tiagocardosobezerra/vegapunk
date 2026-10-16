@@ -1,0 +1,5 @@
+# Fim de linha LF em todo checkout (o teste de regressão confere o hash do
+# código; um checkout com CRLF no Windows mudaria o hash sem mudar o código).
+* text=auto eol=lf
+# Os goldens ficam byte a byte como foram gravados.
+casos/golden/*.json -text

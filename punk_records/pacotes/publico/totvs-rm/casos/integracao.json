@@ -1,0 +1,12 @@
+{
+ "descricao": "Patamares de integração deste pacote (rodados por testes/test_pacotes_publicos.py, genérico para qualquer pacote público). Cair abaixo = ingestão/extração piorou ou a fonte mudou.",
+ "funcoes_minimo": 400,
+ "contextos": [
+  "GLOBAL",
+  "FOP",
+  "PTO"
+ ],
+ "prefixo_url_origem": "https://tdn.totvs.com/",
+ "exemplos_documentados_minimo": 340,
+ "exemplos_documentados_taxa_validos_minima": 0.9
+}

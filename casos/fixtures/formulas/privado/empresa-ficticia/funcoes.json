@@ -1,0 +1,10 @@
+[
+ {"nome": "BONUS_INTERNO_XPTO", "contexto": "MOD1", "descricao": "Regra interna fictícia de bônus da empresa.",
+  "assinaturas": [{"texto": "BONUS_INTERNO_XPTO(NUM)", "tem_parenteses": true, "argumentos": ["NUM"]}],
+  "aridades_documentadas": [1], "tipo_retorno": "numero",
+  "origens": [{"pacote": "empresa-ficticia", "fonte": "manual interno fictício"}]},
+ {"nome": "SOMA2", "contexto": "BASE", "descricao": "variante privada",
+  "assinaturas": [{"texto": "SOMA2(NUM, NUM, NUM)", "tem_parenteses": true, "argumentos": ["NUM", "NUM", "NUM"]}],
+  "aridades_documentadas": [3],
+  "exemplos": [{"codigo": "SOMA2(1, 2)", "texto": "uso interno"}]}
+]

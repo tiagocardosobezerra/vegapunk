@@ -1,0 +1,12 @@
+[
+  {
+    "nome": "EXEMPLO_FUNCAO_INTERNA",
+    "contexto": "FOP",
+    "descricao": "Substitua por uma função/variável que exista na sua instalação e não esteja na documentação pública.",
+    "assinaturas": [{"texto": "EXEMPLO_FUNCAO_INTERNA(VALOR)", "tem_parenteses": true, "argumentos": ["VALOR"]}],
+    "aridades_documentadas": [1],
+    "parametros": [{"posicao": 1, "rotulo_documentado": "VALOR", "tipo": "numero", "obrigatorio": true}],
+    "tipo_retorno": "numero",
+    "origens": [{"pacote": "minha-empresa", "fonte": "onde isto está documentado internamente"}]
+  }
+]

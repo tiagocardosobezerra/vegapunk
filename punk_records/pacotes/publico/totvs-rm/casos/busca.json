@@ -1,0 +1,350 @@
+{
+ "descricao": "Casos rotulados de qualidade da BUSCA do motor de fórmulas (Shaka) contra este pacote público. Cada caso: pedido em PT-BR como um analista de folha/ponto escreveria, contexto do pedido e as funções (por NOME) que são resposta legítima. Acerto = qualquer função esperada aparece entre os top-N resultados de BaseConhecimento.buscar(pedido, contexto). Grupos: calibracao (pode ser usado para ajustar pesos), heldout (medida de generalização com ressalva: os pesos foram escolhidos olhando calibracao+heldout), validacao_cega (nunca usado para ajustar nada — o número honesto). Se algum caso de validacao_cega for usado para calibrar, mova-o para calibracao e escreva um lote novo.",
+ "top_n": 3,
+ "casos": [
+  {
+   "grupo": "calibracao",
+   "pedido": "salário base do funcionário",
+   "contexto": "FOP",
+   "esperadas": [
+    "RC"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "valor de um acumulador",
+   "contexto": "FOP",
+   "esperadas": [
+    "A",
+    "ACUMFF"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "data de admissão do funcionário",
+   "contexto": "FOP",
+   "esperadas": [
+    "DTA"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "número de dependentes para IRRF",
+   "contexto": "FOP",
+   "esperadas": [
+    "D",
+    "NDEPIR"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "dias úteis do mês",
+   "contexto": "FOP",
+   "esperadas": [
+    "DUTEISMES",
+    "NDUTEIS"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "base de INSS do mês",
+   "contexto": "FOP",
+   "esperadas": [
+    "BASEINSS"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "arredondar com duas casas decimais",
+   "contexto": "FOP",
+   "esperadas": [
+    "ARREDONDA",
+    "ARREDVALOR"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "horas extras autorizadas no dia",
+   "contexto": "PTO",
+   "esperadas": [
+    "EXTRAAUTO",
+    "EXTRAEXEC"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "horas de atraso do funcionário na data",
+   "contexto": "PTO",
+   "esperadas": [
+    "HORASATRASO"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "adicional noturno trabalhado no dia",
+   "contexto": "PTO",
+   "esperadas": [
+    "HORASADNOT",
+    "HADNOT"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "verificar se o dia é feriado",
+   "contexto": "PTO",
+   "esperadas": [
+    "DIAFER"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "batidas do funcionário no dia",
+   "contexto": "PTO",
+   "esperadas": [
+    "BATDIA"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "último dia do mês de uma data",
+   "contexto": "GLOBAL",
+   "esperadas": [
+    "ULTDIAMES"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "converter texto em número",
+   "contexto": "GLOBAL",
+   "esperadas": [
+    "VAL"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "anos de casa do funcionário",
+   "contexto": "FOP",
+   "esperadas": [
+    "TCASA"
+   ]
+  },
+  {
+   "grupo": "calibracao",
+   "pedido": "salário mínimo do sindicato",
+   "contexto": "FOP",
+   "esperadas": [
+    "SMSIND",
+    "MINGA"
+   ]
+  },
+  {
+   "grupo": "heldout",
+   "pedido": "horas de falta do funcionário no dia",
+   "contexto": "PTO",
+   "esperadas": [
+    "HORASFALTA",
+    "HORASFALTAJOR"
+   ]
+  },
+  {
+   "grupo": "heldout",
+   "pedido": "saldo do banco de horas até uma data",
+   "contexto": "FOP",
+   "esperadas": [
+    "SALDOBANCOHORASCHRONUS"
+   ]
+  },
+  {
+   "grupo": "heldout",
+   "pedido": "idade do funcionário",
+   "contexto": "FOP",
+   "esperadas": [
+    "IDADE"
+   ]
+  },
+  {
+   "grupo": "heldout",
+   "pedido": "líquido do recibo de férias",
+   "contexto": "FOP",
+   "esperadas": [
+    "LIQFERIAS",
+    "LIQFERIASDATA"
+   ]
+  },
+  {
+   "grupo": "heldout",
+   "pedido": "total de proventos",
+   "contexto": "FOP",
+   "esperadas": [
+    "TOTPROV"
+   ]
+  },
+  {
+   "grupo": "heldout",
+   "pedido": "dias de afastamento",
+   "contexto": "FOP",
+   "esperadas": [
+    "DIASAFT",
+    "DIASAFTPAG"
+   ]
+  },
+  {
+   "grupo": "heldout",
+   "pedido": "intervalo de refeição em minutos",
+   "contexto": "PTO",
+   "esperadas": [
+    "INTREF"
+   ]
+  },
+  {
+   "grupo": "heldout",
+   "pedido": "horas trabalhadas no período",
+   "contexto": "PTO",
+   "esperadas": [
+    "HORASTRABPER",
+    "HORASTRABPERTOT"
+   ]
+  },
+  {
+   "grupo": "heldout",
+   "pedido": "pegar parte da string a partir de uma posição",
+   "contexto": "GLOBAL",
+   "esperadas": [
+    "SUBSTR"
+   ]
+  },
+  {
+   "grupo": "heldout",
+   "pedido": "juntar dois textos",
+   "contexto": "GLOBAL",
+   "esperadas": [
+    "CONCAT",
+    "CONCAT2"
+   ]
+  },
+  {
+   "grupo": "heldout",
+   "pedido": "avos de décimo terceiro",
+   "contexto": "FOP",
+   "esperadas": [
+    "NROAVOS13"
+   ]
+  },
+  {
+   "grupo": "heldout",
+   "pedido": "situação do funcionário, se está ativo ou afastado",
+   "contexto": "FOP",
+   "esperadas": [
+    "SFUNC",
+    "SFUNCDATA"
+   ]
+  },
+  {
+   "grupo": "validacao_cega",
+   "pedido": "salário-hora do empregado",
+   "contexto": "FOP",
+   "esperadas": [
+    "H",
+    "HC"
+   ]
+  },
+  {
+   "grupo": "validacao_cega",
+   "pedido": "quantos feriados tem no mês",
+   "contexto": "FOP",
+   "esperadas": [
+    "FERIADOSMES"
+   ]
+  },
+  {
+   "grupo": "validacao_cega",
+   "pedido": "data de demissão",
+   "contexto": "FOP",
+   "esperadas": [
+    "DTD"
+   ]
+  },
+  {
+   "grupo": "validacao_cega",
+   "pedido": "imposto de renda calculado sobre uma base",
+   "contexto": "FOP",
+   "esperadas": [
+    "TR",
+    "TR2"
+   ]
+  },
+  {
+   "grupo": "validacao_cega",
+   "pedido": "dia da semana de uma data",
+   "contexto": "GLOBAL",
+   "esperadas": [
+    "DIASEMANA"
+   ]
+  },
+  {
+   "grupo": "validacao_cega",
+   "pedido": "data de hoje",
+   "contexto": "GLOBAL",
+   "esperadas": [
+    "HOJE"
+   ]
+  },
+  {
+   "grupo": "validacao_cega",
+   "pedido": "minutos de extra antes ou depois do horário",
+   "contexto": "PTO",
+   "esperadas": [
+    "EXTRAFORAHOR",
+    "EXTRAFORAHORJOR"
+   ]
+  },
+  {
+   "grupo": "validacao_cega",
+   "pedido": "horas de abono no dia",
+   "contexto": "PTO",
+   "esperadas": [
+    "HORASABONO"
+   ]
+  },
+  {
+   "grupo": "validacao_cega",
+   "pedido": "código do horário do funcionário na data",
+   "contexto": "PTO",
+   "esperadas": [
+    "HORARIOCODDIA",
+    "HORARIOCODDIAALTER"
+   ]
+  },
+  {
+   "grupo": "validacao_cega",
+   "pedido": "início do período mensal do ponto",
+   "contexto": "PTO",
+   "esperadas": [
+    "IPM"
+   ]
+  },
+  {
+   "grupo": "validacao_cega",
+   "pedido": "total de descontos da folha",
+   "contexto": "FOP",
+   "esperadas": [
+    "TOTDESC"
+   ]
+  },
+  {
+   "grupo": "validacao_cega",
+   "pedido": "dias de direito de férias",
+   "contexto": "FOP",
+   "esperadas": [
+    "DIADIRFER",
+    "NDDIRFERIAS",
+    "DIADIRFERPER"
+   ]
+  }
+ ],
+ "patamar_minimo": {
+  "calibracao": 15,
+  "heldout": 12,
+  "validacao_cega": 11
+ }
+}

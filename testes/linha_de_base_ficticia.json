@@ -1,0 +1,65 @@
+{
+  "_descricao": "Linha de base PÚBLICA da v3: só métricas medidas na fixture fictícia (casos/), sem nenhum número ou nome da instância. A linha de base completa, com a instância real, fica em egghead/linha_de_base_v3.json (fora do controle de versão).",
+  "medido_em": "2026-10-16",
+  "commit_de_referencia": "tag v3-fase3-fim",
+  "comandos": {
+    "suite": "python -m unittest discover -s testes",
+    "schema": "python satelites/pythagoras.py avaliar --dominio schema",
+    "atlas": "python satelites/atlas.py verificar",
+    "isolamento": "python satelites/atlas.py isolamento",
+    "distribuicao": "python satelites/atlas.py distribuir --destino <pasta fora do repositório>"
+  },
+  "suite_testes": {
+    "testes": 206,
+    "pulados": 4,
+    "falharam": 0,
+    "nota": "os pulados exigem pdftotext/reportlab ou uma condição da base real"
+  },
+  "schema_fixture": {
+    "integridade": "PASSOU",
+    "calibracao": {
+      "casos": 13,
+      "acertos": 13
+    },
+    "heldout": {
+      "casos": 10,
+      "acertos": 10
+    },
+    "validacao_cega": {
+      "casos": 8,
+      "acertos": 8
+    },
+    "total": {
+      "casos": 31,
+      "acertos": 31
+    }
+  },
+  "atlas_fixture": {
+    "consultas": {
+      "resultado": "idêntico ao golden",
+      "pedidos": 36,
+      "detalhamentos": 34
+    },
+    "formulas": {
+      "resultado": "idêntico ao golden",
+      "pedidos": 13,
+      "detalhamentos": 12,
+      "validacoes": 1,
+      "composicoes": 0
+    },
+    "determinismo": "idêntico com qualquer PYTHONHASHSEED"
+  },
+  "mapa_ficticio": {
+    "arquivo": "casos/mapa_ficticio.json",
+    "cadastros": 3,
+    "papeis_divergentes": 0,
+    "tabelas_citadas_fora_da_fixture": 0
+  },
+  "isolamento": {
+    "checagens": 13,
+    "nota": "na instância; numa cópia distribuída sem egghead/, a checagem de nomes do schema real passa com a nota 'sem instância'"
+  },
+  "formulas_fixture": {
+    "nota": "o pacote fictício não traz casos de busca; a avaliação de fórmulas (acerto@3, MRR) só existe com um pacote de conhecimento instalado"
+  }
+}

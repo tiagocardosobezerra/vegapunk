@@ -1,0 +1,7 @@
+{
+  "id": "minha-empresa",
+  "nome": "Conhecimento privado de fórmulas da minha instalação (MODELO — copie para punk_records/pacotes/privado/minha-empresa/)",
+  "visibilidade": "privado",
+  "estende": "<id do pacote público que este complementa>",
+  "contextos": {}
+}
