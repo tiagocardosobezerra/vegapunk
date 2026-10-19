@@ -1,5 +1,7 @@
 # Vegapunk
 
+**Português** | [English](README.en.md)
+
 **Pergunte em português. Receba o T-SQL certo, com as tabelas, as colunas e os JOINs reais do seu banco.**
 
 ![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-3776AB?style=flat-square&logo=python&logoColor=white)
@@ -173,6 +175,7 @@ python3 satelites/atlas.py isolamento
 vegapunk/
 ├── SKILL.md               # O que o Claude lê: regras e caminhos
 ├── README.md              # Este arquivo
+├── README.en.md           # README em inglês
 ├── COMO-INSTALAR.md       # Instalação e conferência
 ├── AVISO.md               # Aviso sobre dados de terceiros
 ├── LICENSE                # MIT License

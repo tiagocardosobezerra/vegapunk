@@ -13,7 +13,7 @@ Responde, de forma verificável (não por promessa em documentação):
      declarar (nomes internos, tabelas, campos, códigos da empresa);
   6. nenhuma MARCA de terceiro declarada por um pacote público (`"marcas"`
      no fonte.json/pacote.json) aparece fora do próprio pacote — core,
-     SKILL.md, README.md, AVISO.md, COMO-INSTALAR.md, referencias/, testes/ e casos/. Mesma regra que o AVISO.md já
+     SKILL.md, README.md, README.en.md, AVISO.md, COMO-INSTALAR.md, referencias/, testes/ e casos/. Mesma regra que o AVISO.md já
      impunha ao motor de consultas: nome de fornecedor não se repete na
      especificação da skill.
   7. nenhum TRECHO do texto da camada privada (sequência de
@@ -355,7 +355,7 @@ def verificar_isolamento(raiz_skill, raiz_conhecimento=None):
 
     # 6. marcas de terceiros só dentro do próprio pacote
     marcas = {m for p in pacotes if p.camada == 'publico' for m in p.manifesto.get('marcas', []) if len(m) >= 3}
-    alvos = core + cruzados + [os.path.join(raiz_skill, x) for x in ('SKILL.md', 'README.md', 'AVISO.md', 'COMO-INSTALAR.md', 'referencias', 'testes', 'casos')]
+    alvos = core + cruzados + [os.path.join(raiz_skill, x) for x in ('SKILL.md', 'README.md', 'README.en.md', 'AVISO.md', 'COMO-INSTALAR.md', 'referencias', 'testes', 'casos')]
     # fixtures de teste são dados fictícios por definição (AVISO.md) e os
     # próprios diretórios de pacote são o lugar CERTO da marca
     ignorar = {os.path.join(raiz_skill, 'casos', 'fixtures')} | {p.dir for p in pacotes}
