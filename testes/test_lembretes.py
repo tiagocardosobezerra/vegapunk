@@ -45,11 +45,28 @@ class TestLembretes(unittest.TestCase):
         self.assertEqual(_stderr(lembretes.lembrar_salvar_no_cartao), '')
         self.assertEqual(_stderr(lembretes.lembrar_buscar_no_cartao, 'x'), '')
         self.assertEqual(_stderr(lembretes.lembrar_conferir_cartao), '')
+        cartao = os.path.join(self._tmp.name, 'cartao')
+        os.makedirs(os.path.join(cartao, '.git'))
         with open(os.path.join(self._tmp.name, 'memory_card.json'), 'w', encoding='utf-8') as f:
-            json.dump({'repo': 'qzdono/qzcartao'}, f)
-        self.assertIn('Memory Card', _stderr(lembretes.lembrar_salvar_no_cartao))
+            json.dump({'repo': 'qzdono/qzcartao', 'pasta': cartao}, f)
+        self._which = mock.patch.object(lembretes.shutil, 'which', return_value='gh')
+        self._which.start()
+        self.addCleanup(self._which.stop)
+        self.assertIn('Ofereça salvar', _stderr(lembretes.lembrar_salvar_no_cartao))
         self.assertIn('stella.py cartao buscar "folha"', _stderr(lembretes.lembrar_buscar_no_cartao, 'folha'))
         self.assertIn('stella.py cartao conferir', _stderr(lembretes.lembrar_conferir_cartao))
+
+    def test_cartao_de_outra_maquina_nao_oferece_salvar(self):
+        with open(os.path.join(self._tmp.name, 'memory_card.json'), 'w', encoding='utf-8') as f:
+            json.dump({'repo': 'qzdono/qzcartao', 'pasta': os.path.join(self._tmp.name, 'nao', 'existe')}, f)
+        txt = _stderr(lembretes.lembrar_salvar_no_cartao)
+        self.assertNotIn('Ofereça salvar', txt)
+        self.assertIn('não funciona aqui', txt)
+        self.assertEqual(_stderr(lembretes.lembrar_buscar_no_cartao, 'x'), '')
+        with mock.patch.object(lembretes.os, 'name', 'posix'):
+            with open(os.path.join(self._tmp.name, 'memory_card.json'), 'w', encoding='utf-8') as f:
+                json.dump({'repo': 'qzdono/qzcartao', 'pasta': 'C:/Users/qz/cartao'}, f)
+            self.assertTrue(lembretes.cartao_em_outra_maquina())
 
     def test_cli_detalhar_lembra_em_stderr_sem_sujar_o_json(self):
         db = os.path.join(self._tmp.name, 'fixture.db')
@@ -86,6 +103,44 @@ class TestInstanciaSoDeLeitura(unittest.TestCase):
         from dominios import solucao
         s = {'pedido': 'x', 'intencoes': [], 'lacunas': []}
         self.assertIsNone(solucao.registrar_candidata(s, os.path.join(self.bloqueio, 'c.jsonl')))
+
+
+class TestMemoryCardEmOutraMaquina(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self._env = mock.patch.dict(os.environ, {'VEGAPUNK_EGGHEAD': self._tmp.name})
+        self._env.start()
+        for v in ('MEMORY_CARD_REPO', 'MEMORY_CARD_DIR'):
+            os.environ.pop(v, None)
+        with open(os.path.join(self._tmp.name, 'memory_card.json'), 'w', encoding='utf-8') as f:
+            json.dump({'repo': 'qzdono/qzcartao', 'pasta': os.path.join(self._tmp.name, 'nao', 'existe')}, f)
+
+    def tearDown(self):
+        self._env.stop()
+        self._tmp.cleanup()
+
+    def test_recusa_sem_tentar_clonar(self):
+        import memory_card
+        with mock.patch.object(memory_card, '_rodar') as rodar:
+            with self.assertRaises(memory_card.EnvioRecusado) as ctx:
+                memory_card.preparar_pasta()
+        rodar.assert_not_called()
+        self.assertIn('outra máquina', str(ctx.exception))
+        self.assertIn('Não rode `iniciar`', str(ctx.exception))
+        self.assertFalse(memory_card.disponivel()[0])
+
+    def test_iniciar_nao_troca_o_cartao_sem_substituir(self):
+        import memory_card
+        with mock.patch.object(memory_card, '_rodar') as rodar:
+            with self.assertRaises(memory_card.EnvioRecusado) as ctx:
+                memory_card.iniciar('qzdono/outro')
+        rodar.assert_not_called()
+        self.assertIn('--substituir', str(ctx.exception))
+
+    def test_caminho_do_windows_fora_do_windows_e_outra_maquina(self):
+        import memory_card
+        with mock.patch.object(memory_card.os, 'name', 'posix'):
+            self.assertFalse(memory_card.pasta_e_desta_maquina('C:/Users/qz/cartao'))
 
 
 class TestMemoryCardSemGh(unittest.TestCase):

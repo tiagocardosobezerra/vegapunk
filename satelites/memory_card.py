@@ -29,9 +29,12 @@ A solução é a ferramenta que gerou o relatório (padrão: Vegapunk). Um artig
 Guia completo: referencias/memory-card.md.
 
 Uso (da pasta da skill; precisa do `gh` instalado e autenticado):
-    python3 satelites/memory_card.py iniciar --repo DONO/NOME [--pasta DIR] [--publico]
+    python3 satelites/memory_card.py iniciar --repo DONO/NOME [--pasta DIR] [--publico] [--substituir]
         cria o cartão no GitHub (privado, a não ser com --publico) ou usa um
-        que já existe, clona e grava a configuração na instância.
+        que já existe, clona e grava a configuração na instância. Só com o
+        pedido do usuário; numa instância que já tem cartão, só com --substituir.
+        Um cartão configurado em outra máquina (a pasta não existe aqui) é
+        recusado com essa explicação, sem tentar clonar.
     python3 satelites/memory_card.py catalogo [--json]
     python3 satelites/memory_card.py buscar TERMO [TERMO ...] [--limite 10]
     python3 satelites/memory_card.py enviar ARQ.sql --categoria C --secao S --artigo A
@@ -156,6 +159,38 @@ ONDE_FUNCIONA = ('o Memory Card só funciona onde há o GitHub CLI (`gh`) autent
                  'ele não está disponível.')
 
 
+OUTRA_MAQUINA = ('este Memory Card foi configurado em outra máquina (a pasta do cartão, {pasta}, não existe '
+                 'aqui). Daqui não dá para ler nem enviar: entregue o relatório (o SQL e o texto do artigo) e diga '
+                 'que salvar é pelo Claude Code na máquina do cartão. Não rode `iniciar` para "consertar": isso '
+                 'criaria outro cartão nesta cópia.')
+_CAMINHO_WINDOWS = re.compile(r'^[A-Za-z]:[\\/]')
+
+
+def pasta_e_desta_maquina(pasta):
+    """False quando a pasta do cartão é de outra máquina: um caminho do Windows
+    fora do Windows (a cópia da skill no claude.ai, por exemplo) ou uma pasta
+    cuja pasta-mãe não existe aqui."""
+    if _CAMINHO_WINDOWS.match(pasta or '') and os.name != 'nt':
+        return False
+    return os.path.isdir(os.path.dirname(os.path.abspath(pasta)))
+
+
+def disponivel():
+    """(True, '') se o cartão funciona aqui (configurado, com a pasta clonada
+    e o `gh`); senão (False, motivo). Não usa a rede."""
+    try:
+        c = config()
+    except EnvioRecusado as e:
+        return False, str(e)
+    if not os.path.isdir(os.path.join(c['pasta'], '.git')):
+        if not pasta_e_desta_maquina(c['pasta']):
+            return False, OUTRA_MAQUINA.format(pasta=c['pasta'])
+        return False, f'a pasta do cartão ainda não foi clonada nesta máquina ({c["pasta"]})'
+    if shutil.which('gh') is None:
+        return False, 'GitHub CLI (`gh`) não encontrado. ' + ONDE_FUNCIONA
+    return True, ''
+
+
 def _exigir_gh():
     """Recusa com explicação clara se o `gh` não existe ou não está autenticado."""
     if shutil.which('gh') is None:
@@ -192,6 +227,8 @@ def preparar_pasta(atualizar=True):
     c = config()
     pasta = c['pasta']
     if not os.path.isdir(os.path.join(pasta, '.git')):
+        if not pasta_e_desta_maquina(pasta):
+            raise EnvioRecusado(OUTRA_MAQUINA.format(pasta=pasta))
         _exigir_gh()
         _rodar(['gh', 'repo', 'clone', c['repo'], pasta])
     elif atualizar:
@@ -213,11 +250,16 @@ def publicar(pasta, mensagem):
     _rodar(['git', 'push', '-q'], cwd=pasta)
 
 
-def iniciar(repo, pasta=None, publico=False):
+def iniciar(repo, pasta=None, publico=False, substituir=False):
     """Cria o cartão (ou usa um que já existe), clona e grava a configuração
-    na instância. Devolve a configuração."""
+    na instância. Devolve a configuração. Uma instância que já tem cartão só é
+    reconfigurada com `substituir` (pedido explícito do usuário)."""
     if not _REPO.match(repo or ''):
         raise EnvioRecusado(f'repositório inválido: {repo!r} (use DONO/NOME)')
+    if os.path.exists(caminho_config()) and not substituir:
+        atual = json.loads(_ler(caminho_config()) or '{}')
+        raise EnvioRecusado(f'esta instância já tem um Memory Card ({atual.get("repo")}, pasta {atual.get("pasta")}). '
+                            'Para trocar, só com o pedido do usuário: iniciar ... --substituir')
     _exigir_gh()
     existe = subprocess.run(['gh', 'repo', 'view', repo, '--json', 'name'], capture_output=True).returncode == 0
     if not existe:
@@ -571,7 +613,7 @@ def _regravar_readme(pasta, ref, ficha):
 # --- comandos ----------------------------------------------------------------
 
 def _cmd_iniciar(a):
-    c = iniciar(a.repo, a.pasta, a.publico)
+    c = iniciar(a.repo, a.pasta, a.publico, a.substituir)
     print(f'cartão: {c["repo"]} ({"PÚBLICO" if c["publico"] else "privado"})')
     print(f'pasta local: {c["pasta"]}')
     print(f'configuração gravada na instância: {caminho_config()}')
@@ -760,6 +802,7 @@ def main(argv=None):
     i.add_argument('--repo', required=True)
     i.add_argument('--pasta')
     i.add_argument('--publico', action='store_true')
+    i.add_argument('--substituir', action='store_true', help='troca o cartão de uma instância que já tem um')
     c = sub.add_parser('catalogo')
     c.add_argument('--json', action='store_true')
     b = sub.add_parser('buscar')

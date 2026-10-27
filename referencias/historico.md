@@ -723,3 +723,20 @@ onde uma função não conversa com a outra. O que mudou:
   golden real mudaram. Nenhuma das duas mudanças entrou. Um pedido como
   "valor de um evento" pede `--contexto` e a revisão dos candidatos; a
   correção certa é um sinônimo revisado, não uma regra geral.
+
+## Memory Card fora da máquina do cartão (27/10/2026)
+
+Numa cópia da skill no claude.ai, a configuração do cartão
+(`egghead/memory_card.json`) veio junto, e o lembrete mandou o Claude
+oferecer salvar. Sem o `gh` e sem a pasta do cartão, o envio falhou e o
+Claude tentou configurar uma pasta. Agora:
+
+- o lembrete de salvar só aparece onde o cartão funciona (pasta clonada e
+  `gh` instalado); em outra máquina, o lembrete diz para entregar o SQL e
+  deixar o envio para o Claude Code;
+- `preparar_pasta` recusa um cartão de outra máquina (caminho do Windows
+  fora do Windows, ou pasta-mãe que não existe) sem tentar clonar;
+- o `iniciar` recusa numa instância que já tem cartão, a não ser com
+  `--substituir`;
+- o `stella.py status` diz quando o cartão está configurado mas não funciona
+  ali; a regra 12 do `SKILL.md` proíbe o `iniciar` sem o pedido do usuário.

@@ -24,8 +24,17 @@ distribuído.
 O cartão é lido e gravado com o `gh` e o `git` na sua máquina. Funciona no
 Claude Code (ou num terminal) da máquina onde o cartão foi criado. Numa
 sandbox, como a do claude.ai, não há o `gh` autenticado nem a pasta do
-cartão: os comandos recusam com uma mensagem que diz isso, e o Claude avisa
-em vez de prometer o envio. Sem rede, `catalogo` e `buscar` usam a cópia
+cartão. A configuração (`egghead/memory_card.json`) vai junto quando a skill
+é copiada, mas lá:
+
+- os comandos recusam dizendo que o cartão é de outra máquina, sem tentar
+  clonar nem criar pasta;
+- o lembrete de salvar não aparece; no lugar dele, um lembrete diz ao Claude
+  para entregar o SQL e o texto do artigo e deixar o envio para o Claude Code;
+- o `stella.py status` mostra o cartão como "configurado, mas NÃO funciona
+  aqui";
+- o `iniciar` recusa numa instância que já tem cartão (só com
+  `--substituir`, a pedido do usuário). Sem rede, `catalogo` e `buscar` usam a cópia
 local do cartão (com um aviso); o envio sempre precisa da rede.
 
 ## Criar o cartão (uma vez)
@@ -43,6 +52,8 @@ Todo comando do cartão roda pela Stella (`stella.py cartao ...`) ou direto
 - A configuração é gravada em `egghead/memory_card.json`.
 - `--publico` cria (ou aceita) um cartão público. Use só se for de
   propósito: um relatório leva nomes de tabela e coluna do seu banco.
+- Numa instância que já tem cartão, `iniciar` recusa; `--substituir` troca
+  o cartão (só quando você pede).
 
 As variáveis `MEMORY_CARD_REPO` e `MEMORY_CARD_DIR` têm precedência sobre a
 configuração.

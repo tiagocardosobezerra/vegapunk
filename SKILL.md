@@ -96,7 +96,9 @@ são extensões só desta instância, que nunca saem na distribuição.
     com o "sim"). Salvar já confirma as tabelas do relatório no log de uso.
     Uma mudança num relatório salvo pede `--motivo`. O cartão só funciona onde
     há o `gh` autenticado e a pasta do cartão (o Claude Code na máquina do
-    usuário); fora disso, diga isso em vez de prometer o envio.
+    usuário). Fora disso (o claude.ai, por exemplo) não ofereça salvar:
+    entregue o SQL e o texto do artigo e diga que salvar é pelo Claude Code.
+    Nunca rode `iniciar` sem o usuário pedir um cartão novo.
 13. **Leia os `LEMBRETE:` da saída.** Os comandos imprimem em stderr o
     próximo passo que não pode ser esquecido (o `confirmar`, o Memory
     Card, a conferência depois de mudar a base). Siga-os.

@@ -151,7 +151,9 @@ def _status_cartao():
         return {'configurado': False}
     tem_copia = os.path.isdir(c['pasta'])
     fichas = memory_card.ler_catalogo(c['pasta']) if tem_copia else []
-    return {'configurado': True, 'repo': c['repo'], 'pasta': c['pasta'], 'copia_local': tem_copia,
+    ok, motivo = memory_card.disponivel()
+    return {'configurado': True, 'disponivel': ok, 'motivo': motivo, 'repo': c['repo'], 'pasta': c['pasta'],
+            'copia_local': tem_copia,
             'saves': len(fichas), 'com_algo_faltando': sum((f.get('conferencia') or {}).get('ok') is False
                                                           for f in fichas)}
 
@@ -206,8 +208,8 @@ def _status(a):
     ca = s['cartao']
     if not ca['configurado']:
         print('  cartão:   nenhum Memory Card configurado (`stella.py cartao iniciar --repo DONO/NOME`)')
-    elif not ca['copia_local']:
-        print(f"  cartão:   {ca['repo']} configurado, sem cópia local ainda ({ca['pasta']})")
+    elif not ca['disponivel']:
+        print(f"  cartão:   {ca['repo']} configurado, mas NÃO funciona aqui: {ca['motivo']}")
     else:
         print(f"  cartão:   {ca['repo']}: {ca['saves']} save(s)"
               + (f", {ca['com_algo_faltando']} com algo faltando no schema" if ca['com_algo_faltando'] else '')

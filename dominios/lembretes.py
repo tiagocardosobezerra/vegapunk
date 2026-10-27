@@ -9,7 +9,10 @@ em JSON nem mudar o que o Atlas compara. Só biblioteca padrão: os dois
 domínios usam este módulo sem depender um do outro.
 """
 
+import json
 import os
+import re
+import shutil
 import sys
 
 _SKILL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,13 +22,39 @@ def lembrar(texto):
     print(f'LEMBRETE: {texto}', file=sys.stderr)
 
 
-def cartao_configurado():
-    """True se esta instância tem um Memory Card configurado (o lembrete do
-    cartão só aparece para quem criou um)."""
-    if os.environ.get('MEMORY_CARD_REPO'):
-        return True
+def _config_do_cartao():
+    """A configuração do Memory Card desta instância ({} se não há)."""
     pasta = os.environ.get('VEGAPUNK_EGGHEAD') or os.path.join(_SKILL, 'egghead')
-    return os.path.exists(os.path.join(pasta, 'memory_card.json'))
+    c = {}
+    try:
+        with open(os.path.join(pasta, 'memory_card.json'), encoding='utf-8') as f:
+            c = json.load(f)
+    except (OSError, ValueError):
+        pass
+    if os.environ.get('MEMORY_CARD_REPO'):
+        c['repo'] = os.environ['MEMORY_CARD_REPO']
+    if os.environ.get('MEMORY_CARD_DIR'):
+        c['pasta'] = os.environ['MEMORY_CARD_DIR']
+    return c if c.get('repo') else {}
+
+
+def cartao_configurado():
+    """True se esta instância tem um Memory Card E ele funciona aqui: a pasta
+    do cartão existe nesta máquina e o `gh` está instalado. A configuração vem
+    junto quando a skill é copiada (para o claude.ai, por exemplo), mas lá o
+    cartão não funciona: o lembrete de salvar viraria uma promessa falsa."""
+    c = _config_do_cartao()
+    if not c:
+        return False
+    pasta = c.get('pasta') or os.path.join(os.path.expanduser('~'), c['repo'].split('/')[-1])
+    if re.match(r'^[A-Za-z]:[\\/]', pasta) and os.name != 'nt':
+        return False
+    return os.path.isdir(os.path.join(pasta, '.git')) and shutil.which('gh') is not None
+
+
+def cartao_em_outra_maquina():
+    """True se há um cartão configurado que não funciona aqui."""
+    return bool(_config_do_cartao()) and not cartao_configurado()
 
 
 def lembrar_buscar_no_cartao(pedido):
@@ -45,6 +74,10 @@ def lembrar_salvar_no_cartao():
         lembrar('relatório entregue e aprovado? Ofereça salvar no Memory Card '
                 '(stella.py cartao enviar: prévia primeiro, `--confirmar` só com o "sim"; salvar também '
                 'confirma as tabelas do relatório).')
+    elif cartao_em_outra_maquina():
+        lembrar('o Memory Card desta instância não funciona aqui (falta a pasta do cartão ou o `gh`: é outra '
+                'máquina, como o claude.ai). Não tente enviar nem configurar (`iniciar`): entregue o SQL e diga '
+                'que salvar é pelo Claude Code na máquina do cartão.')
 
 
 def lembrar_conferir_cartao():
