@@ -11,8 +11,10 @@ A solução aceita vira duas coisas, na instância (ao lado da base):
 - `solucoes_aceitas.jsonl`: exemplo limpo para o Edison (grafo de
   coocorrência e tipos inferidos leem a fórmula aceita, com as marcas);
 - `casos_solucao_aceitos.json`: caso de validação, com o esperado = o que o
-  usuário aceitou em cada intenção. É um conjunto próprio: não mistura com o
-  de desenvolvimento nem com o cego.
+  usuário aceitou em cada intenção (numa intenção de fórmulas, a função que a
+  fórmula aceita usa, não o 1º lugar da busca). É um conjunto próprio: não
+  mistura com o de desenvolvimento nem com o cego, e o `pythagoras avaliar
+  --dominio solucoes --db` o mede ao lado dos casos da instância.
 
 Só aceita candidata cuja fórmula (quando houver) foi validada pelo Shaka e
 cujo SQL (quando houver: solução só com SQL ou mista) passou na conferência
@@ -23,6 +25,7 @@ filtro fica marcado (<<ARGUMENTO>>), nunca com valor.
 import datetime
 import json
 import os
+import re
 
 ARQUIVO_ACEITAS = 'solucoes_aceitas.jsonl'
 ARQUIVO_CASOS = 'casos_solucao_aceitos.json'
@@ -88,6 +91,33 @@ def aceitar(pasta, cid, observacao=None):
     return reg, None
 
 
+_RE_CHAMADA = re.compile(r'\b([A-Za-z_][A-Za-z0-9_]*)\s*\(')
+
+
+def _esperados(reg):
+    """{id da intenção de fórmulas: [funções]}: o esperado é o que a fórmula
+    ACEITA usa, não o 1º lugar da busca. Uma intenção cujos candidatos não
+    aparecem na fórmula fica com a função da fórmula que nenhuma outra
+    intenção explica, se for a única intenção nessa situação; senão None (sem
+    rótulo, para não ensinar a resposta errada)."""
+    if not reg.get('formula'):
+        return {}
+    usadas = {f.upper() for f in _RE_CHAMADA.findall(reg['formula'])}
+    form = [it for it in reg.get('intencoes') or [] if it.get('dominio') == 'formulas' and it.get('status') != 'lacuna']
+    out, sem = {}, []
+    for it in form:
+        achou = [c for c in it.get('candidatos') or [] if c.upper() in usadas]
+        if achou:
+            out[it['id']] = achou[:1]
+        else:
+            sem.append(it)
+    explicadas = {f[0].upper() for f in out.values()}
+    sobra = sorted(usadas - explicadas)
+    for it in sem:
+        out[it['id']] = sobra if len(sem) == 1 and sobra else None
+    return out
+
+
 def _virar_caso(pasta, reg):
     arq = os.path.join(pasta, ARQUIVO_CASOS)
     dados = {'_estado': 'Casos de validação vindos das soluções ACEITAS pelo usuário (4f). Conjunto próprio: não '
@@ -96,11 +126,15 @@ def _virar_caso(pasta, reg):
         with open(arq, encoding='utf-8') as f:
             dados = json.load(f)
     n = len(dados['casos']) + 1
+    esperados = _esperados(reg)
     intencoes = []
     for i, it in enumerate(reg.get('intencoes') or [], 1):
         lacuna = it.get('status') == 'lacuna'
+        esperado = [] if lacuna else esperados.get(it.get('id'), (it.get('candidatos') or [])[:1])
+        if esperado is None:
+            continue                  # não dá para saber o que o usuário usou nesta intenção: sem rótulo
         x = {'id': f'A{n:03d}.{i}', 'texto': it['texto'], 'dominio': it['dominio'],
-             'esperado': [] if lacuna else (it.get('candidatos') or [])[:1], 'lacuna': lacuna}
+             'esperado': esperado, 'lacuna': lacuna}
         for k in ('essencial', 'funcao', 'posicao', 'capacidade'):
             if it.get(k) is not None:
                 x[k] = it[k]

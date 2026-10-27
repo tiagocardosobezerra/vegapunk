@@ -31,11 +31,11 @@ def cartao_configurado():
 def lembrar_buscar_no_cartao(pedido):
     if cartao_configurado():
         lembrar(f'antes de escrever um relatório novo, veja se o Memory Card já tem um: '
-                f'satelites/memory_card.py buscar "{pedido}"')
+                f'stella.py cartao buscar "{pedido}"')
 
 
 def lembrar_confirmar(dominio):
-    alvo = 'TABELA' if dominio == 'schema' else 'FUNCAO [FUNCAO ...] --contexto CTX'
+    alvo = 'TABELA [TABELA ...]' if dominio == 'schema' else 'FUNCAO [FUNCAO ...] --contexto CTX'
     lembrar(f'no fim do fluxo, com o SQL ou a fórmula escrita, rode `stella.py confirmar --dominio {dominio} '
             f'"<pedido>" {alvo}` com o que foi de fato usado. Não pergunte: é o que alimenta a calibração.')
 
@@ -43,10 +43,11 @@ def lembrar_confirmar(dominio):
 def lembrar_salvar_no_cartao():
     if cartao_configurado():
         lembrar('relatório entregue e aprovado? Ofereça salvar no Memory Card '
-                '(satelites/memory_card.py enviar: prévia primeiro, `--confirmar` só com o "sim").')
+                '(stella.py cartao enviar: prévia primeiro, `--confirmar` só com o "sim"; salvar também '
+                'confirma as tabelas do relatório).')
 
 
 def lembrar_conferir_cartao():
     if cartao_configurado():
-        lembrar('a base mudou: rode `satelites/memory_card.py conferir` para ver se algum relatório salvo '
+        lembrar('a base mudou: rode `stella.py cartao conferir` para ver se algum relatório salvo '
                 'usa tabela ou coluna que sumiu.')

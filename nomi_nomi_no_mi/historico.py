@@ -67,6 +67,21 @@ def registrar_uso(db_path: str, registro: Dict) -> bool:
     return True
 
 
+def confirmar(db_path: str, pedido: str, tabelas: List[str], **extra) -> bool:
+    """Grava a confirmação de um pedido: `tabela_confirmada` é a principal
+    (a primeira; é o que as leituras antigas usam) e `tabelas_confirmadas`,
+    todas as do relatório. Usado pelo `confirmar` da Stella e pelo envio do
+    Memory Card."""
+    tabelas = list(dict.fromkeys(t.strip().upper() for t in tabelas if t and t.strip()))
+    if not tabelas:
+        return False
+    reg = {'tipo': 'confirmacao', 'pedido': pedido, 'tabela_confirmada': tabelas[0]}
+    if len(tabelas) > 1:
+        reg['tabelas_confirmadas'] = tabelas
+    reg.update(extra)
+    return registrar_uso(db_path, reg)
+
+
 def ler_historico_confirmado(db_path: str) -> List[Dict]:
     """Lê apenas as entradas de `confirmar` (pedido -> tabela realmente
     usada) do histórico — é isto que vira caso de teste rotulado real,

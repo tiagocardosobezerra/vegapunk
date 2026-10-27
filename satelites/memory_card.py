@@ -19,12 +19,13 @@ criado o cartão público com `iniciar --publico`).
 
 Organização do cartão (nomes de exibição ficam na ficha; pastas sem acento):
 
-    saves/<categoria>/<secao>/<artigo>/relatorio.sql
-    saves/<categoria>/<secao>/<artigo>/README.md    o artigo (o GitHub mostra ao abrir a pasta)
-    saves/<categoria>/<secao>/<artigo>/ficha.json   metadado: versão, status, histórico...
-    CATALOGO.md   (gerado: por categoria e seção, e por tabela)
+    saves/<solucao>/<categoria>/<secao>/<artigo>/relatorio.sql
+    saves/<solucao>/<categoria>/<secao>/<artigo>/README.md    o artigo (o GitHub mostra ao abrir a pasta)
+    saves/<solucao>/<categoria>/<secao>/<artigo>/ficha.json   metadado: versão, status, histórico...
+    CATALOGO.md   (gerado: por solução, categoria e seção, e por tabela)
 
-Um artigo é citado por REF = `<categoria>/<secao>/<artigo>` (as pastas).
+A solução é a ferramenta que gerou o relatório (padrão: Vegapunk). Um artigo
+é citado por REF = `<solucao>/<categoria>/<secao>/<artigo>` (as pastas).
 Guia completo: referencias/memory-card.md.
 
 Uso (da pasta da skill; precisa do `gh` instalado e autenticado):
@@ -34,17 +35,26 @@ Uso (da pasta da skill; precisa do `gh` instalado e autenticado):
     python3 satelites/memory_card.py catalogo [--json]
     python3 satelites/memory_card.py buscar TERMO [TERMO ...] [--limite 10]
     python3 satelites/memory_card.py enviar ARQ.sql --categoria C --secao S --artigo A
-                                        [--descricao D] [--texto ARTIGO.md] [--motivo M]
-                                        [--status rascunho|em-uso] [--relacionado REF ...]
-                                        [--confirmar]
+                                        [--solucao SOL] [--descricao D] [--texto ARTIGO.md]
+                                        [--motivo M] [--pedido P] [--status rascunho|em-uso]
+                                        [--relacionado REF ...] [--mesmo-assim] [--confirmar]
         sem --confirmar: só mostra a prévia (versão, ficha, conferência no
         schema, diff do SQL e do artigo); nada é gravado. --texto é
         obrigatório num artigo novo; --motivo é obrigatório num reenvio.
+        Com --confirmar, também grava a confirmação das tabelas do
+        relatório no log de uso (o que alimenta a calibração). Um relatório
+        com tabela ou coluna que não existe na base só é enviado com
+        --mesmo-assim.
     python3 satelites/memory_card.py marcar REF --status em-uso|rascunho [--confirmar]
     python3 satelites/memory_card.py conferir [REF ...] [--registrar]
-        confere tabelas e colunas de cada relatório na Punk Records atual
-        (só leitura; não grava no log de uso). --registrar guarda o resultado
-        nas fichas e envia.
+        confere tabelas, colunas e JOINs de cada relatório na Punk Records
+        atual, com o mesmo conferidor do `solucionar` (só leitura; não grava
+        no log de uso). --registrar guarda o resultado nas fichas e envia.
+    python3 satelites/memory_card.py migrar [--solucao SOL] [--confirmar]
+        move os saves de um cartão antigo (sem o nível da solução) para
+        saves/<solucao>/..., com as ligações entre artigos.
+
+Também pela Stella: `python3 stella.py cartao COMANDO ...`.
 
 Configuração: `memory_card.json` na instância (VEGAPUNK_EGGHEAD ou
 egghead/), gravado pelo `iniciar`; MEMORY_CARD_REPO e MEMORY_CARD_DIR têm
@@ -65,14 +75,19 @@ import sys
 import unicodedata
 
 SKILL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if SKILL not in sys.path:
+    sys.path.insert(0, SKILL)
 SAVES = 'saves'
+SOLUCAO_PADRAO = 'Vegapunk'
+NIVEIS = 4                       # solução / categoria / seção / artigo
 _REPO = re.compile(r'^[\w.-]+/[\w.-]+$')
 README_DO_CARTAO = """# Memory Card
 
 Cartão de memória de relatórios T-SQL criados com o Vegapunk: cada relatório
 pronto fica salvo aqui, com versão e histórico.
 
-Cada relatório fica em `saves/<categoria>/<secao>/<artigo>/`:
+Cada relatório fica em `saves/<solucao>/<categoria>/<secao>/<artigo>/`. A
+solução é a ferramenta que gerou o relatório (o Vegapunk, ou outra).
 
 - `README.md`: o artigo (o que faz, quando usar, como funciona, colunas,
   parâmetros, regras de negócio, limitações, relacionados e histórico).
@@ -80,12 +95,12 @@ Cada relatório fica em `saves/<categoria>/<secao>/<artigo>/`:
 - `ficha.json`: versão, status (`rascunho` ou `em-uso`), tabelas e colunas
   usadas, relacionados, histórico e a última conferência no schema.
 
-O [CATALOGO.md](CATALOGO.md) lista os saves por categoria e seção, e também
-por tabela. É gerado a cada envio: não edite à mão.
+O [CATALOGO.md](CATALOGO.md) lista os saves por solução, categoria e seção,
+e também por tabela. É gerado a cada envio: não edite à mão.
 
 Cada mudança num artigo sobe a versão e exige um motivo, que entra no
 histórico do artigo e na mensagem do commit. Envio só pelo Vegapunk
-(`satelites/memory_card.py`): primeiro a prévia, depois `--confirmar`.
+(`stella.py cartao enviar`): primeiro a prévia, depois `--confirmar`.
 """
 STATUS = ('rascunho', 'em-uso')
 CORPO_INI, CORPO_FIM = '<!-- corpo -->', '<!-- /corpo -->'
@@ -96,13 +111,6 @@ _AVISOS = [
     (re.compile(r"'[^'@\s]+@[^'@\s]+\.[^'\s]+'"), 'literal com cara de e-mail'),
     (re.compile(r'^\s*USE\s+\S+', re.I | re.M), '`USE` com nome de banco'),
 ]
-_PALAVRAS_SQL = ('ON', 'WHERE', 'INNER', 'LEFT', 'RIGHT', 'FULL', 'CROSS', 'OUTER', 'JOIN', 'GROUP', 'ORDER',
-                 'WITH', 'UNION', 'HAVING', 'APPLY', 'PIVOT', 'UNPIVOT', 'OPTION', 'SELECT', 'SET', 'EXCEPT',
-                 'INTERSECT')
-_ORIGEM = re.compile(r'\b(?:FROM|JOIN)\s+([\[\]\w.@#]+)(?:\s+(?:AS\s+)?(?!(?:' + '|'.join(_PALAVRAS_SQL) +
-                     r')\b)(\w+))?', re.I)
-_QUALIFICADA = re.compile(r'\b(\w+)\.\[?(\w+)\]?')
-_CTE = re.compile(r'\b(\w+)\s+AS\s*\(', re.I)
 
 
 class EnvioRecusado(RuntimeError):
@@ -253,6 +261,7 @@ def _ler(caminho):
 
 def normalizar_ficha(f):
     """Completa fichas antigas (antes de versão, status e histórico)."""
+    f.setdefault('solucao', SOLUCAO_PADRAO)
     f.setdefault('versao', 1)
     f.setdefault('status', 'rascunho')
     f.setdefault('relacionados', [])
@@ -278,7 +287,7 @@ def gravar_ficha(pasta, ref, ficha):
 
 
 def ler_catalogo(pasta):
-    """Fichas dos saves (com `ref`), ordenadas por categoria, seção e artigo."""
+    """Fichas dos saves (com `ref`), ordenadas por solução, categoria, seção e artigo."""
     fichas = []
     raiz = os.path.join(pasta, SAVES)
     for d, _, arqs in os.walk(raiz):
@@ -286,14 +295,11 @@ def ler_catalogo(pasta):
             ficha = normalizar_ficha(json.loads(_ler(os.path.join(d, 'ficha.json'))))
             ficha['ref'] = os.path.relpath(d, raiz).replace(os.sep, '/')
             fichas.append(ficha)
-    return sorted(fichas, key=lambda x: (x['categoria'].lower(), x['secao'].lower(), x['artigo'].lower()))
+    return sorted(fichas, key=lambda x: (x['solucao'].lower(), x['categoria'].lower(), x['secao'].lower(),
+                                         x['artigo'].lower()))
 
 
 # --- SQL ----------------------------------------------------------------------
-
-def _sem_comentario(sql):
-    return re.sub(r"--[^\n]*|/\*.*?\*/|'(?:[^']|'')*'", ' ', sql, flags=re.S)
-
 
 def avisos_do_sql(sql):
     return [msg for rx, msg in _AVISOS if rx.search(sql)]
@@ -301,50 +307,40 @@ def avisos_do_sql(sql):
 
 def referencias_do_sql(sql):
     """(tabelas, colunas): tabelas de FROM/JOIN e colunas qualificadas
-    (`TABELA.COL` ou `ALIAS.COL`), em maiúsculas, sem CTE nem variável."""
-    limpo = _sem_comentario(sql)
-    ctes = {c.upper() for c in _CTE.findall(limpo)}
-    tabelas, apelidos = set(), {}
-    for nome, apelido in _ORIGEM.findall(limpo):
-        if nome.startswith(('@', '#', '(')):
-            continue
-        t = nome.replace('[', '').replace(']', '').split('.')[-1].upper()
-        if not t or t in ctes:
-            continue
-        tabelas.add(t)
-        apelidos[t] = t
-        if apelido:
-            apelidos[apelido.upper()] = t
-    colunas = set()
-    for prefixo, col in _QUALIFICADA.findall(limpo):
-        t = apelidos.get(prefixo.upper())
-        if t:
-            colunas.add(f'{t}.{col.upper()}')
-    return sorted(tabelas), sorted(colunas)
+    (`TABELA.COL` ou `ALIAS.COL`), em maiúsculas, sem CTE, temporária nem
+    variável. O leitor é o do motor (`nomi_nomi_no_mi.montagem.referencias`)."""
+    from nomi_nomi_no_mi import montagem
+    r = montagem.referencias(sql)
+    return sorted(r['tabelas']), sorted(r['colunas'])
 
 
 def caminho_base():
     return os.environ.get('VEGAPUNK_EGGHEAD_DB') or os.path.join(SKILL, 'egghead', 'punk_records.db')
 
 
-def conferir_no_schema(tabelas, colunas, db=None):
-    """{'ok', 'faltando': [...], 'base'}: o que o relatório usa e a Punk Records
-    não tem. Abre a base só para leitura; nada vai para o log de uso."""
+def conferir_no_schema(sql, db=None):
+    """{'ok', 'faltando', 'avisos', 'tabelas', 'base'}: o mesmo conferidor do
+    `solucionar` (`nomi_nomi_no_mi.montagem.conferir`): nome que não existe na
+    base vai para `faltando`; JOIN sem prova ou por parte da ligação provada
+    vai para `avisos`. Nada vai para o log de uso."""
     db = db or caminho_base()
     if not os.path.exists(db):
-        return {'ok': None, 'faltando': [], 'base': 'sem base instalada: não conferido'}
-    conn = sqlite3.connect(f'file:{db}?mode=ro', uri=True)
+        return {'ok': None, 'faltando': [], 'avisos': [], 'tabelas': [], 'base': 'sem base instalada: não conferido'}
+    from nomi_nomi_no_mi import montagem
+    from nomi_nomi_no_mi.busca import NomiNomiNoMi
+    motor = NomiNomiNoMi(db)
     try:
-        tem_t = {r[0].upper() for r in conn.execute('SELECT tabela FROM tabelas')}
-        faltando = [t for t in tabelas if t not in tem_t]
-        for c in colunas:
-            t, col = c.split('.', 1)
-            if t in tem_t and conn.execute('SELECT 1 FROM colunas WHERE UPPER(tabela)=? AND UPPER(coluna)=?',
-                                           (t, col)).fetchone() is None:
-                faltando.append(c)
+        r = montagem.conferir(motor, sql)
+        n = motor.cur.execute('SELECT COUNT(*) FROM tabelas').fetchone()[0]
     finally:
-        conn.close()
-    return {'ok': not faltando, 'faltando': faltando, 'base': f'Punk Records com {len(tem_t)} tabelas'}
+        motor.fechar()
+    return {'ok': not r['erros'], 'faltando': r['erros'], 'avisos': r['avisos'], 'tabelas': r['tabelas'],
+            'base': f'Punk Records com {n} tabelas'}
+
+
+def _registro_da_conferencia(agora, c):
+    return {'data': agora, 'ok': c['ok'], 'faltando': c['faltando'], 'avisos': c.get('avisos', []),
+            'base': c['base']}
 
 
 # --- artigo (README.md) e catálogo ------------------------------------------------
@@ -363,7 +359,8 @@ def gerar_readme(ficha, ref, corpo, titulos):
     """O artigo: cabeçalho e histórico vêm da ficha; o corpo, do texto enviado.
     `titulos`: {ref: artigo} para os relacionados."""
     l = [f'# {ficha["artigo"]}', '',
-         f'{ficha["categoria"]} › {ficha["secao"]} · versão {ficha["versao"]} · {ficha["status"]}', '']
+         f'{ficha["solucao"]} › {ficha["categoria"]} › {ficha["secao"]} · versão {ficha["versao"]} · '
+         f'{ficha["status"]}', '']
     if ficha.get('descricao'):
         l += [f'> {ficha["descricao"]}', '']
     l += [CORPO_INI, corpo.strip('\n'), CORPO_FIM, '', '## Relatório', '', '[relatorio.sql](relatorio.sql)']
@@ -371,8 +368,10 @@ def gerar_readme(ficha, ref, corpo, titulos):
         l += ['', f'Tabelas: {", ".join(f"`{t}`" for t in ficha["tabelas"])}.']
     conf = ficha.get('conferencia')
     if conf:
-        situacao = 'tudo encontrado' if conf['ok'] else f'faltando {", ".join(f"`{x}`" for x in conf["faltando"])}'
+        situacao = 'tudo encontrado' if conf['ok'] else 'faltando: ' + '; '.join(conf['faltando'])
         l += ['', f'Última conferência no schema ({conf["data"][:10]}): {situacao}.']
+        if conf.get('avisos'):
+            l += [''] + [f'- aviso: {a}' for a in conf['avisos']]
     if ficha['relacionados']:
         l += ['', '## Relacionados', '']
         l += [f'- [{titulos.get(r, r)}]({_link(ref, r)})' for r in ficha['relacionados']]
@@ -383,14 +382,19 @@ def gerar_readme(ficha, ref, corpo, titulos):
 
 def gerar_catalogo_md(fichas):
     linhas = ['# Catálogo', '', 'Gerado pelo envio. Não edite à mão.', '']
-    cat = sec = None
+    sol = cat = sec = None
     for f in fichas:
+        if linhas[-1] and (f['solucao'] != sol or f['categoria'] != cat or f['secao'] != sec):
+            linhas.append('')                     # linha em branco antes de cada título
+        if f['solucao'] != sol:
+            sol, cat, sec = f['solucao'], None, None
+            linhas += [f'## {sol}', '']
         if f['categoria'] != cat:
             cat, sec = f['categoria'], None
-            linhas += [f'## {cat}', '']
+            linhas += [f'### {cat}', '']
         if f['secao'] != sec:
             sec = f['secao']
-            linhas += [f'### {sec}', '']
+            linhas += [f'#### {sec}', '']
         desc = f' — {f["descricao"]}' if f.get('descricao') else ''
         quebrado = ' · **conferir: schema mudou**' if (f.get('conferencia') or {}).get('ok') is False else ''
         linhas.append(f'- [{f["artigo"]}]({SAVES}/{f["ref"]}/){desc} · v{f["versao"]} · {f["status"]}{quebrado}')
@@ -414,26 +418,54 @@ def _diff(antes, depois, nome):
 
 # --- busca ------------------------------------------------------------------
 
-def _tokens(texto):
-    t = unicodedata.normalize('NFKD', texto or '').encode('ascii', 'ignore').decode('ascii').lower()
-    return set(re.findall(r'[a-z0-9]+', t))
+def _radicais(texto):
+    from nomi_nomi_no_mi.texto import radical, tokenizar
+    return {radical(t) for t in tokenizar(texto or '')}
 
 
-def buscar(pasta, termos, limite=10):
-    """[(pontos, ficha)]: artigo e descrição valem 3, categoria, seção e
-    tabelas 2, texto do artigo e SQL 1, por termo encontrado."""
-    alvo = set()
-    for t in termos:
-        alvo |= _tokens(t)
+def _termos_da_busca(termos):
+    """[(termo, {radicais do termo e dos sinônimos dele})], com as stop words e
+    os sinônimos de busca da Punk Records (quando instalada), como no `buscar`
+    do schema."""
+    from dominios.schema import config as cfg
+    from nomi_nomi_no_mi.texto import extrair_termos, radical
+    db = caminho_base()
+    if os.path.exists(db):
+        conn = sqlite3.connect(f'file:{os.path.abspath(db)}?mode=ro', uri=True)
+        try:
+            cfg.MODULOS_PRIORIZADOS, cfg.SINONIMOS, cfg.MODULO_NOMES = cfg.carregar_dominio_do_db(conn)
+        finally:
+            conn.close()
+    out = []
+    for t in extrair_termos(' '.join(termos)):
+        if any(t in sin for _, sin in out):
+            continue                      # já entrou como sinônimo de um termo anterior
+        out.append((t, {radical(x) for x in extrair_termos(t)}))
+    return out
+
+
+def buscar(pasta, termos, limite=10, cobertura_minima=0.5):
+    """[(pontos, ficha)]: artigo e descrição valem 3, solução, categoria,
+    seção e tabelas 2, texto do artigo e SQL 1, por termo encontrado (o termo
+    ou um sinônimo dele). Só entra o save que cobre pelo menos
+    `cobertura_minima` dos termos do pedido: palavra solta não basta."""
+    alvo = _termos_da_busca(termos)
+    if not alvo:
+        return []
     achados = []
     for f in ler_catalogo(pasta):
         d = pasta_do_artigo(pasta, f['ref'])
-        campos = [(3, f'{f["artigo"]} {f.get("descricao", "")}'), (2, f'{f["categoria"]} {f["secao"]}'),
-                  (2, ' '.join(f.get('tabelas', []))),
-                  (1, corpo_do_readme(_ler(os.path.join(d, 'README.md'))) or ''),
-                  (1, _ler(os.path.join(d, 'relatorio.sql')) or '')]
-        pontos = sum(peso * len(alvo & _tokens(texto)) for peso, texto in campos)
-        if pontos:
+        campos = [(3, _radicais(f'{f["artigo"]} {f.get("descricao", "")}')),
+                  (2, _radicais(f'{f["solucao"]} {f["categoria"]} {f["secao"]}')),
+                  (2, {t.lower() for t in f.get('tabelas', [])}),
+                  (1, _radicais(corpo_do_readme(_ler(os.path.join(d, 'README.md'))))),
+                  (1, _radicais(_ler(os.path.join(d, 'relatorio.sql'))))]
+        pontos, cobertos = 0, 0
+        for _, rads in alvo:
+            p = sum(peso for peso, toks in campos if rads & toks)
+            pontos += p
+            cobertos += bool(p)
+        if pontos and cobertos / len(alvo) >= cobertura_minima:
             achados.append((pontos, f))
     return sorted(achados, key=lambda x: (-x[0], x[1]['ref']))[:limite]
 
@@ -441,7 +473,7 @@ def buscar(pasta, termos, limite=10):
 # --- envio ------------------------------------------------------------------
 
 def montar_envio(arquivo, categoria, secao, artigo, descricao, pasta, texto=None, motivo=None,
-                 status=None, relacionados=()):
+                 status=None, relacionados=(), solucao=None):
     if not arquivo.lower().endswith('.sql'):
         raise EnvioRecusado('o Memory Card só recebe arquivos .sql')
     sql = _ler(arquivo) if os.path.isfile(arquivo) else None
@@ -449,7 +481,8 @@ def montar_envio(arquivo, categoria, secao, artigo, descricao, pasta, texto=None
         raise EnvioRecusado(f'arquivo não encontrado: {arquivo}')
     if status and status not in STATUS:
         raise EnvioRecusado(f'status inválido: {status} (use {" ou ".join(STATUS)})')
-    ref = '/'.join(slug(x) for x in (categoria, secao, artigo))
+    solucao = (solucao or SOLUCAO_PADRAO).strip()
+    ref = '/'.join(slug(x) for x in (solucao, categoria, secao, artigo))
     destino = pasta_do_artigo(pasta, ref)
     anterior = ler_ficha(pasta, ref) if os.path.exists(os.path.join(destino, 'ficha.json')) else None
     readme_antes = _ler(os.path.join(destino, 'README.md'))
@@ -471,7 +504,7 @@ def montar_envio(arquivo, categoria, secao, artigo, descricao, pasta, texto=None
     versao = anterior['versao'] + 1 if anterior else 1
     tabelas, colunas = referencias_do_sql(sql)
     ficha = {
-        'categoria': categoria.strip(), 'secao': secao.strip(), 'artigo': artigo.strip(),
+        'solucao': solucao, 'categoria': categoria.strip(), 'secao': secao.strip(), 'artigo': artigo.strip(),
         'descricao': (descricao if descricao is not None else (anterior or {}).get('descricao', '')).strip(),
         'status': status or (anterior or {}).get('status', 'rascunho'),
         'versao': versao, 'tabelas': tabelas, 'colunas': colunas,
@@ -481,9 +514,9 @@ def montar_envio(arquivo, categoria, secao, artigo, descricao, pasta, texto=None
         'historico': (anterior or {}).get('historico', []) + [
             {'versao': versao, 'data': agora, 'motivo': (motivo or 'Primeira versão').strip()}],
     }
-    conf = conferir_no_schema(tabelas, colunas)
+    conf = conferir_no_schema(sql)
     if conf['ok'] is not None:
-        ficha['conferencia'] = {'data': agora, **conf}
+        ficha['conferencia'] = _registro_da_conferencia(agora, conf)
     titulos = {f['ref']: f['artigo'] for f in ler_catalogo(pasta)}
     readme = gerar_readme(ficha, ref, corpo, titulos)
     sql_antes = _ler(os.path.join(destino, 'relatorio.sql'))
@@ -509,7 +542,23 @@ def gravar_envio(envio, pasta):
         _gravar(os.path.join(pasta_do_artigo(pasta, r), 'README.md'), gerar_readme(outra, r, corpo, titulos))
     fi = envio['ficha']
     motivo = fi['historico'][-1]['motivo']
-    publicar(pasta, f'save: {fi["categoria"]} / {fi["secao"]} / {fi["artigo"]} (v{fi["versao"]}): {motivo}')
+    publicar(pasta, f'save: {fi["solucao"]} / {fi["categoria"]} / {fi["secao"]} / {fi["artigo"]} '
+                    f'(v{fi["versao"]}): {motivo}')
+
+
+def confirmar_tabelas(envio, pedido=None):
+    """Grava no log de uso a confirmação das tabelas do relatório salvo (a
+    mesma do `stella.py confirmar --dominio schema`): salvar é o momento em
+    que o relatório foi aprovado. Só as tabelas que existem na base; a
+    principal é a primeira do SQL. Devolve (gravou, tabelas)."""
+    tabelas = envio['conferencia'].get('tabelas') or []
+    db = caminho_base()
+    if not tabelas or not os.path.exists(db):
+        return False, tabelas
+    from nomi_nomi_no_mi.historico import confirmar
+    fi = envio['ficha']
+    pedido = (pedido or fi.get('descricao') or fi['artigo']).strip()
+    return confirmar(db, pedido, tabelas, origem='memory_card', ref=envio['ref']), tabelas
 
 
 def _regravar_readme(pasta, ref, ficha):
@@ -550,14 +599,16 @@ def _cmd_buscar(a):
 def _cmd_enviar(a):
     pasta = preparar_pasta()
     e = montar_envio(a.arquivo, a.categoria, a.secao, a.artigo, a.descricao, pasta, a.texto, a.motivo,
-                     a.status, a.relacionado or ())
+                     a.status, a.relacionado or (), a.solucao)
     fi = e['ficha']
     print(f'destino: {config()["repo"]} → {SAVES}/{e["ref"]}/  versão {fi["versao"]}'
           + (' (SUBSTITUI a anterior)' if e['substitui'] else ' (artigo novo)'))
     c = e['conferencia']
     print('schema: ' + ('não conferido (' + c['base'] + ')' if c['ok'] is None else
-                        'tudo encontrado' if c['ok'] else 'FALTANDO ' + ', '.join(c['faltando'])) +
+                        'tudo encontrado' if c['ok'] else 'FALTANDO: ' + '; '.join(c['faltando'])) +
           (f' — {c["base"]}' if c['ok'] is not None else ''))
+    for av in c.get('avisos', []):
+        print(f'AVISO (JOIN): {av}')
     for av in e['avisos']:
         print(f'AVISO: {av}')
     if e['novos_relacionados']:
@@ -569,11 +620,22 @@ def _cmd_enviar(a):
         print('--- diff do artigo ---\n' + (e['diff_readme'] or '(artigo igual)'))
     else:
         print('\n--- artigo ---\n' + e['readme'])
+    if c['ok'] is False and not a.mesmo_assim:
+        print('\nO relatório cita o que não existe na base (acima). Corrija o SQL, ou, se o nome existe no '
+              'banco real e só falta na Punk Records (uma view, por exemplo), repita com --mesmo-assim.')
+        if a.confirmar:
+            raise EnvioRecusado('relatório com tabela ou coluna que não existe na base: use --mesmo-assim')
     if not a.confirmar:
         print('prévia: nada foi gravado. Repita com --confirmar para enviar.')
         return 0
     gravar_envio(e, pasta)
     print(f'\nenviado: https://github.com/{config()["repo"]}/tree/main/{SAVES}/{e["ref"]}')
+    gravou, tabelas = confirmar_tabelas(e, a.pedido)
+    if gravou:
+        print(f'confirmado no log de uso: {", ".join(tabelas)}')
+    elif tabelas:
+        print('NÃO confirmado no log de uso (a pasta da instância não aceita gravação nesta cópia)',
+              file=sys.stderr)
     return 0
 
 
@@ -592,7 +654,8 @@ def _cmd_marcar(a):
     ficha['status'] = a.status
     gravar_ficha(pasta, a.ref, ficha)
     _regravar_readme(pasta, a.ref, ficha)
-    publicar(pasta, f'save: {ficha["categoria"]} / {ficha["secao"]} / {ficha["artigo"]}: status {a.status}')
+    publicar(pasta, f'save: {ficha["solucao"]} / {ficha["categoria"]} / {ficha["secao"]} / {ficha["artigo"]}: '
+                    f'status {a.status}')
     print('enviado')
     return 0
 
@@ -606,16 +669,19 @@ def _cmd_conferir(a):
     agora, quebrados, mudou = _agora(), 0, False
     for f in fichas:
         sql = _ler(os.path.join(pasta_do_artigo(pasta, f['ref']), 'relatorio.sql')) or ''
-        tabelas, colunas = referencias_do_sql(sql)
-        c = conferir_no_schema(tabelas, colunas)
+        c = conferir_no_schema(sql)
         if c['ok'] is None:
             print(c['base'])
             return 1
         quebrados += not c['ok']
-        print(f'{"OK   " if c["ok"] else "FALTA"} {f["ref"]}' + ('' if c['ok'] else ': ' + ', '.join(c['faltando'])))
+        print(f'{"OK   " if c["ok"] else "FALTA"} {f["ref"]}' + ('' if c['ok'] else ': ' + '; '.join(c['faltando'])))
+        for av in c['avisos']:
+            print(f'      aviso: {av}')
         anterior = f.get('conferencia') or {}
-        if a.registrar and (anterior.get('ok'), anterior.get('faltando')) != (c['ok'], c['faltando']):
-            f['conferencia'] = {'data': agora, **c}
+        novo = _registro_da_conferencia(agora, c)
+        if a.registrar and (anterior.get('ok'), anterior.get('faltando'), anterior.get('avisos')) != \
+                (novo['ok'], novo['faltando'], novo['avisos']):
+            f['conferencia'] = novo
             gravar_ficha(pasta, f['ref'], f)
             _regravar_readme(pasta, f['ref'], f)
             mudou = True
@@ -627,6 +693,59 @@ def _cmd_conferir(a):
         else:
             print('nada mudou desde a última conferência registrada')
     return 1 if quebrados else 0
+
+
+def planejar_migracao(pasta, solucao=None):
+    """[(ref antiga, ref nova)] dos saves sem o nível da solução."""
+    pref = slug(solucao or SOLUCAO_PADRAO)
+    return [(f['ref'], f'{pref}/{f["ref"]}') for f in ler_catalogo(pasta) if len(f['ref'].split('/')) == NIVEIS - 1]
+
+
+def migrar(pasta, solucao=None):
+    """Move os saves antigos para saves/<solucao>/..., grava a solução na
+    ficha e reescreve as ligações entre artigos e os READMEs. Devolve o plano."""
+    plano = planejar_migracao(pasta, solucao)
+    if not plano:
+        return plano
+    novo = dict(plano)
+    for velha, nova in plano:
+        destino = pasta_do_artigo(pasta, nova)
+        os.makedirs(os.path.dirname(destino), exist_ok=True)
+        os.replace(pasta_do_artigo(pasta, velha), destino)
+        ficha = ler_ficha(pasta, nova)
+        ficha['solucao'] = (solucao or SOLUCAO_PADRAO).strip()
+        gravar_ficha(pasta, nova, ficha)
+    for f in ler_catalogo(pasta):
+        rel = sorted(novo.get(r, r) for r in f['relacionados'])
+        if rel != f['relacionados']:
+            f['relacionados'] = rel
+            gravar_ficha(pasta, f['ref'], f)
+    for f in ler_catalogo(pasta):
+        _regravar_readme(pasta, f['ref'], f)
+    # pastas antigas que ficaram vazias
+    raiz = os.path.join(pasta, SAVES)
+    for d, subs, arqs in sorted(os.walk(raiz), key=lambda x: -len(x[0])):
+        if d != raiz and not os.listdir(d):
+            os.rmdir(d)
+    _gravar(os.path.join(pasta, 'README.md'), README_DO_CARTAO)
+    return plano
+
+
+def _cmd_migrar(a):
+    pasta = preparar_pasta()
+    plano = planejar_migracao(pasta, a.solucao)
+    if not plano:
+        print('nada a migrar: todos os saves já têm o nível da solução')
+        return 0
+    for velha, nova in plano:
+        print(f'{SAVES}/{velha}/  ->  {SAVES}/{nova}/')
+    if not a.confirmar:
+        print(f'\nprévia: {len(plano)} save(s); nada foi movido. Repita com --confirmar.')
+        return 0
+    migrar(pasta, a.solucao)
+    publicar(pasta, f'saves: nível da solução ({len(plano)} save(s) em {slug(a.solucao or SOLUCAO_PADRAO)}/)')
+    print(f'\n{len(plano)} save(s) movido(s) e enviado(s)')
+    return 0
 
 
 def main(argv=None):
@@ -656,6 +775,10 @@ def main(argv=None):
     e.add_argument('--motivo')
     e.add_argument('--status', choices=STATUS)
     e.add_argument('--relacionado', action='append')
+    e.add_argument('--solucao', help=f'ferramenta que gerou o relatório (padrão: {SOLUCAO_PADRAO})')
+    e.add_argument('--pedido', help='o pedido do usuário, para a confirmação no log de uso (padrão: a descrição)')
+    e.add_argument('--mesmo-assim', action='store_true',
+                   help='envia mesmo com tabela ou coluna que não existe na base (ex.: view ainda não extraída)')
     e.add_argument('--confirmar', action='store_true')
     m = sub.add_parser('marcar')
     m.add_argument('ref')
@@ -664,10 +787,13 @@ def main(argv=None):
     k = sub.add_parser('conferir')
     k.add_argument('refs', nargs='*')
     k.add_argument('--registrar', action='store_true')
+    g = sub.add_parser('migrar')
+    g.add_argument('--solucao', help=f'solução dos saves antigos (padrão: {SOLUCAO_PADRAO})')
+    g.add_argument('--confirmar', action='store_true')
     a = p.parse_args(argv)
     try:
         return {'iniciar': _cmd_iniciar, 'catalogo': _cmd_catalogo, 'buscar': _cmd_buscar, 'enviar': _cmd_enviar,
-                'marcar': _cmd_marcar, 'conferir': _cmd_conferir}[a.cmd](a)
+                'marcar': _cmd_marcar, 'conferir': _cmd_conferir, 'migrar': _cmd_migrar}[a.cmd](a)
     except EnvioRecusado as ex:
         print(f'RECUSADO: {ex}', file=sys.stderr)
         return 1

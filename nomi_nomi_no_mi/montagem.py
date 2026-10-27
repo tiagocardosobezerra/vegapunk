@@ -9,9 +9,11 @@ Duas tarefas, nenhuma executa SQL nem lê linha de conteúdo:
   sai LACUNA, nunca um JOIN palpitado. Filtro que depende do usuário sai
   MARCADO (`<<CÓDIGO DA SEÇÃO>>`), com o SQL de apoio de cada argumento; SQL
   com marca nunca sai pronto para rodar.
-- `conferir`: confere o SQL escrito pelo Claude. Tabela ou coluna que não
-  existe na base é erro (o SQL não é entregue); JOIN cujas colunas não são
-  as de uma ligação provada é aviso.
+- `conferir`: confere o SQL escrito pelo Claude (no `solucionar`) e o dos
+  relatórios do Memory Card (`enviar` e `conferir`): um conferidor só.
+  Tabela ou coluna que não existe na base é erro (o SQL não é entregue);
+  JOIN cujas colunas não são as de uma ligação provada é aviso. CTE,
+  temporária e subconsulta são lidas por `referencias` e não são conferidas.
 
 As provas são as mesmas do `detalhar` (`grafo.agrupar_fks`), mas aqui só
 valem `constraint` e `dicionário`: o agrupamento provado só pela chave da
@@ -202,13 +204,23 @@ def montar(motor, tabelas, filtros=None, mapa=None, colunas_extra=None):
 
 
 # ------------------------------------------------------------------ conferir
+# Um conferidor só, usado pelo `solucionar` (SQL escrito pelo Claude) e pelo
+# Memory Card (`enviar` e `conferir`): `referencias` lê o SQL sem base
+# (tabelas, apelidos, CTEs, colunas qualificadas) e `conferir` compara com a
+# base e com as ligações provadas.
 _PALAVRAS = {'ON', 'WHERE', 'INNER', 'LEFT', 'RIGHT', 'FULL', 'CROSS', 'OUTER', 'JOIN', 'GROUP', 'ORDER',
-             'HAVING', 'UNION', 'WITH', 'AS', 'SELECT', 'FROM', 'AND', 'OR', 'NOLOCK'}
-_RE_TABELA = re.compile(r'\b(FROM|JOIN)\s+([A-Za-z_][\w.]*)(?:\s+(?:AS\s+)?([A-Za-z_]\w*))?', re.I)
-_RE_JOIN_ON = re.compile(r'\bJOIN\s+([A-Za-z_][\w.]*)(?:\s+(?:AS\s+)?([A-Za-z_]\w*))?\s+ON\s+(.*?)'
-                         r'(?=\b(?:INNER|LEFT|RIGHT|FULL|CROSS|JOIN|WHERE|GROUP|ORDER|HAVING|UNION)\b|$)', re.I | re.S)
+             'HAVING', 'UNION', 'WITH', 'AS', 'SELECT', 'FROM', 'AND', 'OR', 'NOLOCK', 'APPLY', 'PIVOT',
+             'UNPIVOT', 'OPTION', 'SET', 'EXCEPT', 'INTERSECT', 'TABLESAMPLE'}
+_RE_TABELA = re.compile(r'\b(FROM|JOIN)\s+([A-Za-z_#@][\w.#@]*)(?:\s+(?:AS\s+)?([A-Za-z_]\w*))?', re.I)
+_RE_JOIN_ON = re.compile(r'\bJOIN\s+([A-Za-z_#@][\w.#@]*)(?:\s+(?:AS\s+)?([A-Za-z_]\w*))?\s+ON\s+(.*?)'
+                         r'(?=\b(?:INNER|LEFT|RIGHT|FULL|CROSS|OUTER|APPLY|JOIN|WHERE|GROUP|ORDER|HAVING|UNION|SELECT|FROM)\b|$)',
+                         re.I | re.S)
 _RE_IGUAL = re.compile(r'([A-Za-z_]\w*)\.([A-Za-z_]\w*)\s*=\s*([A-Za-z_]\w*)\.([A-Za-z_]\w*)')
-_RE_REF = re.compile(r'\b([A-Za-z_]\w*)\.([A-Za-z_]\w*|\*)')
+_RE_REF = re.compile(r'(?<![\w.])([A-Za-z_]\w*)\.([A-Za-z_]\w*|\*)')
+# nome da CTE: `WITH X AS (`, `, X AS (` ou com a lista de colunas `X (A, B) AS (`
+_RE_CTE = re.compile(r'\b([A-Za-z_]\w*)\s*(?:\(\s*\w+(?:\s*,\s*\w+)*\s*\))?\s+AS\s*\(', re.I)
+# apelido de subconsulta ou de APPLY: `) X` ou `) AS X`
+_RE_DERIVADA = re.compile(r'\)\s*(?:AS\s+)?([A-Za-z_]\w*)', re.I)
 
 
 _RE_COL_MARCA = re.compile(r'([A-Za-z_]\w*)\.([A-Za-z_]\w*)\s*=\s*<<([^<>\n]+)>>|<<([^<>\n]+)>>\s*=\s*'
@@ -225,10 +237,97 @@ def literais(sql):
     return _RE_LITERAL.findall(_RE_MARCA.sub(' ', sem_comentario))
 
 
+def _limpar(sql):
+    """SQL sem comentário, sem literal, sem colchete e com as marcas trocadas por 0."""
+    texto = re.sub(r'--[^\n]*|/\*.*?\*/', ' ', sql or '', flags=re.S)
+    texto = _RE_MARCA.sub('0', texto)
+    texto = re.sub(r"'(?:[^']|'')*'", "''", texto)              # literais não são nomes
+    return texto.replace('[', '').replace(']', '')
+
+
+VIRTUAL = '<virtual>'      # apelido de CTE, temporária ou subconsulta: não é tabela da base
+
+
+def _escopos(texto):
+    """(grupo, pai): o parêntese mais interno de cada posição do texto (0 = fora
+    de todos) e o parêntese que contém cada um. Um apelido vale no seu
+    parêntese e nos de dentro: o mesmo apelido em duas CTEs são dois nomes."""
+    grupo, pai, pilha, prox = [0] * (len(texto) + 1), {0: None}, [0], 1
+    for i, ch in enumerate(texto):
+        if ch == '(':
+            pai[prox] = pilha[-1]
+            pilha.append(prox)
+            prox += 1
+        grupo[i] = pilha[-1]
+        if ch == ')' and len(pilha) > 1:
+            pilha.pop()
+    grupo[len(texto)] = 0
+    return grupo, pai
+
+
+def referencias(sql):
+    """O que o SQL cita, sem abrir a base: {'tabelas': [...] (de FROM/JOIN,
+    sem CTE, tabela temporária nem variável), 'apelidos': {APELIDO: TABELA}
+    (o último de cada apelido), 'virtuais': {CTE e apelidos de CTE, de
+    temporária ou de subconsulta}, 'colunas': ['TABELA.COLUNA'] (só as
+    qualificadas por tabela ou apelido), 'resolver': f(APELIDO, posição) ->
+    TABELA, VIRTUAL ou None, pelo escopo de parênteses}."""
+    texto = _limpar(sql)
+    grupo, pai = _escopos(texto)
+    ctes = {c.upper() for c in _RE_CTE.findall(texto)} - _PALAVRAS
+    virtuais = set(ctes)
+    vinculos = defaultdict(dict)                  # grupo -> {APELIDO: TABELA ou VIRTUAL}
+    for m in _RE_DERIVADA.finditer(texto):
+        a = m.group(1).upper()
+        if a not in _PALAVRAS:
+            virtuais.add(a)
+            vinculos[grupo[m.start(1)]][a] = VIRTUAL
+    tabelas, apelidos = [], {}
+    for m in _RE_TABELA.finditer(texto):
+        nome, a = m.group(2), (m.group(3) or '').upper()
+        t = nome.split('.')[-1].upper()
+        g = grupo[m.start(2)]
+        if nome.startswith(('#', '@')) or t in ctes:
+            if a and a not in _PALAVRAS:
+                virtuais.add(a)
+                vinculos[g][a] = VIRTUAL
+            continue
+        if t not in tabelas:
+            tabelas.append(t)
+        apelidos[t] = t
+        vinculos[g][t] = t
+        if a and a not in _PALAVRAS:
+            apelidos[a] = t
+            vinculos[g][a] = t
+    globais = {}
+    for g in sorted(vinculos):
+        globais.update(vinculos[g])
+
+    def resolver(apelido, pos):
+        apelido = apelido.upper()
+        g = grupo[min(pos, len(texto))]
+        while g is not None:
+            if apelido in vinculos.get(g, {}):
+                return vinculos[g][apelido]
+            g = pai.get(g)
+        return globais.get(apelido)                # apelido de um parêntese vizinho (raro)
+
+    colunas = []
+    for m in _RE_REF.finditer(texto):
+        t = resolver(m.group(1), m.start())
+        c = m.group(2)
+        if t and t != VIRTUAL and c != '*' and f'{t}.{c.upper()}' not in colunas:
+            colunas.append(f'{t}.{c.upper()}')
+    return {'tabelas': tabelas, 'apelidos': apelidos, 'virtuais': virtuais, 'colunas': colunas,
+            'resolver': resolver}
+
+
 def conferir(motor, sql, mapa=None):
     """Erros (nome que não existe) e avisos (JOIN sem prova) do SQL do Claude.
     Cada marca comparada com uma coluna (`T.COL = <<NOME>>`) ganha o SQL de
-    apoio da chave completa da tabela (a do cadastro, se o mapa tem a tabela)."""
+    apoio da chave completa da tabela (a do cadastro, se o mapa tem a tabela).
+    CTE, tabela temporária e subconsulta não são da base: não são conferidas,
+    e um JOIN com elas sai como aviso de ligação não conferida."""
     pv = Provas(motor)
     nomes = pv.colunas()
     marcas = [m.group(1).strip() for m in _RE_MARCA.finditer(sql or '')]
@@ -236,41 +335,54 @@ def conferir(motor, sql, mapa=None):
     for m in _RE_COL_MARCA.finditer(sql or ''):
         a, c, nome = (m.group(1), m.group(2), m.group(3)) if m.group(3) else (m.group(5), m.group(6), m.group(4))
         onde_marca.setdefault(nome.strip(), (a.upper(), c.upper()))
-    texto = _RE_MARCA.sub('0', sql or '')
-    texto = re.sub(r"'[^']*'", "''", texto)                     # literais não são nomes
-    texto = re.sub(r'--[^\n]*|/\*.*?\*/', ' ', texto, flags=re.S)
+    texto = _limpar(sql)
+    ref = referencias(sql)
+    resolver = ref['resolver']
     out = {'sql': sql, 'pronto_para_rodar': False, 'joins': [], 'erros': [], 'avisos': [],
+           'tabelas': [t for t in ref['tabelas'] if t in nomes], 'colunas': [],
            'argumentos_a_preencher': [{'marcador': m} for m in dict.fromkeys(marcas)]}
-    alias = {}
-    for _, t, a in _RE_TABELA.findall(texto):
-        t = t.split('.')[-1].upper()
-        if t not in nomes:
-            out['erros'].append(f'tabela {t} não existe na base')
-            continue
-        alias[t] = t
-        if a and a.upper() not in _PALAVRAS:
-            alias[a.upper()] = t
-    for a, c in _RE_REF.findall(texto):
-        t = alias.get(a.upper())
+    out['erros'] = [f'tabela {t} não existe na base' for t in ref['tabelas'] if t not in nomes]
+    alias = {a: t for a, t in ref['apelidos'].items() if t in nomes}
+    for m in _RE_REF.finditer(texto):
+        a, c = m.group(1), m.group(2)
+        t = resolver(a, m.start())
+        if t == VIRTUAL:
+            continue                          # CTE, temporária ou subconsulta: não é da base
         if t is None:
-            if a.upper() not in {x.upper() for x in nomes}:
-                continue                      # esquema ou função: fora do que se confere aqui
+            if a.upper() not in nomes:
+                continue                      # esquema ou função
             out['erros'].append(f'{a.upper()} usada sem estar no FROM/JOIN')
             continue
+        if t not in nomes:
+            continue                          # tabela que já deu erro
         if c != '*' and c.upper() not in nomes[t]:
             out['erros'].append(f'coluna {c.upper()} não existe na tabela {t}')
-    for t, a, cond in _RE_JOIN_ON.findall(texto):
-        t = t.split('.')[-1].upper()
-        if t not in nomes:
+        elif c != '*' and f'{t}.{c.upper()}' not in out['colunas']:
+            out['colunas'].append(f'{t}.{c.upper()}')
+    out['erros'] = list(dict.fromkeys(out['erros']))
+    for mj in _RE_JOIN_ON.finditer(texto):
+        t = mj.group(1).split('.')[-1].upper()
+        if t.startswith(('#', '@')) or resolver(t, mj.start(1)) in (VIRTUAL, None) or t not in nomes:
             continue
-        pares = defaultdict(set)
-        for a1, c1, a2, c2 in _RE_IGUAL.findall(cond):
-            t1, t2 = alias.get(a1.upper()), alias.get(a2.upper())
+        pares, com_virtual, fora = defaultdict(set), False, set()
+        for mi in _RE_IGUAL.finditer(mj.group(3)):
+            a1, c1, a2, c2 = mi.groups()
+            pos = mj.start(3) + mi.start()
+            t1, t2 = resolver(a1, pos), resolver(a2, pos)
+            if VIRTUAL in (t1, t2):
+                com_virtual = True
+                continue
+            fora |= {x for x in (t1, t2) if x and x not in nomes}
+            t1, t2 = (t1 if t1 in nomes else None), (t2 if t2 in nomes else None)
             if t1 and t2 and t1 != t2:
                 outra = t2 if t1 == t else t1
                 pares[outra].add(frozenset(((t1, c1.upper()), (t2, c2.upper()))))
         if not pares:
-            out['avisos'].append(f'JOIN de {t}: condição sem igualdade entre colunas de duas tabelas; não há como '
+            out['avisos'].append(f'JOIN de {t} com {", ".join(sorted(fora))}, que não está na base: ligação não '
+                                 'conferida' if fora else
+                                 f'JOIN de {t} com CTE ou subconsulta: ligação não conferida (só as tabelas da base '
+                                 'são conferidas)' if com_virtual else
+                                 f'JOIN de {t}: condição sem igualdade entre colunas de duas tabelas; não há como '
                                  'conferir a ligação')
             continue
         for outra, usadas in pares.items():

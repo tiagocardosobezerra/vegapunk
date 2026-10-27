@@ -12,6 +12,10 @@ rode com o banco do ERP selecionado. O schema é a variável @esquema logo
 abaixo (padrão dbo). Se o schema não tiver tabelas, a consulta falha e
 lista os schemas que existem, com quantas tabelas cada um tem.
 
+Views: com @objeto = 'V' a mesma consulta lista as views (sem PK; tem_dados
+sai 0). Grave em egghead\extracao\views\ e acrescente com
+`york.py atualizar --dicionario egghead/extracao/views --catalogo egghead/extracao/views`.
+
 Saída: uma coluna; a 1ª linha é o cabeçalho do CSV. Grave o resultado em
 <pasta da skill>\egghead\extracao\colunas.csv (fora do controle de versão).
   SSMS:   Query > Results To > Results to File; em Tools > Options > Query
@@ -24,9 +28,10 @@ Depois: python3 satelites/york.py enriquecer --dir egghead/extracao
 */
 SET NOCOUNT ON;
 DECLARE @esquema sysname = N'dbo';   -- schema das tabelas do ERP
+DECLARE @objeto  char(1) = 'U';      -- 'U' = tabelas; 'V' = views (rode de novo com 'V' para trazê-las)
 
-IF NOT EXISTS (SELECT 1 FROM sys.tables AS t JOIN sys.schemas AS s ON s.schema_id = t.schema_id
-               WHERE s.name = @esquema AND t.is_ms_shipped = 0)
+IF NOT EXISTS (SELECT 1 FROM sys.objects AS t JOIN sys.schemas AS s ON s.schema_id = t.schema_id
+               WHERE s.name = @esquema AND t.is_ms_shipped = 0 AND t.type = @objeto)
 BEGIN
     DECLARE @lista nvarchar(2000) = STUFF((
         SELECT N', ' + s.name + N' (' + CAST(COUNT(*) AS nvarchar(10)) + N')'
@@ -34,7 +39,7 @@ BEGIN
         WHERE t.is_ms_shipped = 0
         GROUP BY s.name ORDER BY COUNT(*) DESC
         FOR XML PATH(''), TYPE).value('.', 'nvarchar(2000)'), 1, 2, N'');
-    RAISERROR(N'O esquema %s não tem tabelas neste banco. Esquemas com tabelas: %s', 16, 1, @esquema, @lista);
+    RAISERROR(N'O esquema %s não tem objetos do tipo %s neste banco. Esquemas com tabelas: %s', 16, 1, @esquema, @objeto, @lista);
 END
 ELSE
 SELECT x.linha
@@ -55,7 +60,7 @@ FROM (
                CASE WHEN c.is_nullable = 1 THEN N'1' ELSE N'0' END, N',',
                c.column_id, N',',
                ic.key_ordinal)
-    FROM sys.tables AS t
+    FROM sys.objects AS t
     JOIN sys.schemas AS s ON s.schema_id = t.schema_id
     JOIN sys.columns AS c ON c.object_id = t.object_id
     JOIN sys.types AS ty ON ty.user_type_id = c.system_type_id   -- tipo base, não o tipo de usuário
@@ -64,6 +69,6 @@ FROM (
            ON ic.object_id = pk.object_id AND ic.index_id = pk.index_id AND ic.column_id = c.column_id
     LEFT JOIN sys.extended_properties AS ep
            ON ep.class = 1 AND ep.major_id = t.object_id AND ep.minor_id = c.column_id AND ep.name = N'MS_Description'
-    WHERE t.is_ms_shipped = 0 AND s.name = @esquema
+    WHERE t.is_ms_shipped = 0 AND s.name = @esquema AND t.type = @objeto
 ) AS x
 ORDER BY x.ordem, x.tabela, x.coluna_id;

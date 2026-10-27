@@ -90,10 +90,11 @@ são extensões só desta instância, que nunca saem na distribuição.
     de cadastro manual: o motor nunca grava no sistema de origem.
 12. **Memory Card: procure antes, ofereça depois.** Se a instância tem um
     cartão configurado (`egghead/memory_card.json`), antes de escrever um
-    relatório novo rode `satelites/memory_card.py buscar` e ofereça
+    relatório novo rode `stella.py cartao buscar` e ofereça
     reaproveitar o que servir; depois de entregar um relatório aprovado,
-    ofereça salvar (prévia do `enviar`; `--confirmar` só com o "sim"). Uma
-    mudança num relatório salvo pede `--motivo`. O cartão só funciona onde
+    ofereça salvar (prévia do `stella.py cartao enviar`; `--confirmar` só
+    com o "sim"). Salvar já confirma as tabelas do relatório no log de uso.
+    Uma mudança num relatório salvo pede `--motivo`. O cartão só funciona onde
     há o `gh` autenticado e a pasta do cartão (o Claude Code na máquina do
     usuário); fora disso, diga isso em vez de prometer o envio.
 13. **Leia os `LEMBRETE:` da saída.** Os comandos imprimem em stderr o
@@ -105,10 +106,10 @@ são extensões só desta instância, que nunca saem na distribuição.
 | O pedido envolve | Faça | Detalhe sob demanda |
 |---|---|---|
 | pedido com vários ingredientes (uma conta + um código de cadastro + uma tabela ou consulta) | quebre o pedido em intenções (JSON) → `stella.py solucionar --intencoes contrato.json` → monte a fórmula só com o que voltou, com `<<ARGUMENTO>>` no código que o usuário preenche → `solucionar` de novo com a `formula` (e o `sql`, se você escreveu um) → entregue como manda a regra 9 | [referencias/fluxo-solucao.md](referencias/fluxo-solucao.md) |
-| tabelas/colunas de uma base cadastrada, domínio de negócio (RH, folha, ponto, cadastros), "escreva uma consulta" | `stella.py buscar --dominio schema "<pedido>"` → `detalhar --dominio schema TAB...` → escrever o SQL → `confirmar --dominio schema "<pedido>" TAB` | [referencias/fluxo-schema.md](referencias/fluxo-schema.md) |
+| tabelas/colunas de uma base cadastrada, domínio de negócio (RH, folha, ponto, cadastros), "escreva uma consulta" | `stella.py buscar --dominio schema "<pedido>"` → `detalhar --dominio schema TAB...` (o caminho com o JOIN pronto vem no topo) → escrever o SQL → `confirmar --dominio schema "<pedido>" TAB [TAB ...]` com todas as tabelas usadas | [referencias/fluxo-schema.md](referencias/fluxo-schema.md) |
 | criar, corrigir, validar ou explicar uma fórmula de sistema | `stella.py contextos` → `buscar --dominio formulas "<pedido>" --contexto CTX` → `detalhar` → `compor`/`validar` → `explicar` → `confirmar --dominio formulas` | [referencias/fluxo-formulas.md](referencias/fluxo-formulas.md) |
 | argumento que é código de um cadastro (evento, cargo, consulta...) | o `detalhar` de fórmulas traz a ligação do parâmetro com a tabela e a coluna e o SQL de apoio para o usuário achar o código; nunca invente o código | [referencias/fluxo-formulas.md](referencias/fluxo-formulas.md), Passo 2 |
-| guardar um relatório pronto, versionar uma mudança, procurar um relatório já feito (Memory Card) | antes de escrever um relatório novo: `satelites/memory_card.py buscar`; relatório pronto e aprovado: ofereça salvar, mostre a prévia do `enviar` e só com o "sim" use `--confirmar`; mudança pede `--motivo` e o diff na prévia; sem cartão configurado, aponte para o `iniciar` | [referencias/memory-card.md](referencias/memory-card.md) |
+| guardar um relatório pronto, versionar uma mudança, procurar um relatório já feito (Memory Card) | antes de escrever um relatório novo: `stella.py cartao buscar`; relatório pronto e aprovado: ofereça salvar, mostre a prévia do `enviar` e só com o "sim" use `--confirmar`; mudança pede `--motivo` e o diff na prévia; sem cartão configurado, aponte para o `iniciar` | [referencias/memory-card.md](referencias/memory-card.md) |
 | T-SQL geral (otimizar, depurar, CTE, window, PIVOT/MERGE/APPLY, plano, índice, procedure, .sql) | instruções gerais, convenções e verificação ao vivo | [referencias/tsql.md](referencias/tsql.md) |
 | base vazia ou desatualizada, sinônimos, calibração, isolamento | satélites de manutenção (York, Edison, Pythagoras, Lilith, Atlas) | [referencias/nomes.md](referencias/nomes.md) |
 

@@ -152,14 +152,14 @@ python3 satelites/york.py ingerir --pacote punk_records/pacotes/publico/<pack>
 
 ### Memory Card: your saved reports
 
-A finished report should not get lost in a folder. The Memory Card saves each one in a GitHub repository of **your own** (private by default), organized by category, section and article:
+A finished report should not get lost in a folder. The Memory Card saves each one in a GitHub repository of **your own** (private by default), organized by solution (Vegapunk or another tool), category, section and article:
 
 ```bash
 gh auth login                                                         # once
-python3 satelites/memory_card.py iniciar --repo YOUR_USER/memory-card    # creates the private card
+python3 stella.py cartao iniciar --repo YOUR_USER/memory-card    # creates the private card
 ```
 
-Then just ask Claude: "save this report to the Memory Card". It shows a preview (the article, the version, the diff of a change, the check of tables and columns against the schema) and only sends it after your "yes". Before writing a new report, it searches the card for something similar. Nothing from your card ships with Vegapunk: which card is yours lives only in your instance. Full guide (in Portuguese) in [`referencias/memory-card.md`](referencias/memory-card.md).
+Then just ask Claude: "save this report to the Memory Card". It shows a preview (the article, the version, the diff of a change, the check of tables, columns and JOINs against the schema) and only sends it after your "yes". Saving also records the report tables in the usage log, which feeds the search calibration. Before writing a new report, it searches the card for something similar. Nothing from your card ships with Vegapunk: which card is yours lives only in your instance. Full guide (in Portuguese) in [`referencias/memory-card.md`](referencias/memory-card.md).
 
 ## How it works inside
 

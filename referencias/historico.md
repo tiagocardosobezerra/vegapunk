@@ -665,3 +665,61 @@ batem com as constraints declaradas em 2.066 de 2.066 pares compostos.
   comando, a recusa diz onde o cartão funciona; sem rede, `catalogo` e
   `buscar` usam a cópia local.
 
+
+## Auditoria de integração (27/10/2026)
+
+Auditoria função por função numa cópia isolada da instância, procurando
+onde uma função não conversa com a outra. O que mudou:
+
+- **Um conferidor de SQL só.** O Memory Card tinha um leitor próprio de SQL,
+  que entendia CTE mas não conferia JOIN (um JOIN por só parte de uma chave composta passava);
+  o `montagem.conferir` do `solucionar` conferia JOIN, mas acusava nome de
+  CTE como "tabela não existe" (a maioria dos relatórios reais usa CTE). Agora
+  `nomi_nomi_no_mi/montagem.py` tem `referencias` (lê o SQL sem base: CTE,
+  temporária, subconsulta, colchetes) e `conferir` usa essa leitura; o
+  Memory Card usa os dois no `enviar` e no `conferir`. JOIN com CTE,
+  subconsulta ou tabela fora da base sai como "ligação não conferida".
+- **Salvar no cartão confirma.** O `enviar --confirmar` grava no log de uso
+  a confirmação com todas as tabelas do relatório
+  (`historico.confirmar`, campo `tabelas_confirmadas`; a principal continua
+  em `tabela_confirmada`). O `stella.py confirmar --dominio schema` aceita
+  várias tabelas, e a calibração do Pythagoras aceita qualquer uma delas no
+  topo (o módulo é o da principal). Antes, quase nenhuma busca virava
+  confirmação, e nenhum relatório salvo no cartão.
+- **`detalhar` enxuto.** Duas tabelas muito ligadas da base real davam 133 KB, com o JOIN
+  pronto e o lembrete nas últimas linhas, depois do corte de 30 mil
+  caracteres do terminal do Claude Code. Agora o caminho com o JOIN e os
+  avisos vêm primeiro, o lembrete sai antes da saída, e as FKs para tabelas
+  fora do pedido saem numa linha, sem o JOIN (`--completo` traz tudo): 47 KB.
+  O JSON não muda.
+- **Casos aceitos medidos.** O `casos_solucao_aceitos.json` era gravado e
+  nunca lido; o `pythagoras avaliar --dominio solucoes --db` agora mede esses
+  casos junto com os da instância. E o rótulo estava errado: o esperado de
+  uma intenção de fórmulas era o 1º lugar da busca, não a função que a
+  fórmula aceita usa (no caso testado, `EXISTEEP` em vez de `C`). Agora é a
+  função da fórmula; quando não dá para saber, a intenção fica sem rótulo.
+- **Memory Card na Stella.** `stella.py cartao ...` despacha para o
+  `memory_card.py`, o `status` mostra o cartão, os lembretes apontam para a
+  Stella, e a busca do cartão usa a normalização do `buscar` do schema
+  (stop words, plural, sinônimos da Punk Records), com corte por cobertura
+  (metade dos termos): antes, uma palavra comum ("de", "com") bastava para
+  um save sem relação aparecer.
+- **Nível da solução no cartão.** `saves/<solucao>/<categoria>/<secao>/<artigo>/`
+  (padrão `Vegapunk`; `--solucao` para outra ferramenta). `migrar` move um
+  cartão antigo, com as ligações entre artigos.
+- **Views na extração.** O `tabelas.sql` e o `colunas.sql` liam só
+  `sys.tables`: uma view usada num relatório nunca chegava à Punk Records.
+  Agora têm `@objeto` (`'U'` tabelas, `'V'` views) e as views entram com o
+  `york.py atualizar` (ver [schema.md](schema.md), "Views").
+- **Atlas da instância.** Um pedido que entrou no log de uso depois da
+  captura do golden não é mudança de comportamento: fica fora da comparação
+  (com uma linha de informação) até o próximo `capturar`. Antes, toda busca
+  real nova deixava o portão vermelho de vez.
+- **`valor` continua stop word nas fórmulas (medido).** Tirar `valor` das
+  stop words derrubou a avaliação de 38/40 para 36/40 e não trouxe a função
+  `C` para o top 5 de "valor de um evento". Usar `valor` só no desempate
+  manteve 38/40, mas na base real o 1º lugar da auto-recuperação (a descrição
+  de cada função como pedido) caiu de 453 para 451 em 524, e 784 respostas do
+  golden real mudaram. Nenhuma das duas mudanças entrou. Um pedido como
+  "valor de um evento" pede `--contexto` e a revisão dos candidatos; a
+  correção certa é um sinônimo revisado, não uma regra geral.

@@ -14,7 +14,7 @@ import sys
 
 from dominios import lembretes
 from nomi_nomi_no_mi.busca import NomiNomiNoMi
-from nomi_nomi_no_mi.historico import registrar_uso
+from nomi_nomi_no_mi.historico import confirmar, registrar_uso
 from nomi_nomi_no_mi.manutencao import checar_cobertura_modulos
 from nomi_nomi_no_mi.saida import formatar_busca_texto, formatar_detalhar_texto
 
@@ -22,7 +22,10 @@ def executar(args):
     """`args`: comando ('buscar', 'detalhar', 'confirmar', 'checar-modulos'), db,
     pedido, limite, tabelas, tabela, json — os mesmos nomes da CLI antiga."""
     if args.comando == 'confirmar':
-        tabela_confirmada = args.tabela.strip().upper()
+        # uma ou mais tabelas: a primeira é a principal (módulo da calibração);
+        # as outras são as do JOIN do relatório
+        tabelas = list(dict.fromkeys(t.strip().upper() for t in
+                                     (args.tabela if isinstance(args.tabela, list) else [args.tabela])))
         # Achado em auditoria: sem esta checagem, um erro de digitação no
         # nome da tabela entra silenciosamente no histórico e pode poluir
         # uma futura calibração do pythagoras.py sem que ninguém perceba.
@@ -30,27 +33,24 @@ def executar(args):
         # ainda ter sido reimportada para o Punk Records) — só avisa.
         if os.path.exists(args.db):
             conn_check = sqlite3.connect(args.db)
-            existe = conn_check.execute(
-                "SELECT 1 FROM tabelas WHERE UPPER(tabela) = ?", (tabela_confirmada,)
-            ).fetchone() is not None
+            for tabela_confirmada in tabelas:
+                existe = conn_check.execute(
+                    "SELECT 1 FROM tabelas WHERE UPPER(tabela) = ?", (tabela_confirmada,)
+                ).fetchone() is not None
+                if not existe:
+                    print(
+                        f"AVISO: \"{tabela_confirmada}\" não foi encontrada em `tabelas` neste banco "
+                        f"({args.db}) — confira se não é erro de digitação. Registrando mesmo assim, "
+                        f"pois a tabela pode existir no schema real e ainda não ter sido importada.",
+                        file=sys.stderr
+                    )
             conn_check.close()
-            if not existe:
-                print(
-                    f"AVISO: \"{tabela_confirmada}\" não foi encontrada em `tabelas` neste banco "
-                    f"({args.db}) — confira se não é erro de digitação. Registrando mesmo assim, "
-                    f"pois a tabela pode existir no schema real e ainda não ter sido importada.",
-                    file=sys.stderr
-                )
-        gravado = registrar_uso(args.db, {
-            'tipo': 'confirmacao',
-            'pedido': args.pedido,
-            'tabela_confirmada': tabela_confirmada,
-        })
+        gravado = confirmar(args.db, args.pedido, tabelas)
         if gravado:
-            print(f"Registrado: \"{args.pedido}\" -> {tabela_confirmada}")
+            print(f"Registrado: \"{args.pedido}\" -> {', '.join(tabelas)}")
         else:
             print(f"NÃO registrado (a pasta da instância não aceita gravação nesta cópia): "
-                  f"\"{args.pedido}\" -> {tabela_confirmada}", file=sys.stderr)
+                  f"\"{args.pedido}\" -> {', '.join(tabelas)}", file=sys.stderr)
         lembretes.lembrar_salvar_no_cartao()
         return
 
@@ -106,11 +106,11 @@ def executar(args):
             lembretes.lembrar_buscar_no_cartao(args.pedido)
         elif args.comando == 'detalhar':
             resultado = engine.detalhar(args.tabelas)
+            lembretes.lembrar_confirmar('schema')     # antes da saída: o fim de uma saída longa pode ser cortado
             if args.json:
                 print(json.dumps(resultado, indent=2, ensure_ascii=False))
             else:
-                print(formatar_detalhar_texto(resultado))
-            lembretes.lembrar_confirmar('schema')
+                print(formatar_detalhar_texto(resultado, getattr(args, 'completo', False)))
     finally:
         engine.fechar()
 

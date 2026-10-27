@@ -73,10 +73,20 @@ class TestDetalharComConstraint(unittest.TestCase):
 
     def test_texto_mostra_tipo_e_join(self):
         from nomi_nomi_no_mi.saida import formatar_detalhar_texto
-        txt = formatar_detalhar_texto(_detalhar(self.db, 'X_FILHA'))
+        txt = formatar_detalhar_texto(_detalhar(self.db, 'X_FILHA'), completo=True)
         self.assertIn('CODPAI [varchar(10) NULL]', txt)
         self.assertIn('PK: CODEMP, CODFILHA', txt)
         self.assertIn('FK_FILHA_PAI (X_FILHA -> X_PAI, composta): INNER JOIN X_PAI ON', txt)
+
+    def test_texto_enxuto_so_traz_o_join_entre_as_tabelas_pedidas(self):
+        from nomi_nomi_no_mi.saida import formatar_detalhar_texto
+        so_filha = formatar_detalhar_texto(_detalhar(self.db, 'X_FILHA'))
+        self.assertNotIn('INNER JOIN X_PAI', so_filha)
+        self.assertIn('com tabelas fora do pedido (2, sem o JOIN): X_PAI', so_filha)
+        self.assertIn('use --completo', so_filha)
+        as_duas = formatar_detalhar_texto(_detalhar(self.db, 'X_FILHA', 'X_PAI'))
+        self.assertIn('FK_FILHA_PAI (X_FILHA -> X_PAI, composta): INNER JOIN X_PAI ON', as_duas)
+        self.assertTrue(as_duas.startswith('Caminho X_FILHA -> X_PAI'))      # o essencial vem primeiro
 
 
 class TestDetalharSemConstraint(unittest.TestCase):

@@ -27,7 +27,8 @@ Uso:
         Cobertura de intenções (fase 4) pelo caminho da Stella orquestradora
         (`dominios/cobertura.py`). Sem --db: fixture fictícia temporária (com
         o mapa fictício) e `casos/casos_solucao_ficticios.json`. Com --db: os
-        casos da instância (`casos_solucao.json` ao lado do banco, ou --casos).
+        casos da instância (`casos_solucao.json` ao lado do banco, mais os
+        casos das soluções aceitas, `casos_solucao_aceitos.json`; ou só --casos).
         Só leitura: rode contra uma CÓPIA da base.
 
     python3 satelites/pythagoras.py calibrar --dominio schema --db BANCO [--sinteticos JSONL]
@@ -152,8 +153,9 @@ def carregar_casos(db_path: str, caminho_sinteticos: str = None):
                     casos_por_modulo.setdefault(modulo, []).append((c['pedido'], esperadas, c.get('top_n', 5)))
 
     for reg in ler_historico_confirmado(db_path):
-        esperadas = {reg['tabela_confirmada']}
-        modulo = _modulo_de(esperadas)
+        # confirmação com várias tabelas (relatório com JOIN, ou salvo no Memory Card): vale qualquer uma no topo
+        esperadas = set(reg.get('tabelas_confirmadas') or [reg['tabela_confirmada']])
+        modulo = _modulo_de({reg['tabela_confirmada']})       # o módulo é o da tabela principal
         if modulo:
             casos_por_modulo.setdefault(modulo, []).append((reg['pedido'], esperadas, 5))
 
@@ -518,6 +520,7 @@ def _avaliar_solucoes(a):
     from dominios.cobertura import avaliar
     from dominios.formulas import conhecimento as kb_
     raiz = os.path.join(AQUI, '..')
+    aceitos_arq = None
     with tempfile.TemporaryDirectory() as tmp:
         if a.db:
             if not os.path.exists(a.db):
@@ -525,6 +528,10 @@ def _avaliar_solucoes(a):
                 return 1
             db = a.db
             casos_arq = a.casos or os.path.join(os.path.dirname(os.path.abspath(db)), 'casos_solucao.json')
+            if not a.casos:
+                # os casos que vieram das soluções aceitas pelo usuário (stella aceitar) entram juntos
+                from dominios.aceite import ARQUIVO_CASOS
+                aceitos_arq = os.path.join(os.path.dirname(os.path.abspath(db)), ARQUIVO_CASOS)
             base = kb_.carregar(a.pacotes)
         else:
             from casos.fixture_schema import gerar_fixture_db
@@ -540,8 +547,20 @@ def _avaliar_solucoes(a):
             extra = [] if a.pacotes else [os.path.join(raiz, 'casos', 'fixtures', 'formulas_consulta',
                                                        'ficticio-consulta')]
             base = kb_.carregar(a.pacotes or os.path.join(raiz, 'casos', 'fixtures', 'formulas'), extras=extra)
-        with open(casos_arq, encoding='utf-8') as f:
-            casos = json.load(f)['casos']
+        casos = []
+        if os.path.exists(casos_arq) or not aceitos_arq:
+            with open(casos_arq, encoding='utf-8') as f:
+                casos = json.load(f)['casos']
+        n_aceitos = 0
+        if aceitos_arq and os.path.exists(aceitos_arq):
+            with open(aceitos_arq, encoding='utf-8') as f:
+                aceitos = [c for c in json.load(f)['casos'] if c.get('intencoes')]
+            n_aceitos = len(aceitos)
+            casos += aceitos
+        if not casos:
+            print(f'ERRO: nenhum caso em {casos_arq}' + (f' nem em {aceitos_arq}' if aceitos_arq else ''),
+                  file=sys.stderr)
+            return 1
         cam = solucao.Camadas(base, db)
         try:
             r = avaliar(casos, solucao.MotorDeCobertura(cam))
@@ -551,7 +570,8 @@ def _avaliar_solucoes(a):
         print(json.dumps(r if a.verbose else {k: v for k, v in r.items() if k != 'casos'}, ensure_ascii=False,
                          indent=1))
         return 0
-    print(f"cobertura de intenções: {r['cobertura']:.4f} ({len(casos)} casos, {os.path.basename(casos_arq)})")
+    print(f"cobertura de intenções: {r['cobertura']:.4f} ({len(casos)} casos, {os.path.basename(casos_arq)}"
+          + (f" + {n_aceitos} aceito(s) pelo usuário" if n_aceitos else '') + ')')
     for d, x in r['por_dominio'].items():
         print(f"  {d:9} {x['acertos']}/{x['intencoes']}")
     for c in r['casos']:

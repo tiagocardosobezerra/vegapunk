@@ -128,13 +128,16 @@ def _tabelas_para_detalhar(snapshot_buscas):
     return sorted(tabs)
 
 
-def capturar_snapshot(db_path, com_cli):
+def capturar_snapshot(db_path, com_cli, so_pedidos=None):
+    """`so_pedidos`: no `verificar` da instância real, só os pedidos que o
+    golden tem (os que entraram no log depois da captura ficam de fora)."""
     _importar_consultas()
     engine = NomiNomiNoMi(db_path)
     try:
         buscas = {}
         for p in _pedidos(None if com_cli else db_path):
-            buscas[p] = engine.buscar(p)
+            if so_pedidos is None or p in so_pedidos:
+                buscas[p] = engine.buscar(p)
         detalhes = engine.detalhar(_tabelas_para_detalhar(buscas))
     finally:
         engine.fechar()
@@ -487,7 +490,19 @@ def main():
     if 'schema' in dominios:
         if args.db:
             golden = os.path.join(os.path.dirname(os.path.abspath(args.db)), 'punk_records_golden.json')
-            snap = capturar_snapshot(args.db, com_cli=False)
+            so = None
+            if args.acao == 'verificar' and os.path.exists(golden):
+                # Um pedido que o usuário fez DEPOIS da captura não é mudança de
+                # comportamento: o golden não tinha como conhecê-lo. Sem este
+                # corte, toda busca real nova deixava o portão vermelho.
+                _importar_consultas()
+                so = set(_ler_json(golden, {}).get('buscar', {}))
+                novos = [p for p in _pedidos(args.db) if p not in so]
+                if novos:
+                    print(f'ATLAS (info): {len(novos)} pedido(s) do log de uso depois da captura, fora da '
+                          'comparação (entram no próximo `capturar`): ' + '; '.join(novos[:5])
+                          + (' ...' if len(novos) > 5 else ''))
+            snap = capturar_snapshot(args.db, com_cli=False, so_pedidos=so)
         else:
             golden = os.path.abspath(GOLDEN_FIXTURE)
             snap = _com_fixture(lambda db: capturar_snapshot(db, com_cli=True))

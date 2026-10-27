@@ -48,8 +48,8 @@ class TestLembretes(unittest.TestCase):
         with open(os.path.join(self._tmp.name, 'memory_card.json'), 'w', encoding='utf-8') as f:
             json.dump({'repo': 'qzdono/qzcartao'}, f)
         self.assertIn('Memory Card', _stderr(lembretes.lembrar_salvar_no_cartao))
-        self.assertIn('memory_card.py buscar "folha"', _stderr(lembretes.lembrar_buscar_no_cartao, 'folha'))
-        self.assertIn('memory_card.py conferir', _stderr(lembretes.lembrar_conferir_cartao))
+        self.assertIn('stella.py cartao buscar "folha"', _stderr(lembretes.lembrar_buscar_no_cartao, 'folha'))
+        self.assertIn('stella.py cartao conferir', _stderr(lembretes.lembrar_conferir_cartao))
 
     def test_cli_detalhar_lembra_em_stderr_sem_sujar_o_json(self):
         db = os.path.join(self._tmp.name, 'fixture.db')

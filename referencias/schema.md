@@ -156,6 +156,23 @@ python3 satelites/york.py migrar aplicar        # uma vez: base na versão 2
 python3 satelites/york.py enriquecer --dir egghead/extracao
 ```
 
+**Views.** A extração lê só tabelas por padrão. Um relatório que usa uma
+view (ex.: uma view de hierarquia) aparece no Memory Card e no `solucionar`
+com "tabela ... não existe na base". Para trazer as views, rode o
+`tabelas.sql` e o `colunas.sql` de novo com `@objeto = 'V'`, grave os dois
+CSVs em `egghead/extracao/views/` e acrescente na base, no lugar:
+
+```bash
+python3 satelites/york.py atualizar --dicionario egghead/extracao/views --catalogo egghead/extracao/views
+python3 satelites/york.py atualizar --dicionario egghead/extracao/views --catalogo egghead/extracao/views --aplicar
+```
+
+O primeiro só lista o que muda. A lista "tabelas fora do export" é o resto
+da base e não é removida. As views entram sem PK, sem FK e com
+`tem_dados=0`: a busca as acha pelas colunas, mas o JOIN com elas nunca sai
+provado. Como a base muda, o golden do Atlas da instância precisa de uma
+nova captura, com o seu aceite.
+
 O `enriquecer` faz cópia de segurança e roda numa transação. Ele só faz
 `UPDATE` em linhas que já existem (nome de tabela e coluna sem diferenciar
 caixa): nunca cria tabela, coluna ou FK e nunca mexe em descrição, nos 4
@@ -198,7 +215,7 @@ completo. Resumo:
 1. `python3 stella.py buscar --dominio schema "<pedido em pt-br>"` → tabelas candidatas (críticas + relacionadas via FK)
 2. `python3 stella.py detalhar --dominio schema TAB1 TAB2 ...` → colunas exatas + FKs dessas tabelas
 3. Só então o T-SQL é escrito, usando exclusivamente os nomes retornados pelo motor — nunca por memória/suposição.
-4. `python3 stella.py confirmar --dominio schema "<pedido>" TABELA` fecha o laço de feedback.
+4. `python3 stella.py confirmar --dominio schema "<pedido>" TABELA [TABELA ...]` fecha o laço de feedback.
 
 Toda saída textual do motor (contagens, scores) segue o padrão numérico
 pt-BR: `.` como separador de milhar e `,` como separador decimal (ex.:

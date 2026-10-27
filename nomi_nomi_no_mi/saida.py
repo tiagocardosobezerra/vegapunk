@@ -70,41 +70,14 @@ def _tipo_texto(c: Dict) -> str:
     return tipo
 
 
-def formatar_detalhar_texto(r: Dict) -> str:
+def formatar_detalhar_texto(r: Dict, completo: bool = False) -> str:
+    """Ficha das tabelas em texto. O essencial vem primeiro (caminho com o JOIN
+    pronto entre as tabelas pedidas e os avisos), depois as colunas. Sem
+    `completo`, as FKs para tabelas FORA do pedido saem numa linha curta, sem
+    o JOIN: numa tabela muito ligada elas eram a maior parte da saída e
+    empurravam o JOIN pronto para depois do corte do terminal."""
+    pedidas = {t.upper() for t in r['tabelas']}
     linhas = []
-    for tabela, info in r['tabelas'].items():
-        m = info['metadados']
-        linhas.append(f"### {tabela}")
-        linhas.append(
-            f"  conexoes_totais={m['conexoes_totais']}  "
-            f"tabelas_filhas={m['tabelas_filhas']}  tabelas_pais={m['tabelas_pais']}  "
-            f"tem_dados={'sim' if m['tem_dados'] else 'não'}  "
-            f"ranking={m['ranking']}"
-        )
-        if m.get('pk'):
-            linhas.append(f"  PK: {', '.join(m['pk'])}")
-        linhas.append(f"  Colunas ({info['total_colunas']}):")
-        for c in info['colunas']:
-            desc = f" — {c['descricao']}" if c['descricao'] else ""
-            tipo = _tipo_texto(c)
-            linhas.append(f"    - {c['coluna']}{f' [{tipo}]' if tipo else ''}{desc}")
-
-        if info.get('fks'):
-            linhas.append(f"  FKs com agrupamento provado e JOIN pronto ({len(info['fks'])}):")
-            for fk in info['fks']:
-                prova = fk['constraint'] or f"[{fk['origem']}]"
-                linhas.append(f"    - {prova} ({fk['tabela_filha']} -> {fk['tabela_mae']}"
-                              f"{', composta' if fk['composta'] else ''}): {fk['join']}")
-        sem = info.get('fks_sem_constraint', info['relacionamentos'])
-        if sem:
-            titulo = 'Relacionamentos (FKs)' if not info.get('fks') and len(sem) == len(info['relacionamentos'])                 else 'Ligações sem agrupamento provado'
-            linhas.append(f"  {titulo} ({len(sem)}):")
-            for rel in sem:
-                linhas.append(
-                    f"    - {rel['tabela_filha']}({rel['campo_filho']}) -> "
-                    f"{rel['tabela_mae']}({rel['campo_mae']})"
-                )
-        linhas.append("")
 
     for c in r.get('caminhos', []):
         if c['tabelas'] is None:
@@ -122,5 +95,63 @@ def formatar_detalhar_texto(r: Dict) -> str:
         linhas.append("Avisos:")
         for a in r['aviso']:
             linhas.append(f"  ! {a}")
+        linhas.append("")
 
-    return '\n'.join(linhas)
+    omitidas = 0
+    for tabela, info in r['tabelas'].items():
+        m = info['metadados']
+        linhas.append(f"### {tabela}")
+        linhas.append(
+            f"  conexoes_totais={m['conexoes_totais']}  "
+            f"tabelas_filhas={m['tabelas_filhas']}  tabelas_pais={m['tabelas_pais']}  "
+            f"tem_dados={'sim' if m['tem_dados'] else 'não'}  "
+            f"ranking={m['ranking']}"
+        )
+        if m.get('pk'):
+            linhas.append(f"  PK: {', '.join(m['pk'])}")
+        linhas.append(f"  Colunas ({info['total_colunas']}):")
+        for c in info['colunas']:
+            desc = f" — {c['descricao']}" if c['descricao'] else ""
+            tipo = _tipo_texto(c)
+            linhas.append(f"    - {c['coluna']}{f' [{tipo}]' if tipo else ''}{desc}")
+
+        def _dentro(f):
+            return completo or {f['tabela_filha'].upper(), f['tabela_mae'].upper()} <= pedidas
+
+        if info.get('fks'):
+            linhas.append(f"  FKs com agrupamento provado e JOIN pronto ({len(info['fks'])}):")
+            fora = []
+            for fk in info['fks']:
+                prova = fk['constraint'] or f"[{fk['origem']}]"
+                if _dentro(fk):
+                    linhas.append(f"    - {prova} ({fk['tabela_filha']} -> {fk['tabela_mae']}"
+                                  f"{', composta' if fk['composta'] else ''}): {fk['join']}")
+                else:
+                    outra = fk['tabela_mae'] if fk['tabela_filha'].upper() == tabela.upper() else fk['tabela_filha']
+                    fora.append(outra)
+            if fora:
+                omitidas += len(fora)
+                linhas.append(f"    - com tabelas fora do pedido ({len(fora)}, sem o JOIN): "
+                              + ', '.join(sorted(set(fora))))
+        sem = info.get('fks_sem_constraint', info['relacionamentos'])
+        if sem:
+            titulo = 'Relacionamentos (FKs)' if not info.get('fks') and len(sem) == len(info['relacionamentos']) \
+                else 'Ligações sem agrupamento provado'
+            mostradas = [rel for rel in sem if _dentro(rel)]
+            linhas.append(f"  {titulo} ({len(sem)}):")
+            for rel in mostradas:
+                linhas.append(
+                    f"    - {rel['tabela_filha']}({rel['campo_filho']}) -> "
+                    f"{rel['tabela_mae']}({rel['campo_mae']})"
+                )
+            fora = [rel['tabela_mae'] if rel['tabela_filha'].upper() == tabela.upper() else rel['tabela_filha']
+                    for rel in sem if not _dentro(rel)]
+            if fora:
+                omitidas += len(fora)
+                linhas.append(f"    - com tabelas fora do pedido ({len(fora)}): " + ', '.join(sorted(set(fora))))
+        linhas.append("")
+
+    if omitidas:
+        linhas.append(f"({omitidas} ligação(ões) com tabelas fora do pedido saíram sem o JOIN. Para o JOIN, "
+                      "detalhe junto a outra tabela ou use --completo.)")
+    return '\n'.join(linhas).rstrip('\n')

@@ -18,8 +18,8 @@ valida a fórmula e aponta as lacunas.
 
 Uso:
     python3 stella.py buscar    --dominio schema   "<pedido>" [--limite 30] [--json]
-    python3 stella.py detalhar  --dominio schema   TABELA [TABELA ...] [--json]
-    python3 stella.py confirmar --dominio schema   "<pedido>" TABELA
+    python3 stella.py detalhar  --dominio schema   TABELA [TABELA ...] [--completo] [--json]
+    python3 stella.py confirmar --dominio schema   "<pedido>" TABELA [TABELA ...]
     python3 stella.py checar-modulos [--json]
 
     python3 stella.py buscar    --dominio formulas "<pedido>" [--contexto CTX] [--limite 10] [--json]
@@ -36,6 +36,10 @@ Uso:
                                  [--sem-registro] [--json]
         solução agrupada por intenção, com lacunas explícitas; registrada
         como candidata a confirmação na instância.
+
+    python3 stella.py cartao COMANDO [...]
+        Memory Card (satelites/memory_card.py): iniciar, catalogo, buscar,
+        enviar, marcar, conferir e migrar. Ver referencias/memory-card.md.
 
     python3 stella.py status [--json]
         camadas presentes, versão e tamanho da base, pacotes de fórmulas e os
@@ -134,6 +138,24 @@ def _status_formulas(a):
             'avisos_de_merge': list(base.avisos)}
 
 
+def _status_cartao():
+    """Memory Card: configurado nesta instância? Só lê a configuração e a
+    cópia local do cartão (sem rede, sem `gh`)."""
+    try:
+        import memory_card
+    except ImportError:
+        return {'configurado': False}
+    try:
+        c = memory_card.config()
+    except memory_card.EnvioRecusado:
+        return {'configurado': False}
+    tem_copia = os.path.isdir(c['pasta'])
+    fichas = memory_card.ler_catalogo(c['pasta']) if tem_copia else []
+    return {'configurado': True, 'repo': c['repo'], 'pasta': c['pasta'], 'copia_local': tem_copia,
+            'saves': len(fichas), 'com_algo_faltando': sum((f.get('conferencia') or {}).get('ok') is False
+                                                          for f in fichas)}
+
+
 def _status(a):
     """Cada domínio é opcional: sem o código ou sem os dados de um deles, o
     status diz que ele roda em modo básico em vez de falhar."""
@@ -145,7 +167,7 @@ def _status(a):
         formulas = _status_formulas(a)
     except ImportError:
         formulas = {'instalado': False, 'pacotes': [], 'funcoes': 0, 'contextos': 0, 'avisos_de_merge': []}
-    s = {'schema': schema, 'formulas': formulas}
+    s = {'schema': schema, 'formulas': formulas, 'cartao': _status_cartao()}
     if a.json:
         print(json.dumps(s, ensure_ascii=False, indent=1))
         return 0
@@ -181,6 +203,15 @@ def _status(a):
             print('              AVISO (conhecimento): ' + av)
     else:
         print('  fórmulas: modo básico — nenhum pacote de conhecimento instalado')
+    ca = s['cartao']
+    if not ca['configurado']:
+        print('  cartão:   nenhum Memory Card configurado (`stella.py cartao iniciar --repo DONO/NOME`)')
+    elif not ca['copia_local']:
+        print(f"  cartão:   {ca['repo']} configurado, sem cópia local ainda ({ca['pasta']})")
+    else:
+        print(f"  cartão:   {ca['repo']}: {ca['saves']} save(s)"
+              + (f", {ca['com_algo_faltando']} com algo faltando no schema" if ca['com_algo_faltando'] else '')
+              + f" (cópia local em {ca['pasta']})")
     return 0
 
 
@@ -369,11 +400,11 @@ def _parser():
     p = sub.add_parser('detalhar', parents=[comum, dom], help='ficha de tabelas (schema) ou funções (fórmulas)')
     p.add_argument('nomes', nargs='+')
     p.add_argument('--contexto', help='fórmulas: família de fórmulas')
-    p.add_argument('--completo', action='store_true', help='fórmulas: inclui texto original da documentação (JSON)')
+    p.add_argument('--completo', action='store_true', help='fórmulas: inclui o texto original da documentação (JSON); schema: o JOIN de toda FK, também com tabelas fora do pedido')
     p = sub.add_parser('confirmar', parents=[comum, dom],
                        help='registra o que foi de fato usado num pedido (feedback para recalibração)')
     p.add_argument('pedido', help='o mesmo pedido em PT-BR usado no `buscar`')
-    p.add_argument('item', nargs='+', help='tabela (schema) ou funções (fórmulas) efetivamente usadas')
+    p.add_argument('item', nargs='+', help='tabelas (schema; a primeira é a principal) ou funções (fórmulas) efetivamente usadas')
     p.add_argument('--contexto', help='fórmulas: família de fórmulas')
     sub.add_parser('checar-modulos', parents=[comum],
                    help='schema: prefixos de tabela sem módulo cadastrado em `sistemas`')
@@ -407,7 +438,26 @@ def _parser():
     p.add_argument('id', help='id da candidata (saída do solucionar)')
     p.add_argument('--observacao', help='observação do usuário sobre a solução (texto livre, sem valores do banco)')
     sub.add_parser('status', parents=[comum], help='camadas presentes, versão da base e avisos de merge')
+    p = sub.add_parser('cartao', help='Memory Card: os relatórios salvos (iniciar, catalogo, buscar, enviar, '
+                                      'marcar, conferir, migrar); o resto da linha vai para satelites/memory_card.py')
+    p.add_argument('args', nargs=argparse.REMAINDER)
     return ap
+
+
+_GERAIS_COM_VALOR = ('--db', '--pacotes', '--privado', '--pacote')
+
+
+def _posicao_do_comando(argv):
+    """Índice do comando (o 1º argumento que não é flag geral), ou None."""
+    i = 0
+    while i < len(argv):
+        if argv[i] in _GERAIS_COM_VALOR:
+            i += 2
+        elif argv[i].startswith('-'):
+            i += 1
+        else:
+            return i
+    return None
 
 
 def main(argv=None):
@@ -417,6 +467,14 @@ def main(argv=None):
         except (AttributeError, ValueError):
             pass
     ap = _parser()
+    argv = sys.argv[1:] if argv is None else list(argv)
+    i = _posicao_do_comando(argv)
+    if i is not None and argv[i] == 'cartao':
+        # tudo depois de `cartao` é do Memory Card (inclusive --json, que lá tem outro sentido)
+        import memory_card
+        if '--db' in argv[:i]:
+            os.environ['VEGAPUNK_EGGHEAD_DB'] = argv[argv.index('--db') + 1]
+        return memory_card.main(argv[i + 1:])
     a = ap.parse_args(argv)
     a.json = getattr(a, 'json', False)
 
@@ -432,17 +490,12 @@ def main(argv=None):
         a.db = a.db or _db_padrao()
         if a.cmd != 'checar-modulos' and getattr(a, 'contexto', None):
             ap.error('--contexto vale só para --dominio formulas')
-        if getattr(a, 'completo', False):
-            ap.error('--completo vale só para --dominio formulas')
         from nomi_nomi_no_mi.comandos import executar
-        if a.cmd == 'confirmar' and len(a.item) != 1:
-            ap.error('--dominio schema confirma uma tabela só')
-        if a.cmd == 'confirmar':
-            a.item = a.item[0]
         args = argparse.Namespace(comando=a.cmd, db=a.db, json=a.json,
                                   pedido=getattr(a, 'pedido', None),
                                   limite=a.limite if getattr(a, 'limite', None) is not None else 30,
-                                  tabelas=getattr(a, 'nomes', None), tabela=getattr(a, 'item', None))
+                                  tabelas=getattr(a, 'nomes', None), tabela=getattr(a, 'item', None),
+                                  completo=getattr(a, 'completo', False))
         return executar(args) or 0
 
     import shaka

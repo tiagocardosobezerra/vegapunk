@@ -68,6 +68,12 @@ não exclusão); o Passo 1.5 é a checagem humana complementar.
 python3 stella.py detalhar --dominio schema TABELA1 TABELA2 ...
 ```
 
+A saída em texto começa pelo essencial: o caminho entre as tabelas pedidas,
+com o JOIN pronto, e os avisos. Depois vêm as colunas de cada tabela. As FKs
+para tabelas FORA do pedido saem numa linha só, sem o JOIN (numa tabela
+muito ligada elas eram a maior parte da saída); para o JOIN de uma delas,
+detalhe as duas juntas ou use `--completo`. O `--json` traz tudo, sempre.
+
 Por tabela:
 
 - **Colunas:** descrição de negócio em português e, quando a base foi
@@ -119,11 +125,15 @@ usuário e pergunte como prosseguir.
   Para enriquecer a base, ver [schema.md](schema.md), seção "Estrutura
   física".
 
-## Passo 4 — Confirmar a tabela usada (sempre, não é opcional)
+## Passo 4 — Confirmar as tabelas usadas (sempre, não é opcional)
 
 ```bash
-python3 stella.py confirmar --dominio schema "<pedido original do usuário>" TABELA_REALMENTE_USADA
+python3 stella.py confirmar --dominio schema "<pedido original do usuário>" TABELA_PRINCIPAL [OUTRA ...]
 ```
+
+Passe todas as tabelas do SQL entregue; a primeira é a principal (é ela que
+decide o módulo na calibração). Salvar o relatório no Memory Card
+(`stella.py cartao enviar ... --confirmar`) já grava essa confirmação.
 
 Fecha o laço de feedback: sem isso, o histórico de uso real nunca acumula e
 a recalibração por módulo nunca sai do zero. Não pergunte ao usuário se ele

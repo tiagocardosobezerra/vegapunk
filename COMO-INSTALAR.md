@@ -55,7 +55,7 @@ instale o [GitHub CLI](https://cli.github.com/), autentique (`gh auth login`)
 e crie o cartão uma vez:
 
 ```bash
-python3 satelites/memory_card.py iniciar --repo SEU_USUARIO/memory-card
+python3 stella.py cartao iniciar --repo SEU_USUARIO/memory-card
 ```
 
 O cartão é criado privado e a configuração fica em `egghead/memory_card.json`,

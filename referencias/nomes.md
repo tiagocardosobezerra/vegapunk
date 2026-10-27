@@ -60,8 +60,8 @@ python3 satelites/pythagoras.py calibrar --dominio schema --db egghead/punk_reco
 python3 satelites/lilith.py gerar --db egghead/punk_records.db --saida egghead/casos_sinteticos.jsonl
 python3 satelites/atlas.py verificar [--db egghead/punk_records.db] [--dominio schema|formulas]
 python3 satelites/atlas.py isolamento [--rapido]
-python3 satelites/memory_card.py iniciar --repo DONO/NOME
-python3 satelites/memory_card.py catalogo|buscar|enviar|marcar|conferir   # ver referencias/memory-card.md
+python3 stella.py cartao iniciar --repo DONO/NOME
+python3 stella.py cartao catalogo|buscar|enviar|marcar|conferir|migrar   # ver referencias/memory-card.md
 ```
 
 Ao criar um script novo, escolha o nome pelo papel (traço do personagem ↔

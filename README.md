@@ -150,14 +150,14 @@ python3 satelites/york.py ingerir --pacote punk_records/pacotes/publico/<pacote>
 
 ### Memory Card: seus relatórios salvos
 
-Relatório pronto não precisa se perder numa pasta. O Memory Card salva cada um num repositório **seu** no GitHub (privado por padrão), organizado em categoria, seção e artigo:
+Relatório pronto não precisa se perder numa pasta. O Memory Card salva cada um num repositório **seu** no GitHub (privado por padrão), organizado em solução (o Vegapunk ou outra ferramenta), categoria, seção e artigo:
 
 ```bash
 gh auth login                                                         # uma vez
-python3 satelites/memory_card.py iniciar --repo SEU_USUARIO/memory-card  # cria o cartão privado
+python3 stella.py cartao iniciar --repo SEU_USUARIO/memory-card  # cria o cartão privado
 ```
 
-Depois é pedir ao Claude: "salve este relatório no Memory Card". Ele mostra a prévia (o artigo, a versão, o diff de uma mudança, a conferência das tabelas e colunas no schema) e só envia com o seu "sim". Antes de escrever um relatório novo, ele procura no cartão se já existe algo parecido. Nada do seu cartão vem junto com o Vegapunk: qual é o cartão fica só na sua instância. Guia completo em [`referencias/memory-card.md`](referencias/memory-card.md).
+Depois é pedir ao Claude: "salve este relatório no Memory Card". Ele mostra a prévia (o artigo, a versão, o diff de uma mudança, a conferência das tabelas, colunas e JOINs no schema) e só envia com o seu "sim". Salvar também registra as tabelas do relatório no log de uso, o que alimenta a calibração da busca. Antes de escrever um relatório novo, ele procura no cartão se já existe algo parecido. Nada do seu cartão vem junto com o Vegapunk: qual é o cartão fica só na sua instância. Guia completo em [`referencias/memory-card.md`](referencias/memory-card.md).
 
 ## Como funciona por dentro
 

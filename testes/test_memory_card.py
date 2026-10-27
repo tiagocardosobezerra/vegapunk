@@ -6,21 +6,21 @@ fictícios; nenhum teste fala com o GitHub.
 
 import json
 import os
-import sqlite3
 import tempfile
 import unittest
 
 from _comum import SKILL
+from casos.fixture_schema import gerar_fixture_db
 import memory_card as al
 from dominios.distribuicao import lista_distribuivel
 
 SQL = """-- Relatório de teste: QZFALSA.X no comentário não conta
-WITH base AS (SELECT 1 AS N)
-SELECT A.X, B.Y, A.DOC
-FROM QZTAB A
-INNER JOIN [dbo].[QZOUTRA] AS B ON A.K = B.K
-CROSS JOIN base
-WHERE A.DOC = '123.456.789-00'
+;WITH Funcionario AS (SELECT F.MATRICULA, F.CODCARGO FROM F_FUNCIONARIO F)
+SELECT A.NOME, B.XPTO, A.CPF, FU.MATRICULA
+FROM F_FUNCIONARIO A
+INNER JOIN [dbo].[F_CARGO] AS B ON A.CODCARGO = B.CODCARGO
+INNER JOIN Funcionario FU ON FU.MATRICULA = A.MATRICULA
+WHERE A.CPF = '123.456.789-00'
 """
 
 
@@ -63,16 +63,8 @@ class _ComMemoryCard(unittest.TestCase):
         self.pasta = os.path.join(self._tmp.name, 'bib')
         self.arq = self._arquivo('r.sql', SQL)
         self.texto = self._arquivo('artigo.md', '## O que faz\n\nLista X.\n')
-        self.db = os.path.join(self._tmp.name, 'b.db')
-        c = sqlite3.connect(self.db)
-        c.execute('CREATE TABLE tabelas (tabela TEXT)')
-        c.execute('CREATE TABLE colunas (tabela TEXT, coluna TEXT)')
-        c.execute('CREATE TABLE meta (chave TEXT, valor TEXT)')
-        c.executemany('INSERT INTO tabelas VALUES (?)', [('QZTAB',), ('QZOUTRA',)])
-        c.executemany('INSERT INTO colunas VALUES (?, ?)', [('QZTAB', 'X'), ('QZTAB', 'K'), ('QZTAB', 'DOC'),
-                                                              ('QZOUTRA', 'K')])
-        c.commit()
-        c.close()
+        self.db = os.path.join(self._tmp.name, 'punk_records.db')
+        gerar_fixture_db(self.db)
         os.environ['VEGAPUNK_EGGHEAD_DB'] = self.db
 
     def tearDown(self):
@@ -101,19 +93,42 @@ class TestMontagem(_ComMemoryCard):
 
     def test_referencias_ignoram_comentario_cte_e_schema(self):
         tabelas, colunas = al.referencias_do_sql(SQL)
-        self.assertEqual(tabelas, ['QZOUTRA', 'QZTAB'])
-        self.assertEqual(colunas, ['QZOUTRA.K', 'QZOUTRA.Y', 'QZTAB.DOC', 'QZTAB.K', 'QZTAB.X'])
+        self.assertEqual(tabelas, ['F_CARGO', 'F_FUNCIONARIO'])
+        self.assertIn('F_CARGO.XPTO', colunas)
+        self.assertNotIn('FUNCIONARIO.MATRICULA', colunas)            # CTE não é tabela
 
     def test_artigo_novo_versao_1_com_texto_e_conferencia(self):
         e = al.montar_envio(self.arq, 'Recursos Humanos', 'Funcionários', 'Pessoas', 'd', self.pasta, self.texto)
-        self.assertEqual(e['ref'], 'recursos-humanos/funcionarios/pessoas')
+        self.assertEqual(e['ref'], 'vegapunk/recursos-humanos/funcionarios/pessoas')
+        self.assertEqual(e['ficha']['solucao'], 'Vegapunk')
         self.assertEqual(e['ficha']['versao'], 1)
         self.assertEqual(e['ficha']['status'], 'rascunho')
         self.assertEqual(e['ficha']['historico'][0]['motivo'], 'Primeira versão')
         self.assertIn('literal com cara de CPF', e['avisos'])
-        self.assertEqual(e['conferencia']['faltando'], ['QZOUTRA.Y'])
+        self.assertEqual(e['conferencia']['faltando'], ['coluna XPTO não existe na tabela F_CARGO'])
+        self.assertEqual(e['conferencia']['tabelas'], ['F_FUNCIONARIO', 'F_CARGO'])
         self.assertIn('Lista X.', e['readme'])
-        self.assertIn('versão 1 · rascunho', e['readme'])
+        self.assertIn('Vegapunk › Recursos Humanos › Funcionários · versão 1 · rascunho', e['readme'])
+
+    def test_outra_solucao_fica_em_outro_ramo(self):
+        e = al.montar_envio(self.arq, 'RH', 'S', 'A', None, self.pasta, self.texto, solucao='Outra Ferramenta')
+        self.assertEqual(e['ref'], 'outra-ferramenta/rh/s/a')
+
+    def test_conferencia_e_a_do_motor_join_sem_prova_e_cte(self):
+        sql = self._arquivo('j.sql', ';WITH X AS (SELECT 1 AS N)\nSELECT A.NOME FROM F_FUNCIONARIO A\n'
+                                     'INNER JOIN F_CARGO B ON A.MATRICULA = B.CODCARGO\nCROSS JOIN X')
+        c = al.montar_envio(sql, 'C', 'S', 'J', None, self.pasta, self.texto)['conferencia']
+        self.assertTrue(c['ok'])                                     # a CTE não é erro
+        self.assertIn('por colunas sem prova', c['avisos'][0])       # o JOIN inventado é aviso
+
+    def test_salvar_confirma_todas_as_tabelas(self):
+        e = al.montar_envio(self.arq, 'C', 'S', 'A', 'funcionários e cargos', self.pasta, self.texto)
+        gravou, tabelas = al.confirmar_tabelas(e)
+        self.assertTrue(gravou)
+        from nomi_nomi_no_mi.historico import ler_historico_confirmado
+        reg = ler_historico_confirmado(self.db)[-1]
+        self.assertEqual((reg['pedido'], reg['tabela_confirmada'], reg['tabelas_confirmadas'], reg['origem']),
+                         ('funcionários e cargos', 'F_FUNCIONARIO', ['F_FUNCIONARIO', 'F_CARGO'], 'memory_card'))
 
     def test_artigo_novo_sem_texto_e_recusado(self):
         with self.assertRaises(al.EnvioRecusado):
@@ -125,7 +140,7 @@ class TestMontagem(_ComMemoryCard):
 
     def test_reenvio_exige_motivo_sobe_versao_e_mostra_diff(self):
         self._gravar_sem_rede(al.montar_envio(self.arq, 'C', 'S', 'A', 'd', self.pasta, self.texto))
-        novo = self._arquivo('r2.sql', SQL.replace('B.Y, A.DOC', 'B.Y, A.DOC, B.K'))
+        novo = self._arquivo('r2.sql', SQL.replace('A.CPF, FU', 'A.CPF, B.CODCARGO, FU'))
         with self.assertRaises(al.EnvioRecusado):
             al.montar_envio(novo, 'C', 'S', 'A', None, self.pasta)
         e = al.montar_envio(novo, 'C', 'S', 'A', None, self.pasta, motivo='mais uma coluna')
@@ -134,7 +149,7 @@ class TestMontagem(_ComMemoryCard):
         self.assertEqual([h['versao'] for h in e['ficha']['historico']], [1, 2])
         self.assertEqual(e['ficha']['descricao'], 'd')           # mantém a descrição
         self.assertIn('Lista X.', e['readme'])                    # mantém o corpo do artigo
-        self.assertIn('+SELECT A.X, B.Y, A.DOC, B.K', e['diff_sql'])
+        self.assertIn('+SELECT A.NOME, B.XPTO, A.CPF, B.CODCARGO, FU.MATRICULA', e['diff_sql'])
         self.assertIn('| 2 |', e['readme'])
 
     def test_ficha_antiga_sem_versao_vira_versao_1(self):
@@ -143,11 +158,28 @@ class TestMontagem(_ComMemoryCard):
 
     def test_relacionado_precisa_existir_e_link_e_relativo(self):
         with self.assertRaises(al.EnvioRecusado):
-            al.montar_envio(self.arq, 'C', 'S', 'A', None, self.pasta, self.texto, relacionados=['c/s/b'])
+            al.montar_envio(self.arq, 'C', 'S', 'A', None, self.pasta, self.texto, relacionados=['vegapunk/c/s/b'])
         self._gravar_sem_rede(al.montar_envio(self.arq, 'C', 'S', 'B', None, self.pasta, self.texto))
-        e = al.montar_envio(self.arq, 'C', 'S', 'A', None, self.pasta, self.texto, relacionados=['c/s/b'])
-        self.assertIn('- [B](../../../c/s/b/)', e['readme'])
-        self.assertEqual(e['novos_relacionados'], ['c/s/b'])
+        e = al.montar_envio(self.arq, 'C', 'S', 'A', None, self.pasta, self.texto, relacionados=['vegapunk/c/s/b'])
+        self.assertIn('- [B](../../../../vegapunk/c/s/b/)', e['readme'])
+        self.assertEqual(e['novos_relacionados'], ['vegapunk/c/s/b'])
+
+    def test_migrar_cartao_antigo_para_o_nivel_da_solucao(self):
+        for art in ('A', 'B'):
+            e = al.montar_envio(self.arq, 'C', 'S', art, None, self.pasta, self.texto)
+            e['ref'] = e['ref'].split('/', 1)[1]                           # como um save antigo, sem a solução
+            e['destino'] = al.pasta_do_artigo(self.pasta, e['ref'])
+            e['ficha'].pop('solucao')
+            e['ficha']['relacionados'] = ['c/s/b'] if art == 'A' else []
+            self._gravar_sem_rede(e)
+        self.assertEqual(al.planejar_migracao(self.pasta), [('c/s/a', 'vegapunk/c/s/a'), ('c/s/b', 'vegapunk/c/s/b')])
+        al.migrar(self.pasta)
+        self.assertEqual([f['ref'] for f in al.ler_catalogo(self.pasta)], ['vegapunk/c/s/a', 'vegapunk/c/s/b'])
+        self.assertEqual(al.ler_ficha(self.pasta, 'vegapunk/c/s/a')['relacionados'], ['vegapunk/c/s/b'])
+        self.assertIn('../../../../vegapunk/c/s/b/', al._ler(os.path.join(al.pasta_do_artigo(
+            self.pasta, 'vegapunk/c/s/a'), 'README.md')))
+        self.assertFalse(os.path.exists(os.path.join(self.pasta, 'saves', 'c')))
+        self.assertEqual(al.planejar_migracao(self.pasta), [])
 
 
 class TestBuscaECatalogo(_ComMemoryCard):
@@ -156,22 +188,27 @@ class TestBuscaECatalogo(_ComMemoryCard):
                                               self.texto))
         self._gravar_sem_rede(al.montar_envio(self.arq, 'RH', 'Ponto', 'Batidas', 'marcações', self.pasta, self.texto))
         achados = al.buscar(self.pasta, ['Funcionarios', 'idade'])
-        self.assertEqual(achados[0][1]['ref'], 'rh/funcionarios/pessoas-idosas')
+        self.assertEqual(achados[0][1]['ref'], 'vegapunk/rh/funcionarios/pessoas-idosas')
+        self.assertGreater(achados[0][0], achados[1][0])
+        self.assertFalse(al.buscar(self.pasta, ['idade', 'qzum', 'qzdois']))   # cobre só 1 de 3 termos
         self.assertFalse(al.buscar(self.pasta, ['inexistente']))
+        self.assertFalse(al.buscar(self.pasta, ['de', 'com']))   # só stop words
 
     def test_catalogo_por_secao_e_por_tabela(self):
         fichas = [
-            al.normalizar_ficha({'categoria': 'RH', 'secao': 'Ponto', 'artigo': 'B', 'ref': 'rh/ponto/b',
+            al.normalizar_ficha({'categoria': 'RH', 'secao': 'Ponto', 'artigo': 'B', 'ref': 'vegapunk/rh/ponto/b',
                                  'tabelas': ['QZTAB'], 'conferencia': {'ok': False, 'faltando': ['QZTAB.X']}}),
             al.normalizar_ficha({'categoria': 'RH', 'secao': 'Ponto', 'artigo': 'A', 'descricao': 'd',
-                                 'ref': 'rh/ponto/a', 'tabelas': ['QZTAB'], 'status': 'em-uso', 'versao': 3}),
+                                 'ref': 'vegapunk/rh/ponto/a', 'tabelas': ['QZTAB'], 'status': 'em-uso',
+                                 'versao': 3}),
         ]
         md = al.gerar_catalogo_md(fichas)
-        self.assertEqual(md.count('## RH'), 1)
-        self.assertEqual(md.count('### Ponto'), 1)
-        self.assertIn('- [A](saves/rh/ponto/a/) — d · v3 · em-uso', md)
+        self.assertEqual(md.count('## Vegapunk'), 1)
+        self.assertEqual(md.count('### RH'), 1)
+        self.assertEqual(md.count('#### Ponto'), 1)
+        self.assertIn('- [A](saves/vegapunk/rh/ponto/a/) — d · v3 · em-uso', md)
         self.assertIn('**conferir: schema mudou**', md)
-        self.assertIn('- `QZTAB`: [B](saves/rh/ponto/b/), [A](saves/rh/ponto/a/)', md)
+        self.assertIn('- `QZTAB`: [B](saves/vegapunk/rh/ponto/b/), [A](saves/vegapunk/rh/ponto/a/)', md)
 
 
 if __name__ == '__main__':

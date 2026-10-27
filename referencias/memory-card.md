@@ -31,8 +31,11 @@ local do cartão (com um aviso); o envio sempre precisa da rede.
 ## Criar o cartão (uma vez)
 
 ```bash
-python3 satelites/memory_card.py iniciar --repo SEU_USUARIO/memory-card
+python3 stella.py cartao iniciar --repo SEU_USUARIO/memory-card
 ```
+
+Todo comando do cartão roda pela Stella (`stella.py cartao ...`) ou direto
+(`satelites/memory_card.py ...`): é o mesmo programa.
 
 - Se o repositório não existe, ele é criado **privado**. Se já existe, é
   usado (e recusado se estiver público).
@@ -49,27 +52,29 @@ configuração.
 ```
 <cartão>/
 ├── README.md                      o que é o cartão
-├── CATALOGO.md                    gerado a cada envio: por categoria e seção, e por tabela
+├── CATALOGO.md                    gerado a cada envio: por solução, categoria e seção, e por tabela
 └── saves/
-    └── <categoria>/<secao>/<artigo>/
+    └── <solucao>/<categoria>/<secao>/<artigo>/
         ├── README.md              o artigo (o GitHub mostra ao abrir a pasta)
         ├── relatorio.sql          o relatório
         └── ficha.json             versão, status, tabelas, colunas, histórico, conferência
 ```
 
+- **Solução** é a ferramenta que gerou o relatório: `Vegapunk` por padrão,
+  ou outra com `--solucao` (um relatório feito à mão, outra ferramenta).
 - **Categoria** é a área (ex.: `Recursos Humanos`), **seção** é o assunto
   dentro dela (ex.: `Funcionários`) e **artigo** é o relatório (ex.:
   `Pessoas acima de 75 anos`). Os nomes de exibição ficam na ficha; as
   pastas usam o nome sem acento e com hífen.
-- Um artigo é citado por **REF** = `<categoria>/<secao>/<artigo>`, com os
-  nomes das pastas (ex.: `recursos-humanos/funcionarios/pessoas-acima-de-75-anos`).
+- Um artigo é citado por **REF** = `<solucao>/<categoria>/<secao>/<artigo>`, com
+  os nomes das pastas (ex.: `vegapunk/recursos-humanos/funcionarios/pessoas-acima-de-75-anos`).
 - **Status**: `rascunho` (padrão) ou `em-uso` (roda em produção).
 
 ### O artigo
 
 O `README.md` de cada save é montado assim:
 
-1. Título, categoria, seção, versão e status.
+1. Título, solução, categoria, seção, versão e status.
 2. A descrição de uma linha.
 3. O texto do artigo, que você (ou o Claude) escreve, com as seções:
    `O que faz`, `Quando usar`, `Como funciona` (tabelas, joins com a prova e
@@ -93,33 +98,43 @@ e só gravam com `--confirmar`.
 |---|---|
 | `iniciar --repo DONO/NOME [--pasta DIR] [--publico]` | cria ou liga o cartão e grava a configuração |
 | `catalogo [--json]` | mostra o catálogo |
-| `buscar TERMO [TERMO ...] [--limite N]` | procura nos saves: título e descrição pesam mais, depois categoria, seção e tabelas, depois o texto do artigo e o SQL; sem acento e sem caixa |
+| `buscar TERMO [TERMO ...] [--limite N]` | procura nos saves com a normalização do `buscar` do schema (sem acento, sem caixa, sem stop words, plural e os sinônimos de busca da Punk Records). Título e descrição pesam mais, depois solução, categoria, seção e tabelas, depois o texto do artigo e o SQL. Só aparece o save que cobre pelo menos metade dos termos do pedido |
 | `enviar ARQ.sql --categoria C --secao S --artigo A [...]` | salva um relatório novo ou uma versão nova (detalhe abaixo) |
 | `marcar REF --status em-uso\|rascunho` | muda o status, sem mudar a versão |
-| `conferir [REF ...] [--registrar]` | confere tabelas e colunas de cada relatório na Punk Records atual |
+| `conferir [REF ...] [--registrar]` | confere tabelas, colunas e JOINs de cada relatório na Punk Records atual |
+| `migrar [--solucao SOL] [--confirmar]` | move os saves de um cartão antigo (sem o nível da solução) para `saves/<solucao>/...`, com as ligações entre artigos |
 
 ### Salvar um relatório novo
 
 ```bash
-python3 satelites/memory_card.py enviar relatorio.sql \
+python3 stella.py cartao enviar relatorio.sql \
     --categoria "Recursos Humanos" --secao "Funcionários" --artigo "Pessoas acima de 75 anos" \
     --descricao "Funcionários com mais de 75 anos, com a idade calculada" \
-    --texto artigo.md
+    --texto artigo.md --pedido "pessoas com idade acima de 75 anos"
 ```
 
 - `--texto` é obrigatório num artigo novo: é o corpo do artigo (parte 3).
 - `--relacionado REF` (pode repetir) liga o artigo a outro. A ligação vale
   nos dois sentidos: o outro artigo ganha o link de volta.
 - `--status em-uso` já salva como em uso.
+- `--solucao` muda a solução (padrão: `Vegapunk`).
 - A prévia mostra o destino, a versão, a conferência no schema, os avisos,
   a ficha e o artigo inteiro. Repita com `--confirmar` para enviar.
+- Um relatório que cita tabela ou coluna que não existe na base é recusado
+  no `--confirmar`. Corrija o SQL; se o nome existe no banco real e só falta
+  na Punk Records (uma view ainda não extraída, por exemplo), repita com
+  `--mesmo-assim`.
+- **Salvar também confirma.** Depois do envio, as tabelas do relatório que
+  existem na base vão para o log de uso, como no `stella.py confirmar
+  --dominio schema` (a principal é a primeira do SQL). O pedido registrado
+  é o `--pedido` ou, sem ele, a descrição. É o que alimenta a calibração.
 
 ### Mudar um relatório (versão nova)
 
-Use o mesmo `enviar`, com a mesma categoria, seção e artigo, e diga o motivo:
+Use o mesmo `enviar`, com a mesma solução, categoria, seção e artigo, e diga o motivo:
 
 ```bash
-python3 satelites/memory_card.py enviar relatorio.sql \
+python3 stella.py cartao enviar relatorio.sql \
     --categoria "Recursos Humanos" --secao "Funcionários" --artigo "Pessoas acima de 75 anos" \
     --motivo "inclui a data de admissão"
 ```
@@ -133,20 +148,36 @@ python3 satelites/memory_card.py enviar relatorio.sql \
 ### Conferir no schema
 
 ```bash
-python3 satelites/memory_card.py conferir
+python3 stella.py cartao conferir
 ```
 
 Rode depois de atualizar a Punk Records (por exemplo, numa versão nova do
-seu sistema). Para cada save, ele lê as tabelas de `FROM`/`JOIN` e as colunas
-qualificadas (`TABELA.COLUNA` ou `APELIDO.COLUNA`) e diz o que não existe
-mais. Abre a base só para leitura e não grava no log de uso. Com
+seu sistema). O conferidor é o mesmo do `stella.py solucionar`
+(`nomi_nomi_no_mi/montagem.py`): para cada save, ele lê as tabelas de
+`FROM`/`JOIN` e as colunas qualificadas (`TABELA.COLUNA` ou
+`APELIDO.COLUNA`) e diz o que não existe mais. CTE, tabela temporária e
+subconsulta não são da base e não são conferidas. Cada JOIN entre tabelas
+da base é comparado com as ligações provadas (constraint ou dicionário): um
+JOIN por colunas sem prova, ou só por parte de uma chave composta (o que
+multiplica linhas), sai como aviso. Não grava no log de uso. Com
 `--registrar`, guarda o resultado nas fichas e marca no catálogo os saves
 com algo faltando ("conferir: schema mudou").
 
 A mesma conferência roda em toda prévia de `enviar`.
 
-Limite: colunas sem prefixo de tabela ou apelido não são conferidas, e uma
-coluna citada só dentro de uma subconsulta com outro apelido pode escapar.
+Limite: colunas sem prefixo de tabela ou apelido não são conferidas, e um
+JOIN com uma CTE ou subconsulta sai como "ligação não conferida".
+
+## Cartão antigo (sem o nível da solução)
+
+Um cartão criado antes do nível da solução tem os saves em
+`saves/<categoria>/<secao>/<artigo>/`. Ele continua sendo lido, e um envio
+novo já vai para `saves/vegapunk/...`. Para mover os antigos:
+
+```bash
+python3 stella.py cartao migrar              # prévia: de onde para onde
+python3 stella.py cartao migrar --confirmar  # move, refaz as ligações e envia
+```
 
 ## Proteções
 
@@ -167,6 +198,9 @@ coluna citada só dentro de uma subconsulta com outro apelido pode escapar.
   checagem de nomes reprova se ele citar o schema real.
 
 ## Como o Claude usa
+
+O `stella.py status` mostra o cartão: quantos saves e quantos com algo
+faltando no schema (só a cópia local, sem rede).
 
 Com um cartão configurado, os comandos da Stella e do York lembram o Claude
 do próximo passo, com uma linha `LEMBRETE:` em stderr: o `buscar` do schema

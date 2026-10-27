@@ -60,8 +60,14 @@ class TestExtracaoSoCatalogo(unittest.TestCase):
         for nome, sql in self.sqls.items():
             self.assertRegex(self.brutos[nome], r"DECLARE @esquema sysname = N'dbo';", nome)
             self.assertIn('s.name = @esquema', sql + self.brutos[nome], nome)
-            self.assertRegex(sql, r'IF NOT EXISTS \(SELECT 1 FROM sys\.tables', nome)
+            self.assertRegex(sql, r'IF NOT EXISTS \(SELECT 1 FROM sys\.(tables|objects)', nome)
             self.assertIn('RAISERROR', sql, nome)
+
+    def test_tabelas_e_colunas_trazem_views_com_a_variavel(self):
+        for nome in ('tabelas.sql', 'colunas.sql'):
+            self.assertIn("DECLARE @objeto  char(1) = 'U';", self.brutos[nome], nome)
+            self.assertEqual(self.sqls[nome].count('t.type = @objeto'), 2, nome)
+            self.assertNotIn('FROM sys.tables AS t\n', self.sqls[nome], nome)
 
     def test_relacionamento_com_os_dois_lados_no_schema(self):
         sql = self.sqls['relacionamentos.sql']
