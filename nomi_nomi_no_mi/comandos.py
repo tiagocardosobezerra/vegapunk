@@ -12,6 +12,7 @@ import os
 import sqlite3
 import sys
 
+from dominios import lembretes
 from nomi_nomi_no_mi.busca import NomiNomiNoMi
 from nomi_nomi_no_mi.historico import registrar_uso
 from nomi_nomi_no_mi.manutencao import checar_cobertura_modulos
@@ -40,12 +41,17 @@ def executar(args):
                     f"pois a tabela pode existir no schema real e ainda não ter sido importada.",
                     file=sys.stderr
                 )
-        registrar_uso(args.db, {
+        gravado = registrar_uso(args.db, {
             'tipo': 'confirmacao',
             'pedido': args.pedido,
             'tabela_confirmada': tabela_confirmada,
         })
-        print(f"Registrado: \"{args.pedido}\" -> {tabela_confirmada}")
+        if gravado:
+            print(f"Registrado: \"{args.pedido}\" -> {tabela_confirmada}")
+        else:
+            print(f"NÃO registrado (a pasta da instância não aceita gravação nesta cópia): "
+                  f"\"{args.pedido}\" -> {tabela_confirmada}", file=sys.stderr)
+        lembretes.lembrar_salvar_no_cartao()
         return
 
     if args.comando == 'checar-modulos':
@@ -97,12 +103,14 @@ def executar(args):
                 print(json.dumps(resultado, indent=2, ensure_ascii=False))
             else:
                 print(formatar_busca_texto(resultado))
+            lembretes.lembrar_buscar_no_cartao(args.pedido)
         elif args.comando == 'detalhar':
             resultado = engine.detalhar(args.tabelas)
             if args.json:
                 print(json.dumps(resultado, indent=2, ensure_ascii=False))
             else:
                 print(formatar_detalhar_texto(resultado))
+            lembretes.lembrar_confirmar('schema')
     finally:
         engine.fechar()
 

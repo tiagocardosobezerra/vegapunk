@@ -58,6 +58,7 @@ import difflib
 import json
 import os
 import re
+import shutil
 import sqlite3
 import subprocess
 import sys
@@ -142,8 +143,24 @@ def _agora():
     return datetime.datetime.now().isoformat(timespec='seconds')
 
 
+ONDE_FUNCIONA = ('o Memory Card só funciona onde há o GitHub CLI (`gh`) autenticado e a pasta do cartão: '
+                 'o Claude Code (ou um terminal) na máquina do usuário. Numa sandbox, como a do claude.ai, '
+                 'ele não está disponível.')
+
+
+def _exigir_gh():
+    """Recusa com explicação clara se o `gh` não existe ou não está autenticado."""
+    if shutil.which('gh') is None:
+        raise EnvioRecusado('GitHub CLI (`gh`) não encontrado. ' + ONDE_FUNCIONA)
+    if subprocess.run(['gh', 'auth', 'status'], capture_output=True).returncode != 0:
+        raise EnvioRecusado('o `gh` não está autenticado (rode `gh auth login`). ' + ONDE_FUNCIONA)
+
+
 def _rodar(args, cwd=None):
-    r = subprocess.run(args, cwd=cwd, capture_output=True, text=True, encoding='utf-8')
+    try:
+        r = subprocess.run(args, cwd=cwd, capture_output=True, text=True, encoding='utf-8')
+    except FileNotFoundError:
+        raise EnvioRecusado(f'`{args[0]}` não encontrado. ' + ONDE_FUNCIONA)
     if r.returncode != 0:
         raise EnvioRecusado(f'{" ".join(args[:3])} falhou: {(r.stderr or r.stdout).strip()}')
     return r.stdout
@@ -157,6 +174,7 @@ def conferir_privado():
     """Recusa se o cartão não for privado no GitHub (a não ser que o usuário
     o tenha criado público de propósito, com `iniciar --publico`)."""
     c = config()
+    _exigir_gh()
     vis = _visibilidade(c['repo'])
     if vis != 'PRIVATE' and not c['publico']:
         raise EnvioRecusado(f'{c["repo"]} está {vis}: o Memory Card só aceita envio com o repositório PRIVATE')
@@ -166,9 +184,14 @@ def preparar_pasta(atualizar=True):
     c = config()
     pasta = c['pasta']
     if not os.path.isdir(os.path.join(pasta, '.git')):
+        _exigir_gh()
         _rodar(['gh', 'repo', 'clone', c['repo'], pasta])
     elif atualizar:
-        _rodar(['git', 'pull', '--ff-only', '--quiet'], cwd=pasta)
+        try:
+            _rodar(['git', 'pull', '--ff-only', '--quiet'], cwd=pasta)
+        except EnvioRecusado as e:
+            # sem rede ainda dá para ler a cópia local; o envio confere tudo de novo antes do push
+            print(f'AVISO: não consegui atualizar o cartão ({e}); usando a cópia local.', file=sys.stderr)
     return pasta
 
 
@@ -187,6 +210,7 @@ def iniciar(repo, pasta=None, publico=False):
     na instância. Devolve a configuração."""
     if not _REPO.match(repo or ''):
         raise EnvioRecusado(f'repositório inválido: {repo!r} (use DONO/NOME)')
+    _exigir_gh()
     existe = subprocess.run(['gh', 'repo', 'view', repo, '--json', 'name'], capture_output=True).returncode == 0
     if not existe:
         _rodar(['gh', 'repo', 'create', repo, '--public' if publico else '--private',

@@ -47,6 +47,7 @@ sys.path.insert(0, AQUI)
 sys.path.insert(0, os.path.dirname(AQUI))   # raiz da skill: pacote `dominios`
 
 from dominios.formulas import conhecimento as kb  # noqa: E402
+from dominios import lembretes  # noqa: E402
 from dominios.formulas import historico  # noqa: E402
 from dominios.formulas.validador import validar  # noqa: E402
 from dominios.formulas.compositor import compor, explicar, formatar  # noqa: E402
@@ -171,9 +172,12 @@ def executar(a, erro):
         reg = {'tipo': 'confirmacao', 'pedido': a.pedido, 'contexto': a.contexto, 'funcao': nomes[0]}
         if len(nomes) > 1:
             reg['funcoes'] = nomes
-        historico.registrar(reg, a.raiz_pacotes)
-        print(f'Confirmado: "{a.pedido}" -> {", ".join(nomes)} ({a.contexto or "sem contexto"}). '
-              f'Registrado em {historico.caminho(a.raiz_pacotes)}')
+        if historico.registrar(reg, a.raiz_pacotes):
+            print(f'Confirmado: "{a.pedido}" -> {", ".join(nomes)} ({a.contexto or "sem contexto"}). '
+                  f'Registrado em {historico.caminho(a.raiz_pacotes)}')
+        else:
+            print(f'NÃO registrado (a pasta da instância não aceita gravação nesta cópia): "{a.pedido}" -> '
+                  f'{", ".join(nomes)}', file=sys.stderr)
         return 0
 
     if a.cmd == 'detalhar':
@@ -190,6 +194,7 @@ def executar(a, erro):
         if enriquecer:
             out = enriquecer(out)
         _json(out) if como_json else print('\n\n'.join(_texto_detalhe(f) for f in out))
+        lembretes.lembrar_confirmar('formulas')
         return 0 if all(o.get('encontrada', True) for o in out) else 1
 
     if a.cmd in ('validar', 'explicar'):

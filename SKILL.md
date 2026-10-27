@@ -1,6 +1,6 @@
 ---
 name: vegapunk
-description: "Especialista em T-SQL para Microsoft SQL Server, com um motor de descoberta de schema por linguagem natural plugável em qualquer base de metadados — a base Punk Records da instância local (`egghead/`) guarda só a estrutura do banco do usuário, importada por ele, e é pensada para bases com tabelas nomeadas por código interno em vez de nomes descritivos (ex.: `T000123`, não `FUNCIONARIOS`). Use sempre que o pedido envolver descoberta de schema por nome de domínio de negócio (funcionários, folha de pagamento, ponto eletrônico, cadastros gerais), e também para qualquer trabalho geral de T-SQL/SQL Server: escrever, otimizar ou depurar queries, CTEs, window functions, PIVOT/MERGE/APPLY, análise de plano de execução, indexação, stored procedures, ou arquivos .sql. Nunca adivinhe nomes de tabela/coluna de memória. Também cria, corrige, valida e explica FÓRMULAS de sistema via dicionário de funções plugável (punk_records/pacotes), sem nunca inventar função ou sintaxe."
+description: "Especialista em T-SQL para Microsoft SQL Server, com um motor de descoberta de schema por linguagem natural plugável em qualquer base de metadados — a base Punk Records da instância local (`egghead/`) guarda só a estrutura do banco do usuário, importada por ele, e é pensada para bases com tabelas nomeadas por código interno em vez de nomes descritivos (ex.: `T000123`). Use sempre que o pedido envolver descoberta de schema por nome de domínio de negócio (funcionários, folha de pagamento, ponto eletrônico, cadastros gerais), e também para qualquer trabalho geral de T-SQL/SQL Server: escrever, otimizar ou depurar queries, CTEs, window functions, PIVOT/MERGE/APPLY, plano de execução, indexação, stored procedures, ou arquivos .sql. Nunca adivinhe nomes de tabela/coluna de memória. Também cria, corrige, valida e explica FÓRMULAS de sistema via dicionário de funções plugável, sem nunca inventar função ou sintaxe. Salva, versiona e procura relatórios prontos no Memory Card do usuário."
 ---
 
 # Vegapunk
@@ -14,7 +14,9 @@ e se enriquecem quando estão juntos:
   de um dicionário de funções documentado.
 
 Todos os comandos rodam da pasta da skill e entram pela **Stella**
-(`stella.py`). Rode `python3 stella.py status` para ver o que está
+(`stella.py`). Os comandos aqui usam `python3`; se ele não existir (no
+Windows o `python3` costuma ser só o atalho da Microsoft Store e responde
+"Python was not found"), use `python` no lugar, sem perguntar. Rode `python3 stella.py status` para ver o que está
 instalado nesta cópia (versão e tamanho da base, pacotes de fórmulas) — é a
 fonte dos números da instância; nenhum número fixo é repetido aqui.
 
@@ -86,6 +88,17 @@ são extensões só desta instância, que nunca saem na distribuição.
     3, ofereça primeiro reaproveitar uma consulta já cadastrada (o SQL de
     apoio da Stella); só se nenhuma servir, a consulta nova, com a instrução
     de cadastro manual: o motor nunca grava no sistema de origem.
+12. **Memory Card: procure antes, ofereça depois.** Se a instância tem um
+    cartão configurado (`egghead/memory_card.json`), antes de escrever um
+    relatório novo rode `satelites/memory_card.py buscar` e ofereça
+    reaproveitar o que servir; depois de entregar um relatório aprovado,
+    ofereça salvar (prévia do `enviar`; `--confirmar` só com o "sim"). Uma
+    mudança num relatório salvo pede `--motivo`. O cartão só funciona onde
+    há o `gh` autenticado e a pasta do cartão (o Claude Code na máquina do
+    usuário); fora disso, diga isso em vez de prometer o envio.
+13. **Leia os `LEMBRETE:` da saída.** Os comandos imprimem em stderr o
+    próximo passo que não pode ser esquecido (o `confirmar`, o Memory
+    Card, a conferência depois de mudar a base). Siga-os.
 
 ## Para onde ir
 

@@ -651,6 +651,9 @@ def registrar_candidata(saida, caminho):
         reg['sql_literais'] = literais(q.get('sql'))
     reg['id'] = hashlib.sha1(json.dumps({k: v for k, v in reg.items() if k != 'data'}, ensure_ascii=False,
                                         sort_keys=True).encode('utf-8')).hexdigest()[:12]
-    with open(caminho, 'a', encoding='utf-8') as fh:
-        fh.write(json.dumps(reg, ensure_ascii=False) + '\n')
+    try:
+        with open(caminho, 'a', encoding='utf-8') as fh:
+            fh.write(json.dumps(reg, ensure_ascii=False) + '\n')
+    except OSError:
+        return None   # instância só de leitura: a solução sai, só não fica como candidata
     return reg['id']

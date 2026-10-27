@@ -47,14 +47,14 @@ def _rotacionar_historico_se_necessario(caminho: str) -> None:
         pass  # best-effort — ver registrar_uso
 
 
-def registrar_uso(db_path: str, registro: Dict) -> None:
+def registrar_uso(db_path: str, registro: Dict) -> bool:
     """Grava uma linha de log (JSONL) por chamada de `buscar` ou
     `confirmar`. Best-effort: uma falha aqui (disco cheio, permissão)
     nunca deve derrubar o fluxo principal da skill, por isso o
     try/except silencioso — perder uma linha de telemetria é aceitável,
     quebrar uma consulta do usuário por causa dela não é. Faz rotação
     (ver `_rotacionar_historico_se_necessario`) antes de gravar, para o
-    arquivo não crescer sem limite."""
+    arquivo não crescer sem limite. Devolve False se não conseguiu gravar."""
     registro = dict(registro)
     registro['timestamp'] = datetime.now(timezone.utc).isoformat()
     caminho = _caminho_historico(db_path)
@@ -63,7 +63,8 @@ def registrar_uso(db_path: str, registro: Dict) -> None:
         with open(caminho, 'a', encoding='utf-8') as f:
             f.write(json.dumps(registro, ensure_ascii=False) + '\n')
     except OSError:
-        pass
+        return False
+    return True
 
 
 def ler_historico_confirmado(db_path: str) -> List[Dict]:

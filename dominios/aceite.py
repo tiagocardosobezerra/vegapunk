@@ -79,9 +79,12 @@ def aceitar(pasta, cid, observacao=None):
     reg = dict(c, tipo='aceita', aceita_em=datetime.datetime.now().isoformat(timespec='seconds'))
     if observacao:
         reg['observacao_do_usuario'] = observacao
-    with open(os.path.join(pasta, ARQUIVO_ACEITAS), 'a', encoding='utf-8') as f:
-        f.write(json.dumps(reg, ensure_ascii=False) + '\n')
-    _virar_caso(pasta, reg)
+    try:
+        with open(os.path.join(pasta, ARQUIVO_ACEITAS), 'a', encoding='utf-8') as f:
+            f.write(json.dumps(reg, ensure_ascii=False) + '\n')
+        _virar_caso(pasta, reg)
+    except OSError as e:
+        return None, f'não foi possível gravar na instância ({e.strerror}): a pasta não aceita gravação nesta cópia'
     return reg, None
 
 

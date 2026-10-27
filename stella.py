@@ -320,7 +320,13 @@ def _solucionar(a):
         return 2
     if not a.sem_registro:
         s['candidata'] = solucao.registrar_candidata(s, solucao.caminho_candidatas(db))
+        if s['candidata'] is None:
+            print('AVISO: a solução não foi registrada como candidata (a pasta da instância não aceita gravação '
+                  'nesta cópia); o aceite não fica disponível.', file=sys.stderr)
     print(json.dumps(s, ensure_ascii=False, indent=1)) if a.json else print(_texto_solucao(s))
+    if s.get('sql'):
+        from dominios import lembretes
+        lembretes.lembrar_salvar_no_cartao()
     f = s.get('formula')
     q = s.get('sql')
     return 1 if (f and not f['valida']) or (q and q['erros']) else 0

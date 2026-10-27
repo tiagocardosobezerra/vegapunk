@@ -643,3 +643,25 @@ batem com as constraints declaradas em 2.066 de 2.066 pares compostos.
   `egghead/termos_proibidos.json` lista palavras ou expressões (ex.: o
   repositório do cartão) que a checagem de nomes recusa na superfície, em
   qualquer caixa e com qualquer separador.
+
+## Lembretes do fluxo e cópias só de leitura (27/10/2026)
+
+- **`dominios/lembretes.py`**: o motor escreve o próximo passo que não pode
+  ser esquecido, numa linha `LEMBRETE:` em stderr (a saída em JSON e o que o
+  Atlas compara não mudam). O `detalhar` dos dois domínios lembra do
+  `confirmar` no fim do fluxo: nos logs, só 1 de 9 buscas de schema tinha
+  sido confirmada. Com um Memory Card configurado, o `buscar` do schema
+  lembra de procurar no cartão, o `confirmar` do schema e o `solucionar` com
+  SQL lembram de oferecer salvar, e o `importar`, o `enriquecer` e o
+  `atualizar --aplicar` do York lembram do `conferir`.
+- **Regras 12 e 13 do `SKILL.md`** (Memory Card; ler os `LEMBRETE:`), a
+  descrição da skill cita o Memory Card e uma nota manda usar `python` onde
+  `python3` não existe (Windows).
+- **Instância só de leitura não derruba o fluxo.** O log de fórmulas, a
+  candidata do `solucionar` e o aceite deixam de quebrar quando a pasta não
+  aceita gravação: o log é perdido, a solução sai sem candidata (com aviso)
+  e o aceite recusa explicando. O `confirmar` diz quando não registrou.
+- **Memory Card fora do lugar**: sem `gh`, sem autenticação ou sem o
+  comando, a recusa diz onde o cartão funciona; sem rede, `catalogo` e
+  `buscar` usam a cópia local.
+

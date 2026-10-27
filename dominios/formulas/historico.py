@@ -45,12 +45,19 @@ def _rotacionar(arq):
 
 
 def registrar(registro, raiz_conhecimento=None):
+    """Best-effort, como o log do schema: numa cópia em que a instância não
+    aceita gravação, perder a linha é aceitável e derrubar o fluxo não é.
+    Devolve False se não conseguiu gravar."""
     arq = caminho(raiz_conhecimento)
-    os.makedirs(os.path.dirname(arq), exist_ok=True)
-    _rotacionar(arq)
     registro = dict(registro, timestamp=datetime.now(timezone.utc).isoformat())
-    with open(arq, 'a', encoding='utf-8') as f:
-        f.write(json.dumps(registro, ensure_ascii=False) + '\n')
+    try:
+        os.makedirs(os.path.dirname(arq), exist_ok=True)
+        _rotacionar(arq)
+        with open(arq, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(registro, ensure_ascii=False) + '\n')
+    except OSError:
+        return False
+    return True
 
 
 def ler_confirmacoes(raiz_conhecimento=None):

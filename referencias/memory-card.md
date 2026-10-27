@@ -19,6 +19,15 @@ distribuído.
   (`egghead/punk_records.db`). Sem ela, o resto funciona e a conferência
   avisa que não pôde rodar.
 
+## Onde funciona
+
+O cartão é lido e gravado com o `gh` e o `git` na sua máquina. Funciona no
+Claude Code (ou num terminal) da máquina onde o cartão foi criado. Numa
+sandbox, como a do claude.ai, não há o `gh` autenticado nem a pasta do
+cartão: os comandos recusam com uma mensagem que diz isso, e o Claude avisa
+em vez de prometer o envio. Sem rede, `catalogo` e `buscar` usam a cópia
+local do cartão (com um aviso); o envio sempre precisa da rede.
+
 ## Criar o cartão (uma vez)
 
 ```bash
@@ -158,6 +167,12 @@ coluna citada só dentro de uma subconsulta com outro apelido pode escapar.
   checagem de nomes reprova se ele citar o schema real.
 
 ## Como o Claude usa
+
+Com um cartão configurado, os comandos da Stella e do York lembram o Claude
+do próximo passo, com uma linha `LEMBRETE:` em stderr: o `buscar` do schema
+lembra de procurar no cartão, o `confirmar` e o `solucionar` com SQL lembram
+de oferecer salvar, e o `importar`, o `enriquecer` e o `atualizar --aplicar`
+do York lembram de rodar o `conferir`.
 
 - **Antes de escrever um relatório novo**, procura no cartão (`buscar`). Se
   algo servir, oferece reaproveitar ou fazer uma variação. É a escada: a

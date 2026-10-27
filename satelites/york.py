@@ -458,12 +458,14 @@ def main(argv=None):
     a = ap.parse_args(argv)
     if a.acao in ('ingerir', 'normalizar', 'status'):
         return _pacote(a)
-    if a.acao == 'importar':
-        return _importar(a)
+    if a.acao in ('importar', 'enriquecer') or (a.acao == 'atualizar' and a.aplicar):
+        r = {'importar': _importar, 'enriquecer': _enriquecer, 'atualizar': _atualizar}[a.acao](a)
+        if not r:
+            from dominios import lembretes
+            lembretes.lembrar_conferir_cartao()
+        return r
     if a.acao == 'gravar-sinonimos':
         return _gravar_sinonimos(a)
-    if a.acao == 'enriquecer':
-        return _enriquecer(a)
     if a.acao == 'compilar-mapa':
         return _compilar_mapa(a)
     if a.acao == 'corrigir-direcao':
