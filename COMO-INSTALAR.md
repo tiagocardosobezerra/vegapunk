@@ -48,6 +48,20 @@ allowlist, a distribuição falha e a pasta é apagada. O repositório de
 trabalho nunca vai para um remoto: rode `python3 ferramentas/instalar_hooks.py`
 (da raiz do repositório) para instalar o hook que recusa qualquer push.
 
+## Memory Card (opcional)
+
+Para salvar e versionar os seus relatórios num repositório seu no GitHub,
+instale o [GitHub CLI](https://cli.github.com/), autentique (`gh auth login`)
+e crie o cartão uma vez:
+
+```bash
+python3 satelites/memory_card.py iniciar --repo SEU_USUARIO/memory-card
+```
+
+O cartão é criado privado e a configuração fica em `egghead/memory_card.json`,
+fora do git e da distribuição. Guia em
+[referencias/memory-card.md](referencias/memory-card.md).
+
 ## Conferir a instalação
 
 ```bash

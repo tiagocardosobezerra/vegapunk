@@ -22,6 +22,7 @@ Vegapunk is a Claude Code skill for people who work with Microsoft SQL Server, e
 * **Writes system formulas without making things up.** It creates, fixes, validates and explains formulas using only documented functions and syntax. Anything without documented support shows up as a gap, with the reason.
 * **Solves requests with several parts.** "Add up this month's overtime hours and show me which table it comes from": it splits each part, solves them one by one and tells you what you still need to fill in.
 * **Never touches your data.** Only the structure comes in from the database: names, descriptions, types and links. No business rows, no values.
+* **Keeps your reports on a Memory Card.** Like a video game memory card: each finished report becomes a save in your own private GitHub repository, with an article explaining what it does, a version, the reason for each change, and a schema check when the database changes.
 * **Knows T-SQL for real.** Tuning, execution plans, indexes, CTEs, window functions, PIVOT/MERGE/APPLY, transactions and security, checked against Microsoft's official documentation when a feature depends on the version.
 
 ## What it looks like
@@ -149,6 +150,17 @@ python3 satelites/york.py ingerir --pacote punk_records/pacotes/publico/<pack>
 
 `python3 stella.py status` lists the installed packs. Your company's internal rules and functions go in the private layer (`punk_records/pacotes/privado/`, ignored by git), starting from the commented template in `punk_records/pacotes/modelo-privado/`. Details in [`referencias/formulas.md`](referencias/formulas.md) (in Portuguese).
 
+### Memory Card: your saved reports
+
+A finished report should not get lost in a folder. The Memory Card saves each one in a GitHub repository of **your own** (private by default), organized by category, section and article:
+
+```bash
+gh auth login                                                         # once
+python3 satelites/memory_card.py iniciar --repo YOUR_USER/memory-card    # creates the private card
+```
+
+Then just ask Claude: "save this report to the Memory Card". It shows a preview (the article, the version, the diff of a change, the check of tables and columns against the schema) and only sends it after your "yes". Before writing a new report, it searches the card for something similar. Nothing from your card ships with Vegapunk: which card is yours lives only in your instance. Full guide (in Portuguese) in [`referencias/memory-card.md`](referencias/memory-card.md).
+
 ## How it works inside
 
 <img width="100%" alt="How Vegapunk finds the right tables and functions" src="assets/vegapunk-sonar-en.svg" />
@@ -162,6 +174,7 @@ python3 satelites/york.py ingerir --pacote punk_records/pacotes/publico/<pack>
 | **Shaka** | composes, validates and explains formulas |
 | **Atlas** and **Pythagoras** | the guards: identical behavior on every change, measured quality and checked isolation |
 | **Edison** and **Lilith** | suggest synonyms and generate synthetic cases for calibration |
+| **Memory Card** | saves, versions, searches and checks your reports against the schema, in a repository of your own |
 
 To check the installation at any time:
 
@@ -182,7 +195,7 @@ vegapunk/
 ├── AVISO.md               # Notice about third-party data
 ├── LICENSE                # MIT License
 ├── stella.py              # Front door
-├── satelites/             # York, Shaka, Atlas, Pythagoras, Edison, Lilith
+├── satelites/             # York, Shaka, Atlas, Pythagoras, Edison, Lilith, Memory Card
 ├── nomi_nomi_no_mi/       # Schema discovery engine
 ├── dominios/              # Schema, formulas and solutions
 ├── punk_records/          # Import, migrations, extraction queries and packs

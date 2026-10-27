@@ -52,8 +52,9 @@ TAMANHO_TRECHO = 12
 
 # Superfície distribuível, por regra (ver `_superficie_distribuivel`).
 _EXT_SUPERFICIE = ('.py', '.md', '.json', '.txt', '.sql', '.svg')
-# Pastas de instância local: nada delas é distribuível.
-_PASTAS_INSTANCIA = ('egghead',)
+# Pastas de instância local: nada delas é distribuível. `pessoal` guarda as
+# extensões que só existem na versão pessoal (ver SKILL.md).
+_PASTAS_INSTANCIA = ('egghead', 'pessoal')
 # Arquivos sem extensão de texto que também saem, pelo nome: a licença, os
 # .gitignore (o da camada privada é a proteção que a checagem 4 exige) e o
 # .gitattributes (fim de linha LF em todo checkout).

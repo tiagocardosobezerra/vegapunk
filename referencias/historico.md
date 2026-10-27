@@ -622,3 +622,24 @@ batem com as constraints declaradas em 2.066 de 2.066 pares compostos.
   atual (cópia de segurança e transação; ligações intactas). Os pesos ficam
   como constantes de módulo (`PESO_FILHAS`, `PESO_CONEXOES`, `PESO_PAIS` em
   `punk_records/schema.py`).
+
+## Memory Card (27/10/2026)
+
+- **`satelites/memory_card.py`**: cartão de memória dos relatórios. Cada
+  relatório pronto vira um save num repositório git do próprio usuário no
+  GitHub (privado por padrão), em `saves/<categoria>/<secao>/<artigo>/`, com
+  o artigo (`README.md`), o `relatorio.sql` e a `ficha.json`. Comandos
+  `iniciar`, `catalogo`, `buscar`, `enviar` (prévia com diff e `--confirmar`;
+  `--motivo` obrigatório numa versão nova), `marcar` (status `rascunho` ou
+  `em-uso`) e `conferir` (tabelas e colunas na Punk Records, só leitura).
+  Guia em [memory-card.md](memory-card.md).
+- **A funcionalidade é do motor; o cartão é do usuário.** Qual é o cartão
+  fica na instância (`egghead/memory_card.json`), fora do git e da
+  distribuição. Antes e depois de cada commit a visibilidade é conferida no
+  GitHub, e o envio é recusado se o cartão não for privado.
+- **`pessoal/` é pasta de instância** (`_PASTAS_INSTANCIA`): extensões que só
+  existem na versão pessoal nunca entram na superfície distribuível.
+- **Palavras proibidas da instância**: a chave `palavras` de
+  `egghead/termos_proibidos.json` lista palavras ou expressões (ex.: o
+  repositório do cartão) que a checagem de nomes recusa na superfície, em
+  qualquer caixa e com qualquer separador.

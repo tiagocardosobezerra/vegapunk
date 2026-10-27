@@ -12,7 +12,7 @@ nomeiam ação.
 <skill>/
 ├── SKILL.md                  roteador curto
 ├── stella.py                 entrada única do fluxo
-├── satelites/                york, edison, shaka, pythagoras, lilith, atlas
+├── satelites/                york, edison, shaka, pythagoras, lilith, atlas, memory_card
 ├── nomi_nomi_no_mi/          núcleo do schema: texto, índice, busca, grafo, saída, manutenção, histórico
 ├── dominios/
 │   ├── schema/               configuração e regras do domínio SQL
@@ -26,6 +26,7 @@ nomeiam ação.
 ├── casos/                    só públicos e fictícios: casos do schema, fixtures, goldens fictícios
 ├── referencias/              T-SQL, schema, fórmulas, fluxos, nomes, histórico
 ├── testes/                   unittest, linha de base, hash do código do schema
+├── pessoal/                  (só na versão pessoal) extensões da instância, fora da distribuição
 └── egghead/                  instância local, fora do controle de versão
 ```
 
@@ -44,6 +45,7 @@ nomeiam ação.
 | **Pythagoras** | avaliação e calibração dos dois domínios | `satelites/pythagoras.py` |
 | **Lilith** | casos sintéticos, nunca casos de validação | `satelites/lilith.py` |
 | **Atlas** | golden de regressão e isolamento: o portão de cada fase | `satelites/atlas.py` |
+| **Memory Card** | o cartão de memória dos relatórios: salvar, versionar, buscar e conferir no schema, num repositório do usuário. Exceção à regra de personagem: o nome é o da ideia (o memory card do videogame) | `satelites/memory_card.py` |
 
 ## Comandos de manutenção (satélites)
 
@@ -58,6 +60,8 @@ python3 satelites/pythagoras.py calibrar --dominio schema --db egghead/punk_reco
 python3 satelites/lilith.py gerar --db egghead/punk_records.db --saida egghead/casos_sinteticos.jsonl
 python3 satelites/atlas.py verificar [--db egghead/punk_records.db] [--dominio schema|formulas]
 python3 satelites/atlas.py isolamento [--rapido]
+python3 satelites/memory_card.py iniciar --repo DONO/NOME
+python3 satelites/memory_card.py catalogo|buscar|enviar|marcar|conferir   # ver referencias/memory-card.md
 ```
 
 Ao criar um script novo, escolha o nome pelo papel (traço do personagem ↔

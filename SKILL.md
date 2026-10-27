@@ -23,6 +23,9 @@ fonte dos números da instância; nenhum número fixo é repetido aqui.
 > `egghead/`, os CSVs de origem do schema nem `punk_records/pacotes/privado/`
 > em nenhum repositório, issue ou canal. Ver `AVISO.md`.
 
+Se esta cópia tiver a pasta `pessoal/`, leia `pessoal/LEIA.md` no início:
+são extensões só desta instância, que nunca saem na distribuição.
+
 ## Regras que valem sempre
 
 1. **Nunca adivinhe nome de tabela ou coluna.** Use só o que o `buscar` e o
@@ -92,6 +95,7 @@ fonte dos números da instância; nenhum número fixo é repetido aqui.
 | tabelas/colunas de uma base cadastrada, domínio de negócio (RH, folha, ponto, cadastros), "escreva uma consulta" | `stella.py buscar --dominio schema "<pedido>"` → `detalhar --dominio schema TAB...` → escrever o SQL → `confirmar --dominio schema "<pedido>" TAB` | [referencias/fluxo-schema.md](referencias/fluxo-schema.md) |
 | criar, corrigir, validar ou explicar uma fórmula de sistema | `stella.py contextos` → `buscar --dominio formulas "<pedido>" --contexto CTX` → `detalhar` → `compor`/`validar` → `explicar` → `confirmar --dominio formulas` | [referencias/fluxo-formulas.md](referencias/fluxo-formulas.md) |
 | argumento que é código de um cadastro (evento, cargo, consulta...) | o `detalhar` de fórmulas traz a ligação do parâmetro com a tabela e a coluna e o SQL de apoio para o usuário achar o código; nunca invente o código | [referencias/fluxo-formulas.md](referencias/fluxo-formulas.md), Passo 2 |
+| guardar um relatório pronto, versionar uma mudança, procurar um relatório já feito (Memory Card) | antes de escrever um relatório novo: `satelites/memory_card.py buscar`; relatório pronto e aprovado: ofereça salvar, mostre a prévia do `enviar` e só com o "sim" use `--confirmar`; mudança pede `--motivo` e o diff na prévia; sem cartão configurado, aponte para o `iniciar` | [referencias/memory-card.md](referencias/memory-card.md) |
 | T-SQL geral (otimizar, depurar, CTE, window, PIVOT/MERGE/APPLY, plano, índice, procedure, .sql) | instruções gerais, convenções e verificação ao vivo | [referencias/tsql.md](referencias/tsql.md) |
 | base vazia ou desatualizada, sinônimos, calibração, isolamento | satélites de manutenção (York, Edison, Pythagoras, Lilith, Atlas) | [referencias/nomes.md](referencias/nomes.md) |
 
@@ -107,5 +111,6 @@ dados", em vez de inventar nomes.
 - [referencias/fluxo-schema.md](referencias/fluxo-schema.md) e [referencias/schema.md](referencias/schema.md): descoberta de schema, base Punk Records, import, arquitetura e limitações
 - [referencias/fluxo-formulas.md](referencias/fluxo-formulas.md) e [referencias/formulas.md](referencias/formulas.md): fórmulas, dicionário, isolamento público × privado, ingestão
 - [referencias/tsql.md](referencias/tsql.md), [patterns.md](referencias/patterns.md), [performance.md](referencias/performance.md), [security.md](referencias/security.md), [data-types.md](referencias/data-types.md), [transactions.md](referencias/transactions.md): T-SQL
+- [referencias/memory-card.md](referencias/memory-card.md): cartão de memória dos relatórios (salvar, versionar, buscar, conferir no schema)
 - [referencias/nomes.md](referencias/nomes.md): estrutura da skill, papéis e comandos de manutenção
 - [referencias/historico.md](referencias/historico.md): histórico de versões e decisões

@@ -57,6 +57,25 @@ class TestNomesReais(unittest.TestCase):
         self.assertIn('1 termos da lista da instância', r['detalhe'])
         self.assertNotIn('QZSEMPREFIXO', r['detalhe'])
 
+    def test_palavra_da_lista_da_instancia_e_recusada_em_qualquer_caixa(self):
+        lista = os.path.join(self._tmp.name, 'termos_proibidos.json')
+        with open(lista, 'w', encoding='utf-8') as f:
+            f.write('{"palavras": ["qzpessoal"]}')
+        r = verificar_nomes_reais(SKILL, [self._doc('Linha 1\nVeja a Qzpessoal e a qzpessoal.\n')], self.db)
+        self.assertFalse(r['ok'])
+        self.assertIn('doc.md:2 (2)', r['detalhe'])
+        self.assertNotIn('qzpessoal', r['detalhe'].lower())
+        self.assertTrue(verificar_nomes_reais(SKILL, [self._doc('Qzpessoalx não é a palavra.\n')], self.db)['ok'])
+
+    def test_expressao_da_lista_vale_com_qualquer_separador_e_a_parte_sozinha_nao(self):
+        lista = os.path.join(self._tmp.name, 'termos_proibidos.json')
+        with open(lista, 'w', encoding='utf-8') as f:
+            f.write('{"palavras": ["qzmeu cartao"]}')
+        r = verificar_nomes_reais(SKILL, [self._doc('QZMEU CARTAO, qzmeu-cartao, qzmeu_cartao e qzmeucartao.\n')],
+                                  self.db)
+        self.assertIn('doc.md:1 (4)', r['detalhe'])
+        self.assertTrue(verificar_nomes_reais(SKILL, [self._doc('qzmeu sozinho; cartao sozinho.\n')], self.db)['ok'])
+
     def test_sem_instancia_nao_ha_o_que_comparar(self):
         r = verificar_nomes_reais(SKILL, [self._doc('QZTABREAL\n')], os.path.join(self._tmp.name, 'nao.db'))
         self.assertTrue(r['ok'])

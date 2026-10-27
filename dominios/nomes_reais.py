@@ -13,7 +13,9 @@ são nome de coluna (AVISO, SERVER...) não entram.
 Lista extra da instância (`egghead/termos_proibidos.json`, fora do git):
 nomes reais que a régua automática não pega (coluna sem prefixo técnico,
 nome achado à mão). Cada termo vale como proibido em qualquer lugar da
-superfície.
+superfície. A chave `palavras` do mesmo arquivo lista palavras ou expressões
+que só existem na instância (extensões pessoais): valem em qualquer caixa e,
+numa expressão, com qualquer separador entre as partes.
 
 A saída diz só arquivo, linha e contagem, nunca o nome. Sem instância (uma
 cópia distribuída), não há o que comparar: a checagem passa com essa nota.
@@ -88,6 +90,21 @@ def termos_proibidos(caminho):
         return {t.strip().upper() for t in json.load(f).get('termos', []) if len(t.strip()) >= 3}
 
 
+def palavras_proibidas(caminho):
+    """Palavras ou expressões da chave `palavras` da lista da instância (maiúsculas), ou set()."""
+    import json
+    if not caminho or not os.path.exists(caminho):
+        return set()
+    with open(caminho, encoding='utf-8') as f:
+        return {t.strip().upper() for t in json.load(f).get('palavras', []) if len(t.strip()) >= 3}
+
+
+def _padrao_da_palavra(palavra):
+    """Expressão em qualquer caixa e com qualquer separador entre as partes
+    (`a b`, `a-b`, `a_b`, `ab`)."""
+    return re.compile(r'\b' + r'[\W_]*'.join(map(re.escape, re.findall(r'[^\W_]+', palavra))) + r'\b', re.I)
+
+
 def verificar_nomes_reais(raiz_skill, arquivos, db_path=None, termos_path=None):
     """{verificacao, ok, detalhe} no formato do verificar_isolamento."""
     raiz_skill = os.path.abspath(raiz_skill)
@@ -97,6 +114,8 @@ def verificar_nomes_reais(raiz_skill, arquivos, db_path=None, termos_path=None):
     if termos_path is None:
         termos_path = os.path.join(os.path.dirname(os.path.abspath(db_path)), 'termos_proibidos.json')
     extras = termos_proibidos(termos_path)
+    palavras = palavras_proibidas(termos_path)
+    padroes = [_padrao_da_palavra(p) for p in palavras]
     tabelas, colunas = regua(db_path, raiz_skill)
     colunas = colunas | extras
     achados = []
@@ -109,14 +128,15 @@ def verificar_nomes_reais(raiz_skill, arquivos, db_path=None, termos_path=None):
         n, onde = 0, []
         for i, l in enumerate(linhas, 1):
             k = sum(1 for t in _TOKEN.findall(l) if t in tabelas or t in colunas)
+            k += sum(len(p.findall(l)) for p in padroes)
             if k:
                 n += k
                 onde.append(i)
         if n:
             achados.append(f'{os.path.relpath(a, raiz_skill)}:{",".join(map(str, onde[:8]))} ({n})')
     return {'verificacao': NOME, 'ok': not achados,
-            'detalhe': f'{len(tabelas)} tabelas, {len(colunas) - len(extras)} colunas técnicas e {len(extras)} termos da '
-                       f'lista da instância verificados em {len(arquivos)} arquivos'
+            'detalhe': f'{len(tabelas)} tabelas, {len(colunas) - len(extras)} colunas técnicas, {len(extras)} termos da '
+                       f'lista da instância e {len(palavras)} palavras dela verificados em {len(arquivos)} arquivos'
                        + ('; ' + '; '.join(achados[:20]) if achados else '')}
 
 
