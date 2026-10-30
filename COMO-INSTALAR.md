@@ -80,8 +80,9 @@ da raiz do repositório, sempre fora dele:
 python3 ferramentas/empacotar_privado.py --destino ~/Downloads/vegapunk-privado.zip
 ```
 
-Ele leva o motor e as instâncias, sem `.git`, testes, cópias de segurança e
-CSVs de extração (limite do claude.ai: 200 arquivos), e grava um
+Ele leva o motor e as instâncias, sem `.git`, testes, cópias de segurança,
+CSVs de extração e os goldens do Atlas (limites do claude.ai: 200 arquivos e
+30 MB descompactados; o empacotador confere os dois), e grava um
 `VERSAO.json`: o `stella.py status` da cópia instalada mostra a versão e
 avisa quando o repositório está à frente. O zip tem a estrutura dos seus
 bancos: nunca o compartilhe.
