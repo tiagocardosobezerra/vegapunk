@@ -740,3 +740,66 @@ Claude tentou configurar uma pasta. Agora:
   `--substituir`;
 - o `stella.py status` diz quando o cartão está configurado mas não funciona
   ali; a regra 12 do `SKILL.md` proíbe o `iniciar` sem o pedido do usuário.
+
+## Várias instâncias locais (30/10/2026)
+
+Uma instância por banco: `egghead/` (a padrão) e `egghead-<nome>/`, todas
+fora do git e da distribuição. Antes, trocar de banco era só pela variável
+`VEGAPUNK_EGGHEAD`, e o conferidor do Memory Card e a trava de nomes reais
+olhavam sempre `egghead/`.
+
+- `punk_records/instancias.py`: regra única da pasta e da base ativas;
+  `--instancia NOME` no `stella.py`, `york.py`, `edison.py`, `atlas.py` e
+  `memory_card.py` aponta a pasta antes de o motor ler a variável; nome
+  inválido ou instância inexistente sai com código 2.
+- `stella.py instancias [--pedido "..."]`: lista as instâncias (descrição e
+  assuntos do `instancia.json`) e, com `--pedido`, quantos termos do pedido
+  cada base cobre e a mais provável, ou `EMPATE` (só leitura, sem log;
+  `nomi_nomi_no_mi/roteamento.py`).
+- Logs, confirmações e soluções candidatas ficam na instância usada;
+  confirmar uma tabela que só existe em outra instância avisa qual é.
+- Memory Card: um cartão para todas as instâncias irmãs; cada save guarda a
+  sua instância, a conferência usa a base dela e uma versão nova só sai da
+  mesma instância.
+- Isolamento: nenhuma `egghead-<nome>/` entra na superfície distribuível; a
+  trava de nomes reais confere contra todas as instâncias; a chave
+  `permitidos` da lista da instância tira da régua um nome real que só
+  coincide com vocabulário do motor.
+- `ferramentas/empacotar_privado.py`: zip pessoal com as instâncias, até
+  200 arquivos (limite do claude.ai), sempre fora do repositório.
+
+Medido em 7 rodadas de ponta a ponta: suíte verde, Atlas idêntico na
+fixture e na base real, mesma resposta da main em 8 pedidos, busca e
+`status` no mesmo tempo da main (com o mesmo conteúdo, n=40: +0,5% a
++1,3%), execuções paralelas iguais às seriais e nenhuma linha de log
+perdida com confirmações simultâneas.
+
+## Auditoria do motor inteiro (30/10/2026)
+
+Uma auditoria crítica, com sondagens em cópias das bases, achou falhas que
+a suíte não pegava. Corrigidas em 7 rodadas, cada uma de ponta a ponta:
+
+- **Nomes em caixa mista.** O motor passava todo nome para maiúsculas e o
+  `detalhar` não achava nenhuma tabela de uma base com nomes como `QzCadastro`;
+  sem isso, o SQL não montava JOIN algum. Agora `nome_real`/`coluna_real`
+  resolvem o nome gravado, e o SQL sai com ele.
+- **JOIN por tabela de passagem.** Duas tabelas ligadas só pela empresa ou
+  coligada saíam "pronto para rodar" (cada linha de uma cruzava com todas da
+  outra). Agora é LACUNA, e o caminho prefere a FK direta da principal; antes
+  o desempate era alfabético.
+- **Siglas.** `EPI`, `PIS`, `REP` sumiam (tokens de 4+ letras); agora uma
+  sigla em maiúsculas no pedido casa com a mesma sigla nas descrições, e o
+  índice só as carrega quando o pedido tem uma.
+- **Avaliação.** O 31/31 do Pythagoras era a fixture fictícia; numa base real
+  os casos dela contavam como falha. Agora saem da conta, e a avaliação mostra
+  ao lado o recall em 80 pedidos sintéticos da própria base (informativo).
+  Cada instância pode ter golden próprio do Atlas (`casos_atlas.json`).
+- **Edison.** Os candidatos a sinônimo saem em dois grupos: variação ou erro
+  de digitação, e palavras diferentes parecidas (contato/contrato).
+- **Roteamento.** `instancias --pedido` pesa o termo que dá nome a tabela e
+  diz quando a escolha é só provável.
+- **Versão.** O zip pessoal leva `VERSAO.json`; o `status` da cópia
+  instalada avisa quando o repositório está à frente.
+
+Em todas as rodadas: suíte verde, Atlas idêntico na fixture e nas bases
+reais, mesma resposta da main nas buscas e o mesmo tempo de busca.

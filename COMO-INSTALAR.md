@@ -48,6 +48,44 @@ allowlist, a distribuição falha e a pasta é apagada. O repositório de
 trabalho nunca vai para um remoto: rode `python3 ferramentas/instalar_hooks.py`
 (da raiz do repositório) para instalar o hook que recusa qualquer push.
 
+## Mais de um banco
+
+Cada banco tem a sua instância: `egghead/` (a padrão) e `egghead-<nome>/`,
+todas fora do git e da distribuição. Para um banco novo, crie a pasta
+`egghead-<nome>/extracao/`, extraia o catálogo dele como acima e importe com
+`--instancia <nome>`:
+
+```bash
+python3 satelites/york.py --instancia <nome> importar --dir egghead-<nome>/extracao
+python3 satelites/york.py --instancia <nome> migrar aplicar
+python3 satelites/york.py --instancia <nome> enriquecer --dir egghead-<nome>/extracao
+python3 stella.py instancias
+```
+
+Um `instancia.json` na pasta descreve o banco (`descricao` e `assuntos`).
+Para cada pedido, `python3 stella.py instancias --pedido "<pedido>"` mostra
+quantos termos dele cada base cobre e qual instância é a mais provável (só
+leitura). Todo comando da Stella e dos satélites (York, Edison, Atlas,
+Memory Card) aceita `--instancia <nome>`. O Memory Card é um só: sem
+`memory_card.json` na instância, vale o de `egghead/`. Banco com vários
+schemas e nomes de tabela repetidos entre eles: uma instância por schema.
+Detalhes em [referencias/schema.md](referencias/schema.md).
+
+## Zip pessoal (skill no claude.ai)
+
+Para usar a skill com as suas instâncias na sua conta do Claude, gere o zip
+da raiz do repositório, sempre fora dele:
+
+```bash
+python3 ferramentas/empacotar_privado.py --destino ~/Downloads/vegapunk-privado.zip
+```
+
+Ele leva o motor e as instâncias, sem `.git`, testes, cópias de segurança e
+CSVs de extração (limite do claude.ai: 200 arquivos), e grava um
+`VERSAO.json`: o `stella.py status` da cópia instalada mostra a versão e
+avisa quando o repositório está à frente. O zip tem a estrutura dos seus
+bancos: nunca o compartilhe.
+
 ## Memory Card (opcional)
 
 Para salvar e versionar os seus relatórios num repositório seu no GitHub,

@@ -14,6 +14,7 @@ import os
 from datetime import datetime, timezone
 
 from . import conhecimento as kb
+from ..anexar import anexar_linha
 
 NOME_ARQUIVO = 'shaka_log.jsonl'
 # Testes e execuções de diagnóstico apontam o log para outro lugar, para não
@@ -53,8 +54,7 @@ def registrar(registro, raiz_conhecimento=None):
     try:
         os.makedirs(os.path.dirname(arq), exist_ok=True)
         _rotacionar(arq)
-        with open(arq, 'a', encoding='utf-8') as f:
-            f.write(json.dumps(registro, ensure_ascii=False) + '\n')
+        anexar_linha(arq, json.dumps(registro, ensure_ascii=False))   # trava: processos em paralelo
     except OSError:
         return False
     return True

@@ -61,6 +61,22 @@ class TestIdentidadeConsultas(unittest.TestCase):
         self.assertEqual(antes, sha256(LOG_REAL) if os.path.exists(LOG_REAL) else None,
                          'atlas não pode gravar no log de uso')
 
+    def test_atlas_das_outras_instancias(self):
+        """Cada egghead-<nome>/ com golden próprio também não pode mudar de
+        comportamento sem decisão (só as que têm golden; sem nenhuma, passa)."""
+        for d in sorted(os.listdir(SKILL)):
+            pasta = os.path.join(SKILL, d)
+            db = os.path.join(pasta, 'punk_records.db')
+            if not (d.startswith('egghead-') and os.path.exists(db)
+                    and os.path.exists(os.path.join(pasta, 'punk_records_golden.json'))):
+                continue
+            with self.subTest(instancia=d):
+                log = os.path.join(pasta, 'punk_records_log.jsonl')
+                antes = sha256(log) if os.path.exists(log) else None
+                r = self._atlas('--db', db)
+                self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+                self.assertEqual(antes, sha256(log) if os.path.exists(log) else None)
+
 
 class TestFormulasNaoTocamConsultas(unittest.TestCase):
     @unittest.skipUnless(os.path.exists(DB_REAL), 'sem banco real')

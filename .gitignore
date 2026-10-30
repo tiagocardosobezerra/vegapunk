@@ -1,5 +1,6 @@
 # Instância local (Egghead): a sua base, logs e cópias de segurança. Nunca versionar.
 egghead/
+egghead-*/
 *.db
 *.db-journal
 *.db-wal

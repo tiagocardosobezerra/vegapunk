@@ -28,6 +28,19 @@ fonte dos números da instância; nenhum número fixo é repetido aqui.
 Se esta cópia tiver a pasta `pessoal/`, leia `pessoal/LEIA.md` no início:
 são extensões só desta instância, que nunca saem na distribuição.
 
+**Mais de uma instância.** Cada banco pode ter a sua: `egghead/` (a padrão)
+e `egghead-<nome>/`. Num pedido de schema, rode antes
+`python3 stella.py instancias --pedido "<pedido>"`: ele lista cada uma com
+a descrição e os assuntos do `instancia.json`, quantos termos do pedido a
+base dela cobre e qual é a mais provável (só leitura, sem log). Passe
+`--instancia NOME` em todo comando do fluxo (`buscar`, `detalhar`,
+`confirmar`, `solucionar`, `cartao`, e no `york.py`). Com `EMPATE` ou
+`Provável ... confirme`, ou se
+o pedido servir a mais de uma, pergunte. Diga na resposta qual instância
+foi usada. Nunca misture numa consulta nomes vindos
+de instâncias diferentes sem dizer isso ao usuário: cada instância é outro
+banco.
+
 ## Regras que valem sempre
 
 1. **Nunca adivinhe nome de tabela ou coluna.** Use só o que o `buscar` e o

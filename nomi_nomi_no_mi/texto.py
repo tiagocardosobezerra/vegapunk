@@ -78,6 +78,17 @@ def tokenizar(texto: str) -> Set[str]:
     return set(re.findall(r'\w{4,}|(?<!\d)\d{2,3}(?!\d)', normalizar(texto)))
 
 
+_RE_SIGLA = re.compile(r'\b[A-ZÀ-Ý]{2,3}\b')
+
+
+def siglas(texto: str) -> Set[str]:
+    """Siglas de 2-3 letras escritas em MAIÚSCULAS no texto original (EPI,
+    PIS, CPF), normalizadas. A tokenização comum (4+ letras) as perde; em
+    minúsculas elas se confundem com palavras curtas (de, do, mes)."""
+    achadas = _RE_SIGLA.findall(texto) if texto else ()
+    return {normalizar(s) for s in achadas} - STOP_WORDS if achadas else set()
+
+
 def extrair_termos(pedido: str) -> List[str]:
     """Extrai termos relevantes (4+ caracteres, sem stop words) de um
     pedido, e EXPANDE com sinônimos de domínio conhecidos (solução 4).
@@ -86,6 +97,7 @@ def extrair_termos(pedido: str) -> List[str]:
     texto_norm = _substituir_ordinais_por_extenso(normalizar(pedido))
     termos_norm = re.findall(r'\w{4,}|(?<!\d)\d{2,3}(?!\d)', texto_norm)
     termos = [t for t in termos_norm if t not in STOP_WORDS]
+    termos += sorted(siglas(pedido) - set(termos))   # sigla em maiúsculas no pedido também é termo
 
     # Expande sinônimos EM CADEIA (ponto fixo), não só uma passada: um
     # sinônimo pode por sua vez ter outro sinônimo (ex.: "desligamento"

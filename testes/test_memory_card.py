@@ -8,8 +8,10 @@ import json
 import os
 import tempfile
 import unittest
+from unittest import mock
 
 from _comum import SKILL
+from punk_records import instancias
 from casos.fixture_schema import gerar_fixture_db
 import memory_card as al
 from dominios.distribuicao import lista_distribuivel
@@ -30,8 +32,12 @@ class TestInstancia(unittest.TestCase):
         os.environ['VEGAPUNK_EGGHEAD'] = self._tmp.name
         for v in ('MEMORY_CARD_REPO', 'MEMORY_CARD_DIR'):
             os.environ.pop(v, None)
+        # sem cartão na instância ativa vale o da padrão: a padrão aqui é vazia
+        self._raiz = mock.patch.object(instancias, 'RAIZ_SKILL', self._tmp.name)
+        self._raiz.start()
 
     def tearDown(self):
+        self._raiz.stop()
         os.environ.pop('VEGAPUNK_EGGHEAD', None)
         self._tmp.cleanup()
 
@@ -129,6 +135,24 @@ class TestMontagem(_ComMemoryCard):
         reg = ler_historico_confirmado(self.db)[-1]
         self.assertEqual((reg['pedido'], reg['tabela_confirmada'], reg['tabelas_confirmadas'], reg['origem']),
                          ('funcionários e cargos', 'F_FUNCIONARIO', ['F_FUNCIONARIO', 'F_CARGO'], 'memory_card'))
+
+    def test_save_guarda_a_instancia_e_nao_troca_de_instancia(self):
+        e = al.montar_envio(self.arq, 'C', 'S', 'A', 'd', self.pasta, self.texto)
+        self.assertEqual(e['ficha']['instancia'], al.instancia_ativa())
+        self._gravar_sem_rede(e)
+        outra = os.path.join(self._tmp.name, 'egghead-outra')
+        os.makedirs(outra)
+        os.environ['VEGAPUNK_EGGHEAD'] = outra
+        try:
+            with self.assertRaises(al.EnvioRecusado) as ctx:
+                al.montar_envio(self.arq, 'C', 'S', 'A', None, self.pasta, motivo='de outra instância')
+            self.assertIn('--instancia', str(ctx.exception))
+        finally:
+            os.environ.pop('VEGAPUNK_EGGHEAD', None)
+
+    def test_ficha_antiga_e_da_instancia_padrao(self):
+        self.assertEqual(al.normalizar_ficha({'artigo': 'x'})['instancia'], 'egghead')
+        self.assertFalse(os.path.exists(al.base_da_instancia('qz-nao-existe')))
 
     def test_artigo_novo_sem_texto_e_recusado(self):
         with self.assertRaises(al.EnvioRecusado):

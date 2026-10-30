@@ -61,6 +61,10 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, AQUI)
 sys.path.insert(0, os.path.dirname(AQUI))   # raiz da skill: pacote `casos`
 
+if __name__ == '__main__':      # --instancia NOME antes de calcular os caminhos da instância
+    from punk_records.instancias import ativar_ou_sair  # noqa: E402
+    sys.argv[1:] = ativar_ou_sair(sys.argv[1:])
+
 GOLDEN_FIXTURE = os.path.join(AQUI, '..', 'casos', 'golden', 'golden_consultas_fixture.json')
 GOLDEN_FORMULAS_FIXTURE = os.path.join(AQUI, '..', 'casos', 'golden', 'golden_formulas_fixture.json')
 FIXTURE_FORMULAS = os.path.join(AQUI, '..', 'casos', 'fixtures', 'formulas')
@@ -101,6 +105,13 @@ def _pedidos(db_path):
     # Banco real: soma os pedidos que o próprio usuário já fez (log de uso),
     # que são a melhor amostra de comportamento real a preservar.
     if db_path:
+        # Pedidos que a instância quer proteger (`casos_atlas.json`, lista de
+        # textos, fora do git): uma instância nova não tem log de uso e os
+        # casos acima são de outro domínio.
+        proprios = os.path.join(os.path.dirname(os.path.abspath(db_path)), 'casos_atlas.json')
+        if os.path.exists(proprios):
+            with open(proprios, encoding='utf-8') as f:
+                pedidos.extend(p for p in json.load(f) if isinstance(p, str) and p.strip())
         log = os.path.join(os.path.dirname(os.path.abspath(db_path)), 'punk_records_log.jsonl')
         if os.path.exists(log):
             with open(log, encoding='utf-8') as f:

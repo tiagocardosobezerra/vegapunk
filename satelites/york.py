@@ -36,6 +36,9 @@ Uso:
     python3 york.py normalizar --pacote ../punk_records/pacotes/publico/<pacote>   # offline, a partir de bruto/
     python3 york.py status     --pacote ../punk_records/pacotes/publico/<pacote>
 
+Todo comando aceita --instancia NOME (antes ou depois da ação): o padrão de
+--db passa a ser egghead-NOME/punk_records.db (egghead = a padrão).
+
 `ingerir` é incremental: página cuja versão não mudou não é baixada de novo.
 Depois de qualquer escrita, rode `python3 atlas.py verificar` e a suíte de
 testes: atualizar a base ou a documentação não pode mudar o comportamento
@@ -389,11 +392,16 @@ def _migrar(args):
 
 
 def main(argv=None):
+    global DB_PADRAO
     for fluxo in (sys.stdout, sys.stderr):
         try:
             fluxo.reconfigure(encoding='utf-8')
         except (AttributeError, ValueError):
             pass
+    from punk_records.instancias import ativar_ou_sair
+    argv = ativar_ou_sair(sys.argv[1:] if argv is None else list(argv))
+    if os.environ.get('VEGAPUNK_EGGHEAD'):     # --instancia acabou de apontar a pasta
+        DB_PADRAO = os.path.join(os.environ['VEGAPUNK_EGGHEAD'], 'punk_records.db')
     ap = argparse.ArgumentParser(description='York — a única porta de escrita da Punk Records')
     sub = ap.add_subparsers(dest='acao', required=True)
 

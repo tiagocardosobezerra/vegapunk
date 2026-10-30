@@ -45,9 +45,13 @@ Uso:
         camadas presentes, versão e tamanho da base, pacotes de fórmulas e os
         avisos de merge entre camadas (que antes saíam em todo comando).
 
-Flags gerais (antes ou depois do comando): --json. Antes do comando:
---db BANCO (schema), --pacotes DIR, --privado DIR, --somente-publico e
---pacote ID (fórmulas).
+    python3 stella.py instancias [--json]
+        instâncias locais (egghead/ e egghead-<nome>/) e qual está ativa.
+
+Flags gerais (antes ou depois do comando): --json e --instancia NOME
+(usa egghead-NOME/; egghead = a padrão; o mesmo vale no york.py). Antes do
+comando: --db BANCO (schema), --pacotes DIR, --privado DIR,
+--somente-publico e --pacote ID (fórmulas).
 
 Manutenção fica nos satélites: York (escrita), Edison (análise),
 Pythagoras (avaliação e calibração), Lilith (casos sintéticos) e Atlas
@@ -80,7 +84,8 @@ def _status_schema(db):
     if not os.path.exists(db):
         return {'instalado': False, 'db': db}
     from punk_records.migracoes import versao_atual, MIGRACOES
-    conn = sqlite3.connect(f'file:{os.path.abspath(db)}?mode=ro', uri=True)
+    from punk_records.instancias import abrir_leitura
+    conn = abrir_leitura(db)
     try:
         contagens = {}
         for t in TABELAS_SCHEMA:
@@ -158,6 +163,83 @@ def _status_cartao():
                                                           for f in fichas)}
 
 
+def _instancias(a):
+    """Só leitura: pasta, base e contagens de cada instância local."""
+    from punk_records.instancias import listar
+    itens = listar()
+    if getattr(a, 'pedido', None):
+        from nomi_nomi_no_mi.roteamento import assuntos_no_pedido, cobertura
+        for i in itens:
+            i['cobertura'] = cobertura(i['base'], a.pedido) if i['tabelas'] is not None else None
+            i['assuntos_no_pedido'] = assuntos_no_pedido(i['assuntos'], a.pedido)
+        itens.sort(key=lambda i: (-len((i['cobertura'] or {}).get('cobertos', [])),
+                                  -len((i['cobertura'] or {}).get('em_nome_de_tabela', [])),
+                                  -len(i['assuntos_no_pedido']), i['nome']))
+    if a.json:
+        print(json.dumps(itens, ensure_ascii=False, indent=1))
+        return 0
+    if not itens:
+        print('Nenhuma instância local (egghead/ ou egghead-<nome>/).')
+        return 0
+    for i in itens:
+        marca = '*' if i['ativa'] else ' '
+        base = (f"{i['tabelas']} tabelas, {i['colunas']} colunas" if i['tabelas'] is not None
+                else 'base instalada' if i['existe'] else 'sem base')
+        print(f"{marca} {i['nome']:<12} {base}  ({i['pasta']})")
+        if i['descricao']:
+            print(f"               {i['descricao']}")
+        if i['assuntos']:
+            print(f"               assuntos: {', '.join(i['assuntos'])}")
+        if i.get('cobertura'):
+            c = i['cobertura']
+            print(f"               pedido: cobre {len(c['cobertos'])}/{len(c['termos'])} termo(s)"
+                  + (f", {len(c['em_nome_de_tabela'])} em nome de tabela" if c['em_nome_de_tabela'] else '')
+                  + (f"; não acha: {', '.join(c['faltando'])}" if c['faltando'] else '')
+                  + (f"; assuntos citados: {', '.join(i['assuntos_no_pedido'])}" if i['assuntos_no_pedido'] else ''))
+    com = [i for i in itens if i.get('cobertura')]
+    if len(com) > 1:
+        chave = lambda i: (len(i['cobertura']['cobertos']), len(i['cobertura']['em_nome_de_tabela']),  # noqa: E731
+                           len(i['assuntos_no_pedido']))
+        a, b = chave(com[0]), chave(com[1])
+        if a == b:
+            print('\nEMPATE entre as primeiras: pergunte ao usuário qual banco ele quer.')
+        elif (a[0], a[2]) == (b[0], b[2]):
+            # só o nome de tabela desempata: evidência fraca, o pedido ainda serve às duas
+            print(f"\nProvável {com[0]['nome']} (só pelo nome das tabelas): confirme com o usuário antes de seguir.")
+        else:
+            print(f"\nMais provável para o pedido: {com[0]['nome']} (`--instancia {com[0]['nome']}`).")
+    print('\n* = ativa. Troque com `--instancia NOME` no stella.py e no york.py (egghead = a padrão).'
+          '\nDescrição e assuntos: `instancia.json` na pasta de cada instância.')
+    return 0
+
+
+def _status_versao():
+    """Versão da cópia instalada (`VERSAO.json`, gravado pelo empacotador do
+    zip pessoal) e, se o repositório de onde ela saiu existe nesta máquina,
+    se ele já está à frente. Sem o arquivo (o próprio repositório ou uma
+    distribuição), devolve {}."""
+    caminho = os.path.join(RAIZ, 'VERSAO.json')
+    try:
+        with open(caminho, encoding='utf-8') as f:
+            v = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    repo = v.get('repositorio')
+    if repo and os.path.isdir(os.path.join(repo, '.git')):
+        import subprocess
+        try:
+            atual = subprocess.run(['git', '-C', repo, 'rev-parse', '--short', 'HEAD'], capture_output=True,
+                                   text=True, timeout=10).stdout.strip()
+            if atual and v.get('commit') and not atual.startswith(v['commit']) and not v['commit'].startswith(atual):
+                n = subprocess.run(['git', '-C', repo, 'rev-list', '--count', f"{v['commit']}..HEAD"],
+                                   capture_output=True, text=True, timeout=10).stdout.strip()
+                v['aviso'] = (f'o repositório está à frente desta cópia ({n or "?"} commit(s), agora em {atual}): '
+                              f'gere o zip de novo com ferramentas/empacotar_privado.py e reinstale a skill')
+        except (OSError, subprocess.SubprocessError):
+            pass
+    return v
+
+
 def _status(a):
     """Cada domínio é opcional: sem o código ou sem os dados de um deles, o
     status diz que ele roda em modo básico em vez de falhar."""
@@ -169,12 +251,19 @@ def _status(a):
         formulas = _status_formulas(a)
     except ImportError:
         formulas = {'instalado': False, 'pacotes': [], 'funcoes': 0, 'contextos': 0, 'avisos_de_merge': []}
-    s = {'schema': schema, 'formulas': formulas, 'cartao': _status_cartao()}
+    s = {'schema': schema, 'formulas': formulas, 'cartao': _status_cartao(), 'versao': _status_versao()}
     if a.json:
         print(json.dumps(s, ensure_ascii=False, indent=1))
         return 0
     sc, fo = s['schema'], s['formulas']
     print('Vegapunk — status da instalação')
+    v = s['versao']
+    if v.get('commit'):
+        print(f"  versão:   {v['commit']} de {v.get('data', '?')} (cópia instalada)")
+        if v.get('aviso'):
+            print(f"  AVISO:    {v['aviso']}")
+    from punk_records.instancias import nome_da_pasta, pasta_ativa
+    print(f"  instância: {nome_da_pasta(pasta_ativa())} (outras: `stella.py instancias`)")
     if sc['instalado']:
         c = sc['contagens']
         print(f"  schema:   instalado ({sc['db']})")
@@ -440,6 +529,8 @@ def _parser():
     p.add_argument('id', help='id da candidata (saída do solucionar)')
     p.add_argument('--observacao', help='observação do usuário sobre a solução (texto livre, sem valores do banco)')
     sub.add_parser('status', parents=[comum], help='camadas presentes, versão da base e avisos de merge')
+    p = sub.add_parser('instancias', parents=[comum], help='instâncias locais (egghead/ e egghead-<nome>/) e qual está ativa')
+    p.add_argument('--pedido', help='ordena as instâncias por quanto cada base cobre o pedido (só leitura, sem log)')
     p = sub.add_parser('cartao', help='Memory Card: os relatórios salvos (iniciar, catalogo, buscar, enviar, '
                                       'marcar, conferir, migrar); o resto da linha vai para satelites/memory_card.py')
     p.add_argument('args', nargs=argparse.REMAINDER)
@@ -468,8 +559,10 @@ def main(argv=None):
             fluxo.reconfigure(encoding='utf-8')
         except (AttributeError, ValueError):
             pass
-    ap = _parser()
     argv = sys.argv[1:] if argv is None else list(argv)
+    from punk_records.instancias import ativar_ou_sair
+    argv = ativar_ou_sair(argv)      # antes de qualquer import do motor: vários leem a variável na importação
+    ap = _parser()
     i = _posicao_do_comando(argv)
     if i is not None and argv[i] == 'cartao':
         # tudo depois de `cartao` é do Memory Card (inclusive --json, que lá tem outro sentido)
@@ -482,6 +575,8 @@ def main(argv=None):
 
     if a.cmd == 'status':
         return _status(a)
+    if a.cmd == 'instancias':
+        return _instancias(a)
     if a.cmd == 'solucionar':
         return _solucionar(a)
     if a.cmd == 'aceitar':

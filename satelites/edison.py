@@ -25,6 +25,7 @@ Uso:
     python3 satelites/edison.py sugerir-sinonimos [--min-similaridade 0.84] [--min-frequencia 2]
                                                 [--limite 30] [--json]
     python3 satelites/edison.py --db outro.db sugerir-sinonimos
+    python3 satelites/edison.py --instancia NOME sugerir-sinonimos   # base de egghead-NOME/
     python3 satelites/edison.py sugerir-mapa [--json]
     python3 satelites/edison.py grafo-funcoes [--pacotes DIR] [--minimo N] [--funcao NOME] [--json]
         grafo de coocorrência de funções nas fontes limpas (receitas e exemplos da
@@ -48,6 +49,10 @@ from typing import Dict, List, Set
 AQUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, AQUI)
 sys.path.insert(0, os.path.dirname(AQUI))   # raiz da skill: pacote `nomi_nomi_no_mi`
+
+if __name__ == '__main__':      # --instancia NOME antes do motor ler a pasta da instância
+    from punk_records.instancias import ativar_ou_sair  # noqa: E402
+    sys.argv[1:] = ativar_ou_sair(sys.argv[1:])
 
 from nomi_nomi_no_mi import DEFAULT_DB_PATH, normalizar, radical, tokenizar  # noqa: E402
 
@@ -162,9 +167,34 @@ def sugerir_sinonimos(db_path: str, min_similaridade: float = 0.84, min_frequenc
                     'termo_a': t1, 'freq_a': df[t1],
                     'termo_b': t2, 'freq_b': df[t2],
                     'similaridade': round(sim, 3),
+                    'tipo': classificar_par(t1, df[t1], t2, df[t2]),
                 })
-    candidatos.sort(key=lambda c: (-c['similaridade'], c['termo_a'], c['termo_b']))
+    # primeiro os prováveis erros de digitação (o que o Edison acha bem),
+    # depois as palavras diferentes parecidas (revisão cuidadosa)
+    candidatos.sort(key=lambda c: (c['tipo'] != TIPO_DIGITACAO, -c['similaridade'], c['termo_a'], c['termo_b']))
     return candidatos
+
+
+TIPO_DIGITACAO = 'provavel_erro_de_digitacao'
+TIPO_PALAVRAS = 'palavras_diferentes_parecidas'
+FREQUENTE = 5          # ocorrências a partir das quais um token é palavra do vocabulário, não deslize
+RAZAO_RARA = 4         # um lado tantas vezes mais raro que o outro: cara de deslize
+
+
+def classificar_par(t1, f1, t2, f2):
+    """Tipo do par parecido. Grafia parecida junta dois casos que pedem
+    revisões diferentes: a variação ou o deslize de digitação (um começa com
+    o outro, como 'calcula'/'calcular', ou um lado bem mais raro) e duas
+    palavras reais do vocabulário ('contato'/'contrato', 'emissao'/'demissao':
+    começando diferente, ou as duas frequentes). Medido nas duas bases reais:
+    letra somada no início quase sempre forma outra palavra."""
+    if t1.startswith(t2) or t2.startswith(t1):
+        return TIPO_DIGITACAO
+    if t1[0] != t2[0]:
+        return TIPO_PALAVRAS
+    if min(f1, f2) >= FREQUENTE and max(f1, f2) < RAZAO_RARA * min(f1, f2):
+        return TIPO_PALAVRAS
+    return TIPO_DIGITACAO
 
 
 def sugerir_mapa(db_path, raiz_conhecimento=None):
@@ -360,10 +390,15 @@ def main():
         if args.json:
             print(json.dumps(candidatos, indent=2, ensure_ascii=False))
         else:
-            print(f"{len(candidatos)} candidato(s) a sinônimo (revise antes de colocar em sinonimos.csv):\n")
-            for c in candidatos:
-                print(f"  {c['termo_a']:<20} (freq {c['freq_a']:>3})  ~  {c['termo_b']:<20} "
-                      f"(freq {c['freq_b']:>3})   similaridade={c['similaridade']}")
+            print(f"{len(candidatos)} candidato(s) a sinônimo (revise antes de colocar em sinonimos.csv):")
+            for tipo, titulo in ((TIPO_DIGITACAO, 'Variações e prováveis erros de digitação (um começa com o outro, ou um lado raro)'),
+                                 (TIPO_PALAVRAS, 'Palavras diferentes e parecidas: quase sempre NÃO são sinônimos')):
+                grupo = [c for c in candidatos if c['tipo'] == tipo]
+                if grupo:
+                    print(f"\n{titulo}:")
+                for c in grupo:
+                    print(f"  {c['termo_a']:<20} (freq {c['freq_a']:>3})  ~  {c['termo_b']:<20} "
+                          f"(freq {c['freq_b']:>3})   similaridade={c['similaridade']}")
         return 0
 
 

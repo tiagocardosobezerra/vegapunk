@@ -146,8 +146,12 @@ colunas que o usuário pediu, com `detalhar`. Se você mesmo escrever o SQL,
 mande-o em `"sql"` no contrato: a Stella confere cada tabela e coluna
 (nome que não existe é erro, e o SQL não é entregue) e cada JOIN contra as
 ligações provadas (JOIN por colunas sem prova, ou só com parte delas, é
-aviso). SQL com marca nunca sai pronto para rodar. O motor nunca executa
-SQL.
+aviso). SQL com marca nunca sai pronto para rodar. O caminho de JOIN prefere
+as tabelas que o pedido citou (a principal primeiro); um JOIN que só existe
+passando por tabela que o pedido não citou (por exemplo, duas tabelas ligadas
+só pela empresa) entra no SQL como LACUNA e nunca sai pronto para rodar:
+confirme com o usuário qual é a ligação. Os nomes saem como estão gravados na
+base, inclusive em caixa mista. O motor nunca executa SQL.
 
 ## Passo 4: entregar ao usuário
 

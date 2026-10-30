@@ -61,7 +61,8 @@ Também pela Stella: `python3 stella.py cartao COMANDO ...`.
 
 Configuração: `memory_card.json` na instância (VEGAPUNK_EGGHEAD ou
 egghead/), gravado pelo `iniciar`; MEMORY_CARD_REPO e MEMORY_CARD_DIR têm
-precedência. Base conferida: VEGAPUNK_EGGHEAD_DB ou egghead/punk_records.db.
+precedência. Base conferida: VEGAPUNK_EGGHEAD_DB, senão a da instância
+ativa (punk_records/instancias.py: VEGAPUNK_EGGHEAD ou egghead/).
 ================================================================================
 """
 
@@ -121,11 +122,34 @@ class EnvioRecusado(RuntimeError):
 
 
 def pasta_instancia():
-    return os.environ.get('VEGAPUNK_EGGHEAD') or os.path.join(SKILL, 'egghead')
+    from punk_records.instancias import pasta_ativa
+    return pasta_ativa()
 
 
 def caminho_config():
-    return os.path.join(pasta_instancia(), 'memory_card.json')
+    """O cartão é do usuário, não do banco: vale o `memory_card.json` da
+    instância ativa e, sem ele, o da instância padrão (`egghead/`) — só
+    para instâncias irmãs (`egghead-<nome>/` da mesma skill). Uma pasta
+    externa (VEGAPUNK_EGGHEAD apontando para fora) fica isolada."""
+    from punk_records.instancias import RAIZ_SKILL, pasta
+    ativa = os.path.join(pasta_instancia(), 'memory_card.json')
+    irma = os.path.normcase(os.path.dirname(os.path.abspath(pasta_instancia()))) == \
+        os.path.normcase(os.path.abspath(RAIZ_SKILL))
+    return ativa if os.path.exists(ativa) or not irma else os.path.join(pasta(), 'memory_card.json')
+
+
+def instancia_ativa():
+    from punk_records.instancias import nome_da_pasta
+    return nome_da_pasta(pasta_instancia())
+
+
+def base_da_instancia(nome):
+    """Base de schema da instância `nome` (a ativa usa a regra de
+    caminho_base, que respeita VEGAPUNK_EGGHEAD_DB)."""
+    from punk_records.instancias import ARQUIVO_BASE, PADRAO, pasta
+    if nome == instancia_ativa():
+        return caminho_base()
+    return os.path.join(pasta('' if nome == PADRAO else nome), ARQUIVO_BASE)
 
 
 def config():
@@ -304,6 +328,7 @@ def _ler(caminho):
 def normalizar_ficha(f):
     """Completa fichas antigas (antes de versão, status e histórico)."""
     f.setdefault('solucao', SOLUCAO_PADRAO)
+    f.setdefault('instancia', 'egghead')     # antes das várias instâncias, todo save era da padrão
     f.setdefault('versao', 1)
     f.setdefault('status', 'rascunho')
     f.setdefault('relacionados', [])
@@ -357,7 +382,10 @@ def referencias_do_sql(sql):
 
 
 def caminho_base():
-    return os.environ.get('VEGAPUNK_EGGHEAD_DB') or os.path.join(SKILL, 'egghead', 'punk_records.db')
+    # A mesma base do motor: antes ignorava VEGAPUNK_EGGHEAD e conferia o SQL
+    # de outra instância contra egghead/.
+    from punk_records.instancias import caminho_base as base_ativa
+    return base_ativa()
 
 
 def conferir_no_schema(sql, db=None):
@@ -538,6 +566,11 @@ def montar_envio(arquivo, categoria, secao, artigo, descricao, pasta, texto=None
             raise EnvioRecusado('artigo novo precisa do texto: --texto ARTIGO.md')
     if anterior and not (motivo or '').strip():
         raise EnvioRecusado(f'{ref} já existe (versão {anterior["versao"]}): diga o motivo da mudança com --motivo')
+    instancia = instancia_ativa()
+    if anterior and normalizar_ficha(dict(anterior))['instancia'] != instancia:
+        de = normalizar_ficha(dict(anterior))['instancia']
+        raise EnvioRecusado(f'{ref} é da instância {de} e a ativa é {instancia}: '
+                            f'salve com --instancia {de} (a conferência é contra a base dela)')
     for r in relacionados:
         if r == ref:
             raise EnvioRecusado('um artigo não se relaciona com ele mesmo')
@@ -546,7 +579,8 @@ def montar_envio(arquivo, categoria, secao, artigo, descricao, pasta, texto=None
     versao = anterior['versao'] + 1 if anterior else 1
     tabelas, colunas = referencias_do_sql(sql)
     ficha = {
-        'solucao': solucao, 'categoria': categoria.strip(), 'secao': secao.strip(), 'artigo': artigo.strip(),
+        'solucao': solucao, 'instancia': instancia,
+        'categoria': categoria.strip(), 'secao': secao.strip(), 'artigo': artigo.strip(),
         'descricao': (descricao if descricao is not None else (anterior or {}).get('descricao', '')).strip(),
         'status': status or (anterior or {}).get('status', 'rascunho'),
         'versao': versao, 'tabelas': tabelas, 'colunas': colunas,
@@ -708,10 +742,17 @@ def _cmd_conferir(a):
     faltam = [r for r in (a.refs or []) if r not in {f['ref'] for f in fichas}]
     if faltam:
         raise EnvioRecusado(f'artigo não encontrado: {", ".join(faltam)}')
-    agora, quebrados, mudou = _agora(), 0, False
+    agora, quebrados, mudou, pulados = _agora(), 0, False, 0
     for f in fichas:
         sql = _ler(os.path.join(pasta_do_artigo(pasta, f['ref']), 'relatorio.sql')) or ''
-        c = conferir_no_schema(sql)
+        inst = normalizar_ficha(dict(f))['instancia']
+        db = base_da_instancia(inst)
+        if not os.path.exists(db):
+            # relatório de um banco que esta cópia não tem: não é "quebrado"
+            print(f'---- {f["ref"]}: instância {inst} não existe nesta cópia (não conferido)')
+            pulados += 1
+            continue
+        c = conferir_no_schema(sql, db)
         if c['ok'] is None:
             print(c['base'])
             return 1
@@ -727,7 +768,8 @@ def _cmd_conferir(a):
             gravar_ficha(pasta, f['ref'], f)
             _regravar_readme(pasta, f['ref'], f)
             mudou = True
-    print(f'\n{len(fichas)} relatório(s), {quebrados} com algo faltando no schema atual')
+    print(f'\n{len(fichas)} relatório(s), {quebrados} com algo faltando no schema atual'
+          + (f', {pulados} de instância ausente nesta cópia' if pulados else ''))
     if a.registrar:
         if mudou:
             publicar(pasta, f'save: conferência no schema ({quebrados} com algo faltando)')
@@ -833,7 +875,8 @@ def main(argv=None):
     g = sub.add_parser('migrar')
     g.add_argument('--solucao', help=f'solução dos saves antigos (padrão: {SOLUCAO_PADRAO})')
     g.add_argument('--confirmar', action='store_true')
-    a = p.parse_args(argv)
+    from punk_records.instancias import ativar_ou_sair
+    a = p.parse_args(ativar_ou_sair(sys.argv[1:] if argv is None else list(argv)))
     try:
         return {'iniciar': _cmd_iniciar, 'catalogo': _cmd_catalogo, 'buscar': _cmd_buscar, 'enviar': _cmd_enviar,
                 'marcar': _cmd_marcar, 'conferir': _cmd_conferir, 'migrar': _cmd_migrar}[a.cmd](a)

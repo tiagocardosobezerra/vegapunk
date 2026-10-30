@@ -118,6 +118,11 @@ def _modulo_de(tabelas_esperadas):
     return sorted(tabelas_esperadas)[0][0].upper()
 
 
+def _maiusc(nomes):
+    """Nomes de tabela comparáveis sem caixa (o log de uso grava em maiúsculas)."""
+    return {n.upper() for n in nomes}
+
+
 def carregar_casos(db_path: str, caminho_sinteticos: str = None):
     casos_por_modulo = {}
     tabelas_existentes = _tabelas_existentes(db_path)
@@ -129,7 +134,7 @@ def carregar_casos(db_path: str, caminho_sinteticos: str = None):
         # fixture fictícia, isso mantém todos os
         # casos (as tabelas existem lá). Contra um schema real, isso
         # descarta os casos fictícios em vez de contá-los como erro.
-        if esperadas and not (esperadas & tabelas_existentes):
+        if esperadas and not (_maiusc(esperadas) & _maiusc(tabelas_existentes)):
             casos_fixture_ignorados += 1
             continue
         modulo = _modulo_de(esperadas)
@@ -173,7 +178,7 @@ def _taxa_acerto(engine, casos, estrutura):
     for pedido, esperadas, top_n in casos:
         resultado = engine.buscar(pedido, limite_criticas=30)
         top = [t['tabela'] for t in resultado['criticas'][:top_n]]
-        if esperadas & set(top):
+        if _maiusc(esperadas) & _maiusc(top):     # log grava em maiúsculas; a base pode ter caixa mista
             acertos += 1
     return acertos / len(casos) if casos else 0.0
 
@@ -313,7 +318,8 @@ def _rodar_grupo(engine, nome_grupo, casos, top_n_override, verbose):
         tabelas_no_topo = [t['tabela'] for t in resultado['criticas'][:n]] if n else \
             [t['tabela'] for t in resultado['criticas']]
 
-        acertou = (len(resultado['criticas']) == 0) if not esperadas else bool(esperadas & set(tabelas_no_topo))
+        acertou = (len(resultado['criticas']) == 0) if not esperadas else \
+            bool(_maiusc(esperadas) & _maiusc(tabelas_no_topo))
         status = "PASSOU" if acertou else "FALHOU"
         if acertou:
             passou += 1
@@ -340,6 +346,17 @@ def rodar(db_path: str, top_n_override: int = None, verbose: bool = False) -> bo
     print("=" * 70)
 
     casos = casos_consultas()
+    # Caso desenhado para a fixture (tabela esperada que não existe nesta base)
+    # não se aplica aqui: antes contava como falha e uma base real dava 0/31.
+    existentes = _maiusc(_tabelas_existentes(db_path))
+    fora = 0
+    for g in ('calibracao', 'heldout', 'validacao_cega'):
+        aplicaveis = [c for c in casos[g] if not c[1] or _maiusc(c[1]) & existentes]
+        fora += len(casos[g]) - len(aplicaveis)
+        casos[g] = aplicaveis
+    if fora:
+        print(f"(info: {fora} caso(s) desenhado(s) para a fixture não se aplicam a esta base — tabelas esperadas "
+              f"ausentes; fora da conta)\n")
     engine = NomiNomiNoMi(db_path)
     p1, t1, f1 = _rodar_grupo(engine, "CALIBRAÇÃO", casos['calibracao'], top_n_override, verbose)
     print("=" * 70)
@@ -347,6 +364,7 @@ def rodar(db_path: str, top_n_override: int = None, verbose: bool = False) -> bo
     print("=" * 70)
     p3, t3, f3 = _rodar_grupo(engine, "VALIDAÇÃO CEGA", casos['validacao_cega'], top_n_override, verbose)
     print("=" * 70)
+    sintetico = _generalizacao_sintetica(engine, db_path)
     engine.fechar()
 
     passou_total, total = p1 + p2 + p3, t1 + t2 + t3
@@ -363,12 +381,50 @@ def rodar(db_path: str, top_n_override: int = None, verbose: bool = False) -> bo
     print(_linha("Calibração", p1, t1))
     print(_linha("Held-out", p2, t2))
     print(_linha("Validação cega", p3, t3) + ("  <- número mais confiável de generalização" if t3 else ""))
+    if sintetico:
+        n = sintetico['n']
+        print(f"  Generalização (sintético, informativo): {n} pedidos tirados das descrições da base: "
+              f"1º lugar {sintetico['top1']}/{n} ({sintetico['top1']/n*100:.0f}%), "
+              f"top 3 {sintetico['top3']}/{n} ({sintetico['top3']/n*100:.0f}%), "
+              f"top 10 {sintetico['top10']}/{n} ({sintetico['top10']/n*100:.0f}%)")
+        if total and passou_total == total and sintetico['top1'] / n < 0.6:
+            print("  AVISO: 100% nos casos desenhados não é o desempenho geral da busca: veja a linha de "
+                  "generalização (casos de outra natureza, não entram no portão).")
     if todas_falhas:
         print("\nCasos que falharam:")
         for pedido, esperadas, obtido in todas_falhas:
             print(f"  - \"{pedido}\" | esperava {sorted(esperadas) or '(vazio)'} | obteve {obtido}")
     print("=" * 70)
     return ok_integridade and passou_total == total
+
+
+AMOSTRA_SINTETICA = 80
+
+
+def _generalizacao_sintetica(engine, db_path, n=AMOSTRA_SINTETICA, semente=7):
+    """Recall em pedidos que o Lilith tira das descrições da própria base
+    (amostra fixa por semente): uma medida de generalização ao lado dos
+    casos desenhados, que são poucos e escolhidos. Informativo: não entra no
+    resultado (os pedidos sintéticos são frases de descrição, não perguntas
+    reais). Só leitura; nada é gravado. None sem casos."""
+    try:
+        from lilith import gerar
+    except ImportError:
+        return None
+    casos = gerar(db_path)
+    if not casos:
+        return None
+    amostra = random.Random(semente).sample(casos, min(n, len(casos)))
+    r = {'n': len(amostra), 'top1': 0, 'top3': 0, 'top10': 0}
+    for c in amostra:
+        esperadas = _maiusc(c['esperadas'])
+        nomes = [t['tabela'].upper() for t in engine.buscar(c['pedido'], limite_criticas=10)['criticas']]
+        pos = min((nomes.index(e) + 1 for e in esperadas if e in nomes), default=None)
+        if pos:
+            r['top10'] += 1
+            r['top3'] += pos <= 3
+            r['top1'] += pos == 1
+    return r
 
 
 # ==============================================================================

@@ -54,6 +54,8 @@ import hashlib
 import json
 import os
 
+from dominios.anexar import anexar_linha
+
 DOMINIOS = ('formulas', 'schema', 'cadastro')
 LIMITE_PADRAO = 5
 USAR_SINONIMOS_DA_BASE = False  # medido no 4c: sem ganho de cobertura e top-1 pior (S14.1, S24.1); decisão do usuário
@@ -652,8 +654,7 @@ def registrar_candidata(saida, caminho):
     reg['id'] = hashlib.sha1(json.dumps({k: v for k, v in reg.items() if k != 'data'}, ensure_ascii=False,
                                         sort_keys=True).encode('utf-8')).hexdigest()[:12]
     try:
-        with open(caminho, 'a', encoding='utf-8') as fh:
-            fh.write(json.dumps(reg, ensure_ascii=False) + '\n')
+        anexar_linha(caminho, json.dumps(reg, ensure_ascii=False))   # trava: processos em paralelo
     except OSError:
         return None   # instância só de leitura: a solução sai, só não fica como candidata
     return reg['id']

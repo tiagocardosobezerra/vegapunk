@@ -12,7 +12,7 @@ from collections import Counter
 from typing import Dict, List
 
 from dominios.schema.config import FUZZY_CUTOFF_PADRAO
-from nomi_nomi_no_mi.texto import normalizar, radical, tokenizar
+from nomi_nomi_no_mi.texto import normalizar, radical, siglas, tokenizar
 
 
 class IndiceMixin:
@@ -52,6 +52,22 @@ class IndiceMixin:
         # termos do pedido que não bateram literalmente em nada.
         self._vocabulario = [t for t in df.keys() if len(t) >= 4]
 
+    def _carregar_siglas(self):
+        """Acrescenta ao índice as siglas de 2-3 letras escritas em maiúsculas
+        nas descrições (EPI, PIS, CPF), que a tokenização comum (4+ letras)
+        perde. Sob demanda: só um pedido com sigla em maiúsculas precisa
+        delas, e extraí-las de toda descrição custaria em toda busca."""
+        self._carregar_indice()
+        if getattr(self, '_siglas_carregadas', False):
+            return
+        for item in self._indice:
+            novas = siglas(item['descricao']) - item['_tokens_desc']
+            if novas:
+                item['_tokens_desc'] |= novas
+                for tk in novas:
+                    self._df[tk] += 1
+        self._siglas_carregadas = True
+
     def _sugestoes_fuzzy(self, termos: List[str], cutoff: float = FUZZY_CUTOFF_PADRAO) -> Dict[str, str]:
         """Item 3 — fallback de correção aproximada (distância de edição
         via difflib, stdlib, sem dependência nova). SÓ é chamado pelo
@@ -67,6 +83,8 @@ class IndiceMixin:
             termo_norm = normalizar(termo)
             if self._df.get(termo_norm, 0) > 0:
                 continue  # já bate literalmente — fuzzy não se aplica aqui
+            if len(termo_norm) < 4:
+                continue  # sigla: corrigir 3 letras por aproximação só inventaria
             candidatos = difflib.get_close_matches(termo_norm, self._vocabulario, n=1, cutoff=cutoff)
             if candidatos and candidatos[0] != termo_norm:
                 correcoes[termo] = candidatos[0]

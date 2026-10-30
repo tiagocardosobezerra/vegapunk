@@ -11,6 +11,8 @@ import os
 from datetime import datetime, timezone
 from typing import Dict, List
 
+from dominios.anexar import anexar_linha
+
 # ==============================================================================
 # ITEM 1 — LOOP DE FEEDBACK (histórico de uso real, sem depender de
 # ninguém escrever caso de teste à mão)
@@ -60,8 +62,7 @@ def registrar_uso(db_path: str, registro: Dict) -> bool:
     caminho = _caminho_historico(db_path)
     try:
         _rotacionar_historico_se_necessario(caminho)
-        with open(caminho, 'a', encoding='utf-8') as f:
-            f.write(json.dumps(registro, ensure_ascii=False) + '\n')
+        anexar_linha(caminho, json.dumps(registro, ensure_ascii=False))   # trava: processos em paralelo
     except OSError:
         return False
     return True

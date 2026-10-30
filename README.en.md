@@ -140,6 +140,16 @@ Details on each field and on how the engine uses each table: [`referencias/schem
 
 </details>
 
+### More than one database
+
+Each database gets its own instance: `egghead/` is the default and every other one goes in `egghead-<name>/`, also outside git. Import with `--instancia <name>` (the same `york.py` as always) and describe the database in an `instancia.json` (`descricao` and `assuntos`). Given a request, Claude runs:
+
+```bash
+python3 stella.py instancias --pedido "crachás bloqueados no mês"
+```
+
+It shows how many terms of the request each database covers (and how many name a table) and which one is most likely; on a tie, it asks. A database with several schemas that repeat table names becomes one instance per schema. Every Stella and satellite command accepts `--instancia <name>`, logs and confirmations stay in the instance used, and the Memory Card works for all of them. Step by step in [`COMO-INSTALAR.md`](COMO-INSTALAR.md) (in Portuguese).
+
 ### System formulas
 
 Vegapunk works with knowledge packs in `punk_records/pacotes/`. A public pack brings the dialect and the test cases; the documentation text is downloaded and processed on your machine:
@@ -213,7 +223,7 @@ Named after Vegapunk, the genius engineer from One Piece, a character known for 
 
 ## Acknowledgments
 
-* My wife **Júlia** and my children **Arthur** and **Aurora**, the safe harbor where I find peace, inspiration and the lightness I need every day.
+* My wife **Júlia** and my children **Arthur** and **Dante**, the safe harbor where I find peace, inspiration and the lightness I need every day.
 * **Bruna Cardoso Bezerra** | [brunacbezerra](https://github.com/brunacbezerra), for teaching me everything I know about Claude Code.
 * **Hatem Mohamed** | [hmohamed01](https://github.com/hmohamed01), for sharing the T-SQL best practices I apply in Vegapunk.
 * **You**, for using Vegapunk!

@@ -55,6 +55,8 @@ _EXT_SUPERFICIE = ('.py', '.md', '.json', '.txt', '.sql', '.svg')
 # Pastas de instância local: nada delas é distribuível. `pessoal` guarda as
 # extensões que só existem na versão pessoal (ver SKILL.md).
 _PASTAS_INSTANCIA = ('egghead', 'pessoal')
+# Outras instâncias locais (`egghead-<nome>/`, uma por banco): também nada sai.
+_PREFIXO_INSTANCIA = 'egghead-'
 # Arquivos sem extensão de texto que também saem, pelo nome: a licença, os
 # .gitignore (o da camada privada é a proteção que a checagem 4 exige) e o
 # .gitattributes (fim de linha LF em todo checkout).
@@ -197,7 +199,8 @@ def _superficie_distribuivel(raiz_skill, raiz_con):
     for raiz in raizes:
         for d, subdirs, arqs in os.walk(raiz):
             em_fixture = d == fixtures or d.startswith(fixtures + os.sep)
-            em_instancia = any(p in _PASTAS_INSTANCIA for p in os.path.relpath(d, raiz).split(os.sep))
+            em_instancia = any(p in _PASTAS_INSTANCIA or p.startswith(_PREFIXO_INSTANCIA)
+                               for p in os.path.relpath(d, raiz).split(os.sep))
             if not em_fixture and not em_instancia:
                 for s in subdirs:
                     if s == 'privado':

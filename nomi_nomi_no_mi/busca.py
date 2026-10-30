@@ -128,6 +128,8 @@ class NomiNomiNoMi(IndiceMixin, GrafoMixin):
 
         termos = extrair_termos(pedido)
         resultado['termos'] = termos
+        if any(len(t) < 4 and not t.isdigit() for t in termos):
+            self._carregar_siglas()      # pedido com sigla (EPI, PIS): só então o índice ganha as siglas
 
         if not termos:
             resultado['aviso'].append('Nenhum termo útil encontrado (tudo era stop word).')
@@ -464,7 +466,9 @@ class NomiNomiNoMi(IndiceMixin, GrafoMixin):
         """
         resultado = {'tabelas': {}, 'aviso': []}
 
-        tabelas = [t.strip().upper() for t in tabelas if t.strip()]
+        # o nome gravado na base, em qualquer caixa que o pedido use (base com
+        # nomes em caixa mista não achava nenhuma tabela quando tudo virava maiúscula)
+        tabelas = list(dict.fromkeys(self.nome_real(t) for t in tabelas if t.strip()))
         if not tabelas:
             resultado['aviso'].append('Nenhuma tabela informada.')
             return resultado
@@ -577,21 +581,44 @@ class NomiNomiNoMi(IndiceMixin, GrafoMixin):
             )
         return resultado
 
+    def nome_real(self, tabela: str) -> str:
+        """Nome da tabela como está gravado na base, a partir de qualquer
+        caixa (`qzcadastro` -> `QzCadastro`). O motor compara nomes em maiúsculas;
+        a base guarda o nome original, que pode ter caixa mista. Sem a
+        tabela na base, devolve o nome em maiúsculas."""
+        if not hasattr(self, '_nomes_reais'):
+            self._nomes_reais = {}
+            for (t,) in self.cur.execute('SELECT tabela FROM tabelas').fetchall():
+                self._nomes_reais.setdefault(t.upper(), t)
+                self._nomes_reais[t] = t          # a grafia exata vence (base com colisão de caixa)
+        t = (tabela or '').strip()
+        return self._nomes_reais.get(t) or self._nomes_reais.get(t.upper()) or t.upper()
+
+    def coluna_real(self, tabela: str, coluna: str) -> str:
+        """Nome da coluna como está gravado na base (mesma regra do nome_real)."""
+        if not hasattr(self, '_colunas_reais'):
+            self._colunas_reais = {}
+            for t, c in self.cur.execute('SELECT tabela, coluna FROM colunas').fetchall():
+                self._colunas_reais.setdefault((t.upper(), c.upper()), c)
+        return self._colunas_reais.get(((tabela or '').upper(), (coluna or '').upper()), coluna)
+
     def _pk_da_mae(self, tabela: str) -> Dict[str, int]:
         """PK de uma tabela (colunas em maiúsculas -> posição), da base
         enriquecida; vazio quando a base não tem `pk_ordem`."""
         cache = self.__dict__.setdefault('_cache_pk', {})
-        if tabela not in cache:
+        chave = tabela.upper()
+        if chave not in cache:
             if 'pk_ordem' not in self._colunas_de_estrutura()[0]:
-                cache[tabela] = {}
+                cache[chave] = {}
             else:
                 self.cur.execute('SELECT coluna, pk_ordem FROM colunas WHERE tabela = ? AND pk_ordem IS NOT NULL',
-                                 (tabela,))
-                cache[tabela] = {c.strip().upper(): o for c, o in self.cur.fetchall()}
-        return cache[tabela]
+                                 (self.nome_real(tabela),))
+                cache[chave] = {c.strip().upper(): o for c, o in self.cur.fetchall()}
+        return cache[chave]
 
     def _linhas_entre(self, a: str, b: str) -> List[Dict]:
         extras = ''.join(f', {c}' for c in self._colunas_de_estrutura()[1])
+        a, b = self.nome_real(a), self.nome_real(b)
         self.cur.execute(
             f"""SELECT tabela_filha, campo_filho, tabela_mae, campo_mae{extras} FROM {self._relacionamentos()}
                 WHERE (tabela_filha = ? AND tabela_mae = ?) OR (tabela_filha = ? AND tabela_mae = ?)""",

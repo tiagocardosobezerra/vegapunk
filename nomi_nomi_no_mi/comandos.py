@@ -18,6 +18,31 @@ from nomi_nomi_no_mi.historico import confirmar, registrar_uso
 from nomi_nomi_no_mi.manutencao import checar_cobertura_modulos
 from nomi_nomi_no_mi.saida import formatar_busca_texto, formatar_detalhar_texto
 
+
+def _instancias_com_a_tabela(tabela, db_atual):
+    """Nomes das OUTRAS instâncias locais que têm `tabela` (só leitura).
+    Serve para avisar uma confirmação feita na instância errada."""
+    try:
+        from punk_records.instancias import abrir_leitura, listar
+    except ImportError:
+        return []
+    atual = os.path.normcase(os.path.abspath(db_atual))
+    achou = []
+    for i in listar():
+        if not i['existe'] or os.path.normcase(os.path.abspath(i['base'])) == atual:
+            continue
+        try:
+            conn = abrir_leitura(i['base'])
+            try:
+                if conn.execute('SELECT 1 FROM tabelas WHERE UPPER(tabela) = ?', (tabela,)).fetchone():
+                    achou.append(i['nome'])
+            finally:
+                conn.close()
+        except sqlite3.DatabaseError:
+            pass
+    return achou
+
+
 def executar(args):
     """`args`: comando ('buscar', 'detalhar', 'confirmar', 'checar-modulos'), db,
     pedido, limite, tabelas, tabela, json — os mesmos nomes da CLI antiga."""
@@ -44,6 +69,10 @@ def executar(args):
                         f"pois a tabela pode existir no schema real e ainda não ter sido importada.",
                         file=sys.stderr
                     )
+                    outras = _instancias_com_a_tabela(tabela_confirmada, args.db)
+                    if outras:
+                        print(f"AVISO: \"{tabela_confirmada}\" existe na instância {', '.join(outras)}: "
+                              f"faltou `--instancia {outras[0]}`? (o log é da instância ativa)", file=sys.stderr)
             conn_check.close()
         gravado = confirmar(args.db, args.pedido, tabelas)
         if gravado:

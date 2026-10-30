@@ -76,10 +76,21 @@ class TestNomesReais(unittest.TestCase):
         self.assertIn('doc.md:1 (4)', r['detalhe'])
         self.assertTrue(verificar_nomes_reais(SKILL, [self._doc('qzmeu sozinho; cartao sozinho.\n')], self.db)['ok'])
 
+    def test_nome_real_em_caixa_mista_tambem_e_recusado(self):
+        self.assertFalse(verificar_nomes_reais(SKILL, [self._doc('Veja a QzTabReal aqui.' + chr(10))], self.db)['ok'])
+        self.assertTrue(verificar_nomes_reais(SKILL, [self._doc('Uma palavra comum: Cadastro.' + chr(10))], self.db)['ok'])
+
     def test_sem_instancia_nao_ha_o_que_comparar(self):
         r = verificar_nomes_reais(SKILL, [self._doc('QZTABREAL\n')], os.path.join(self._tmp.name, 'nao.db'))
         self.assertTrue(r['ok'])
         self.assertIn('sem instância', r['detalhe'])
+
+    def test_permitidos_da_instancia_saem_da_regua(self):
+        doc = self._doc('Use QZTABREAL e CODQZREAL aqui.\n')
+        self.assertFalse(verificar_nomes_reais(SKILL, [doc], self.db)['ok'])
+        with open(os.path.join(os.path.dirname(self.db), 'termos_proibidos.json'), 'w', encoding='utf-8') as f:
+            f.write('{"permitidos": ["qztabreal", "CODQZREAL"]}')
+        self.assertTrue(verificar_nomes_reais(SKILL, [doc], self.db)['ok'])
 
 
 if __name__ == '__main__':

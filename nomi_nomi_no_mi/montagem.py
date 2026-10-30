@@ -73,7 +73,8 @@ class Provas:
         a constraint vem primeiro)."""
         chave = (a, b)
         if chave not in self._fks:
-            fks, _ = agrupar_fks(self.m._linhas_entre(a, b), a, self.m._pk_da_mae)
+            # o lado da FK é decidido comparando com o nome gravado (caixa mista)
+            fks, _ = agrupar_fks(self.m._linhas_entre(a, b), self.m.nome_real(a), self.m._pk_da_mae)
             unicas = {}
             for f in sorted((f for f in fks if f['origem'] in PROVAS), key=lambda f: f['origem'] != ORIGEM_CONSTRAINT):
                 k = frozenset(frozenset(((f['tabela_filha'].upper(), c['campo_filho'].strip().upper()),
@@ -83,15 +84,19 @@ class Provas:
             self._fks[chave] = list(unicas.items())
         return self._fks[chave]
 
-    def caminho(self, origens, destino, max_saltos=MAX_SALTOS_CAMINHO):
-        """Menor caminho provado de qualquer tabela de `origens` até `destino`
-        (desempate pela ordem alfabética). Lista de tabelas ou None."""
+    def caminho(self, origens, destino, max_saltos=MAX_SALTOS_CAMINHO, preferidas=None):
+        """Menor caminho provado de qualquer tabela de `origens` até `destino`.
+        Desempate: primeiro a ordem de `preferidas` (as tabelas que o pedido
+        citou, a principal antes), depois a ordem alfabética. Sem isso uma
+        tabela de passagem (ex.: a coligada) ganhava de uma FK direta da
+        principal só pelo nome. Lista de tabelas ou None."""
         adj = self.adjacencia()
-        fila = [(0, (o,)) for o in sorted(origens)]
+        ordem = {t: i for i, t in enumerate(preferidas or ())}
+        fila = [(0, ordem.get(o, len(ordem)), o, (o,)) for o in origens]
         heapq.heapify(fila)
         vistos = set()
         while fila:
-            n, cam = heapq.heappop(fila)
+            n, _r, _o, cam = heapq.heappop(fila)
             t = cam[-1]
             if t == destino:
                 return list(cam)
@@ -100,7 +105,7 @@ class Provas:
             vistos.add(t)
             for v in sorted(adj.get(t, ())):
                 if v not in vistos:
-                    heapq.heappush(fila, (n + 1, cam + (v,)))
+                    heapq.heappush(fila, (n + 1, _r, _o, cam + (v,)))
         return None
 
 
@@ -120,20 +125,21 @@ def montar(motor, tabelas, filtros=None, mapa=None, colunas_extra=None):
     cadastros. `colunas_extra`: ['TABELA.COLUNA'] que o pedido cita (entram no
     SELECT só se a tabela entrou no SQL e a coluna existe nela)."""
     pv = Provas(motor)
+    R, C = motor.nome_real, motor.coluna_real   # o SQL sai com os nomes gravados na base (caixa mista)
     tabelas = list(dict.fromkeys(t.upper() for t in tabelas))
     cad_de = {c['tabela'].upper(): c for c in ((mapa or {}).get('cadastros') or {}).values()}
     out = {'sql': None, 'pronto_para_rodar': False, 'tabelas': [], 'joins': [], 'argumentos_a_preencher': [],
            'lacunas': [], 'avisos': [], 'erros': []}
     if not tabelas:
         return out
-    juntas, linhas = [tabelas[0]], [f'FROM {tabelas[0]}']
+    juntas, linhas = [tabelas[0]], [f'FROM {R(tabelas[0])}']
     for t in tabelas[1:]:
         if t in juntas:
             continue
-        cam = pv.caminho(juntas, t)
+        cam = pv.caminho(juntas, t, preferidas=[j for j in juntas if j in tabelas])
         if cam is None:
-            out['lacunas'].append(f'sem caminho de JOIN provado (constraint ou dicionário) entre {t} e '
-                                  f'{", ".join(juntas)}: a tabela fica fora do SQL')
+            out['lacunas'].append(f'sem caminho de JOIN provado (constraint ou dicionário) entre {R(t)} e '
+                                  f'{", ".join(R(j) for j in juntas)}: a tabela fica fora do SQL')
             continue
         passos = []
         for x, y in zip(cam, cam[1:]):
@@ -143,52 +149,61 @@ def montar(motor, tabelas, filtros=None, mapa=None, colunas_extra=None):
                 motivo = ('nenhuma ligação provada' if not fks else
                           f'{len(fks)} ligações provadas diferentes (' + ' | '.join(f["on"] for _, f in fks) +
                           '): o usuário escolhe qual')
-                out['lacunas'].append(f'JOIN entre {x} e {y}: {motivo}')
+                out['lacunas'].append(f'JOIN entre {R(x)} e {R(y)}: {motivo}')
                 break
             passos.append((x, y, fks[0][1]))
         if passos is None:
             continue
+        # Caminho por tabela que o pedido não citou (ex.: as duas ligadas só pela
+        # empresa/coligada): o JOIN existe, mas pode não ser a ligação que o
+        # pedido quer e pode multiplicar linhas. Entra no SQL, mas não é pronto.
+        meio = [y for y in cam[:-1] if y not in tabelas]
+        if meio:
+            out['lacunas'].append(
+                f'JOIN de {R(cam[0])} até {R(t)} passa por {", ".join(R(y) for y in meio)}, que o pedido não citou: '
+                f'confirme com o usuário se é essa a ligação (não há ligação provada direta)')
         for x, y, f in passos:
             if y in juntas:
                 continue
             juntas.append(y)
             linhas.append(f['join'])
-            out['joins'].append({'de': x, 'para': y, 'origem': f['origem'], 'constraint': f['constraint'],
+            out['joins'].append({'de': R(x), 'para': R(y), 'origem': f['origem'], 'constraint': f['constraint'],
                                  'on': f['on'], 'cobre_chave_da_mae': f.get('cobre_chave_da_mae')})
             if f.get('cobre_chave_da_mae') is False:
-                out['avisos'].append(f'o JOIN {x}–{y} não usa a chave primária inteira de {f["tabela_mae"]}: '
+                out['avisos'].append(f'o JOIN {R(x)}–{R(y)} não usa a chave primária inteira de {f["tabela_mae"]}: '
                                      'pode trazer mais de uma linha; confira antes de somar ou contar')
-    out['tabelas'] = juntas
+    out['tabelas'] = [R(t) for t in juntas]
     # colunas: a chave da principal e, de cada cadastro do mapa, código e descrição
-    cols = [f'{tabelas[0]}.{c}' for c in sorted(motor._pk_da_mae(tabelas[0]), key=motor._pk_da_mae(tabelas[0]).get)]
+    cols = [f'{R(tabelas[0])}.{C(tabelas[0], c)}' for c in sorted(motor._pk_da_mae(tabelas[0]), key=motor._pk_da_mae(tabelas[0]).get)]
     for t in juntas:
         c = cad_de.get(t)
         if c:
-            cols += [f'{t}.{x}' for x in (c['coluna_codigo'], c.get('coluna_descricao')) if x]
+            cols += [f'{R(t)}.{C(t, x)}' for x in (c['coluna_codigo'], c.get('coluna_descricao')) if x]
     nomes = pv.colunas()
     for tc in colunas_extra or []:
         t, _, c = tc.upper().partition('.')
         if t in juntas and c in nomes.get(t, ()):
-            cols.append(f'{t}.{c}')
-    cols = list(dict.fromkeys(cols)) or [f'{tabelas[0]}.*']
+            cols.append(f'{R(t)}.{C(t, c)}')
+    cols = list(dict.fromkeys(cols)) or [f'{R(tabelas[0])}.*']
     where = []
     for t, nome in (filtros or {}).items():
         t = t.upper()
         if t not in juntas:
-            out['lacunas'].append(f'filtro em {t}: a tabela não entrou no SQL')
+            out['lacunas'].append(f'filtro em {R(t)}: a tabela não entrou no SQL')
             continue
         c = cad_de.get(t)
         pk = motor._pk_da_mae(t)
         chave = list(c['chave']) if c else sorted(pk, key=pk.get)
         if not chave:
-            out['lacunas'].append(f'filtro em {t}: a tabela não tem chave conhecida (nem mapa nem PK)')
+            out['lacunas'].append(f'filtro em {R(t)}: a tabela não tem chave conhecida (nem mapa nem PK)')
             continue
         codigo = c['coluna_codigo'] if c else chave[-1]
-        apoio = _sql_apoio(t, chave, [codigo, c.get('coluna_descricao') if c else None])
+        apoio = _sql_apoio(R(t), [C(t, k) for k in chave],
+                           [C(t, x) for x in (codigo, c.get('coluna_descricao') if c else None) if x])
         for col in [codigo] + [k for k in chave if k != codigo]:
             marca = nome if col == codigo else col
-            where.append(f'{t}.{col} = {MARCA[0]}{marca}{MARCA[1]}')
-            arg = {'marcador': marca, 'tabela': t, 'coluna': col, 'sql_apoio': apoio}
+            where.append(f'{R(t)}.{C(t, col)} = {MARCA[0]}{marca}{MARCA[1]}')
+            arg = {'marcador': marca, 'tabela': R(t), 'coluna': C(t, col), 'sql_apoio': apoio}
             if len(chave) > 1 and col == codigo:
                 arg['chave_completa'] = (f'o código só é único junto com {", ".join(k for k in chave if k != codigo)}'
                                          f': preencha todos da mesma linha')

@@ -53,10 +53,41 @@ class TestRetrato(unittest.TestCase):
             self.assertNotEqual(_retrato(tmp), antes)
 
 
+def _retrato_das_instancias():
+    """Retrato de egghead/ e de cada egghead-<nome>/ real (não as temporárias deste teste)."""
+    out = {}
+    for d in sorted(os.listdir(SKILL)):
+        if (d == 'egghead' or d.startswith('egghead-')) and not d.startswith('egghead-qzguarda'):
+            out.update({os.path.join(d, k): v for k, v in _retrato(os.path.join(SKILL, d)).items()})
+    return out
+
+
 @unittest.skipUnless(os.path.exists(DB_REAL), 'instância real ausente (cópia distribuível)')
 class TestInstanciaIntocada(unittest.TestCase):
+    def test_comando_com_instancia_temporaria_nao_toca_nas_reais(self):
+        antes = _retrato_das_instancias()
+        env = {k: v for k, v in os.environ.items() if k not in ('VEGAPUNK_EGGHEAD', 'VEGAPUNK_EGGHEAD_DB')}
+        env['PYTHONIOENCODING'] = 'utf-8'
+        irma = os.path.join(SKILL, 'egghead-qzguarda')
+        try:
+            os.makedirs(irma)
+            shutil.copy2(DB_REAL, os.path.join(irma, 'punk_records.db'))
+            for cmd in (['stella.py', '--instancia', 'qzguarda', 'buscar', '--dominio', 'schema', 'funcionários'],
+                        ['stella.py', '--instancia', 'qzguarda', 'confirmar', '--dominio', 'schema', 'guarda', 'QZNAOEXISTE'],
+                        ['stella.py', '--instancia', 'qzguarda', 'status'],
+                        ['satelites/york.py', '--instancia', 'qzguarda', 'migrar', 'status']):
+                r = subprocess.run([sys.executable, *cmd], cwd=SKILL, env=env, capture_output=True, text=True,
+                                   encoding='utf-8', errors='replace')
+                self.assertIn(r.returncode, (0, 1), f'{cmd}: {r.stderr[-500:]}')
+            depois = _retrato_das_instancias()
+            mudou = sorted(k for k in set(antes) | set(depois) if antes.get(k) != depois.get(k))
+            self.assertEqual(mudou, [], f'--instancia qzguarda mudou arquivo(s) de instância real: {mudou}')
+            self.assertTrue(os.path.exists(os.path.join(irma, 'punk_records_log.jsonl')))   # o log foi para a irmã
+        finally:
+            shutil.rmtree(irma, ignore_errors=True)
+
     def test_comandos_de_medicao_em_copia_nao_tocam_em_egghead(self):
-        antes = _retrato(EGGHEAD)
+        antes = _retrato_das_instancias()
         env = {k: v for k, v in os.environ.items() if k not in ('VEGAPUNK_EGGHEAD', 'VEGAPUNK_EGGHEAD_DB')}
         env['PYTHONIOENCODING'] = 'utf-8'
         py = sys.executable
@@ -84,9 +115,9 @@ class TestInstanciaIntocada(unittest.TestCase):
                 r = subprocess.run([py, *cmd], cwd=SKILL, env=env, capture_output=True, text=True,
                                    encoding='utf-8', errors='replace')
                 self.assertIn(r.returncode, (0, 1), f'{cmd}: {r.stderr[-500:]}')
-                depois = _retrato(EGGHEAD)
+                depois = _retrato_das_instancias()
                 mudou = sorted(k for k in set(antes) | set(depois) if antes.get(k) != depois.get(k))
-                self.assertEqual(mudou, [], f'{" ".join(cmd[:3])} mudou arquivo(s) de egghead/: {mudou}')
+                self.assertEqual(mudou, [], f'{" ".join(cmd[:3])} mudou arquivo(s) de instância real: {mudou}')
             self.assertTrue(os.path.exists(os.path.join(tmp, 'atlas_formulas_golden.json')))  # foi para a cópia
 
 

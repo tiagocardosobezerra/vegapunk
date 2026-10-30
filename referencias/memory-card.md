@@ -179,6 +179,17 @@ A mesma conferência roda em toda prévia de `enviar`.
 Limite: colunas sem prefixo de tabela ou apelido não são conferidas, e um
 JOIN com uma CTE ou subconsulta sai como "ligação não conferida".
 
+### Várias instâncias
+
+O cartão é do usuário, não do banco: sem `memory_card.json` na instância
+ativa, vale o de `egghead/` (para as instâncias `egghead-<nome>/` da mesma
+skill; uma pasta externa em `VEGAPUNK_EGGHEAD` fica isolada). Cada save
+guarda a instância em que foi feito (`instancia` na ficha; save antigo é da
+`egghead`). A prévia e a conferência usam a base dessa instância: `conferir`
+confere cada relatório no banco dele e pula, sem contar como quebrado, o de
+uma instância que esta cópia não tem. Uma versão nova de um save só sai da
+mesma instância (`--instancia <nome>`); de outra, o envio é recusado.
+
 ## Cartão antigo (sem o nível da solução)
 
 Um cartão criado antes do nível da solução tem os saves em

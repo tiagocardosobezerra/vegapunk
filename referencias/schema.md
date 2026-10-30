@@ -58,6 +58,47 @@ basta importar dados diferentes (ver "Como importar seus dados" abaixo),
 sem tocar no código do motor. A pasta da instância pode ser trocada pela
 variável `VEGAPUNK_EGGHEAD`.
 
+Para mais de um banco, crie uma instância por banco: `egghead-<nome>/`, ao
+lado de `egghead/` e também fora do git. `--instancia <nome>` no `stella.py`
+e no `york.py` aponta a pasta para aquele comando (`--instancia egghead`
+volta à padrão), e `python3 stella.py instancias` lista todas, com a ativa
+marcada. Um `instancia.json` opcional em cada pasta descreve o banco:
+
+```json
+{"descricao": "o que este banco guarda", "assuntos": ["palavra", "outra palavra"]}
+```
+
+É por ele, e por `python3 stella.py instancias --pedido "<pedido>"`, que o
+Claude escolhe a instância de cada pedido. O `--pedido` mede, sem gravar
+log, quantos termos do pedido cada base cobre (palavra de descrição,
+radical, sinônimo da própria base ou pedaço de nome de tabela com 5+
+letras) e quais assuntos ele cita; diz a mais provável ou `EMPATE`.
+
+O que muda com várias instâncias:
+
+- `--instancia` vale no `stella.py`, `york.py`, `edison.py`, `atlas.py` e
+  `memory_card.py`; instância inexistente ou nome inválido sai com código 2.
+- Logs de uso, confirmações e soluções candidatas ficam na instância usada.
+  Confirmar uma tabela que só existe em outra instância avisa qual é.
+- A base de cada instância tem os seus próprios sinônimos e sistemas.
+- Um banco com mais de um schema e nomes de tabela repetidos entre eles: uma
+  instância por schema (`egghead-<banco>-<schema>`). A Punk Records identifica
+  tabela pelo nome, sem o schema; duas tabelas com o mesmo nome numa base só
+  se confundem.
+- Nome em caixa mista (`QzCadastro`) é achado em qualquer grafia no `detalhar`, e
+  o SQL montado usa o nome gravado.
+- Sigla de 2 ou 3 letras escrita em maiúsculas no pedido (`EPI`, `PIS`) vira
+  termo e casa com a mesma sigla em maiúsculas nas descrições; em minúsculas
+  ela é palavra comum e fica de fora, como antes.
+- Cada instância pode ter um `casos_atlas.json` (lista de pedidos): o
+  `atlas.py capturar --db <cópia>` protege esses pedidos no golden dela, e a
+  suíte confere o golden de toda `egghead-<nome>/` que tem um.
+- O Memory Card é um só (ver [memory-card.md](memory-card.md)).
+- A checagem de nomes reais da distribuição confere contra todas as
+  instâncias; o `termos_proibidos.json` de cada uma vale para a dela, e a
+  chave `permitidos` tira da régua um nome real que só coincide com
+  vocabulário do motor.
+
 ### Estrutura da base (Punk Records — `punk_records.db`)
 
 | Tabela            | Linhas na versão vazia | Conteúdo esperado (depois do import)                                    |

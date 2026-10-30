@@ -27,6 +27,8 @@ import json
 import os
 import re
 
+from dominios.anexar import anexar_linha
+
 ARQUIVO_ACEITAS = 'solucoes_aceitas.jsonl'
 ARQUIVO_CASOS = 'casos_solucao_aceitos.json'
 
@@ -83,8 +85,7 @@ def aceitar(pasta, cid, observacao=None):
     if observacao:
         reg['observacao_do_usuario'] = observacao
     try:
-        with open(os.path.join(pasta, ARQUIVO_ACEITAS), 'a', encoding='utf-8') as f:
-            f.write(json.dumps(reg, ensure_ascii=False) + '\n')
+        anexar_linha(os.path.join(pasta, ARQUIVO_ACEITAS), json.dumps(reg, ensure_ascii=False))
         _virar_caso(pasta, reg)
     except OSError as e:
         return None, f'não foi possível gravar na instância ({e.strerror}): a pasta não aceita gravação nesta cópia'
