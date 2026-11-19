@@ -1,17 +1,50 @@
-# Vegapunk
+<a href="https://tiagocardosobezerra.github.io/vegapunk/"><img width="100%" alt="Vegapunk: pergunte em português e receba o T-SQL certo, com as tabelas, as colunas e os JOINs reais do seu SQL Server. Na animação, o pedido 'funcionários ativos com o nome da seção' encontra as tabelas T001042 e T000318, prova o JOIN pela chave composta e vira a consulta." src="assets/readme/hero.svg" /></a>
 
-**Português** | [English](README.en.md)
+<p align="center">
+  <a href="https://tiagocardosobezerra.github.io/vegapunk/"><strong>Site do projeto</strong></a> ·
+  <a href="https://tiagocardosobezerra.github.io/vegapunk/#demo"><strong>Ver a demonstração</strong></a> ·
+  <a href="#comece-em-3-passos"><strong>Instalar</strong></a> ·
+  <a href="#resultados"><strong>Resultados</strong></a>
+</p>
 
-**Pergunte em português. Receba o T-SQL certo, com as tabelas, as colunas e os JOINs reais do seu banco.**
+<p align="center">
+  <strong>Português</strong> · <a href="README.en.md">English</a>
+</p>
 
-![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-3776AB?style=flat-square&logo=python&logoColor=white)
-![Sem dependências](https://img.shields.io/badge/depend%C3%AAncias-nenhuma-2ea44f?style=flat-square)
-![SQL Server 2016–2022](https://img.shields.io/badge/SQL%20Server-2016%E2%80%932022-CC2927?style=flat-square&logo=microsoftsqlserver&logoColor=white)
-![MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue?style=flat-square)
+<p align="center">
+  <img alt="Skill do Claude Code" src="https://img.shields.io/badge/Claude%20Code-skill-d97757?style=flat-square" />
+  <img alt="Python 3.8+" src="https://img.shields.io/badge/python-3.8%2B-3776AB?style=flat-square&logo=python&logoColor=white" />
+  <img alt="Sem dependências" src="https://img.shields.io/badge/depend%C3%AAncias-nenhuma-2ea44f?style=flat-square" />
+  <img alt="SQL Server 2016 a 2022" src="https://img.shields.io/badge/SQL%20Server-2016%E2%80%932022-CC2927?style=flat-square&logo=microsoftsqlserver&logoColor=white" />
+  <img alt="346 testes" src="https://img.shields.io/badge/testes-346-2ea44f?style=flat-square" />
+  <img alt="Licença MIT" src="https://img.shields.io/badge/licen%C3%A7a-MIT-blue?style=flat-square" />
+</p>
 
-<img width="100%" alt="Vegapunk: SQL com nomes reais e fórmulas sem invenção" src="assets/vegapunk-banner.svg" />
+O **Vegapunk** é uma skill gratuita do [Claude Code](https://claude.com/claude-code) para quem trabalha com Microsoft
+SQL Server, especialmente em sistemas que dão às tabelas nomes em código (`T000123` em vez de `FUNCIONARIOS`). Em vez
+de o Claude adivinhar esses nomes, o Vegapunk consulta um mapa do **seu** banco, guardado só no seu computador, e
+responde com o que existe de verdade.
 
-O Vegapunk é uma skill do Claude Code para quem trabalha com Microsoft SQL Server, especialmente em sistemas que dão às tabelas nomes em código (`T000123` em vez de `FUNCIONARIOS`). Em vez de o Claude adivinhar esses nomes, o Vegapunk consulta um mapa do **seu** banco, guardado só no seu computador, e responde com o que existe de verdade.
+<table>
+  <tr>
+    <td align="center" width="20%"><h3>0</h3><sub>linhas de dados lidas do seu banco: só a estrutura</sub></td>
+    <td align="center" width="20%"><h3>3</h3><sub>consultas prontas ao catálogo, com <code>VIEW DEFINITION</code></sub></td>
+    <td align="center" width="20%"><h3>100%</h3><sub>dos JOINs de chave composta entregues com prova, nos pedidos de teste</sub></td>
+    <td align="center" width="20%"><h3>346</h3><sub>testes automatizados</sub></td>
+    <td align="center" width="20%"><h3>0</h3><sub>dependências: Python e a biblioteca padrão</sub></td>
+  </tr>
+</table>
+
+## Em 30 segundos
+
+> **Você:** quero o salário dos colaboradores por cargo
+
+O Vegapunk busca no mapa do seu banco, detalha as colunas e devolve o JOIN provado. O Claude escreve o SQL só com
+esses nomes:
+
+<img width="100%" alt="Saída real do Vegapunk no banco fictício dos testes. A busca encontra F_FUNCIONARIO e F_CARGO entre as tabelas críticas, o detalhar devolve as colunas e o JOIN provado pela FK, e o Claude escreve o SQL que soma a remuneração por cargo." src="assets/readme/demo.svg" />
+
+<p align="center"><sub>Saída real da Stella (resumida) no "Sistema Aurora", o banco 100% fictício que vem nos testes. <a href="https://tiagocardosobezerra.github.io/vegapunk/#demo">Veja os quatro pedidos no site</a>, inclusive o que fica sem SQL por falta de prova.</sub></p>
 
 ## O que ele faz por você
 
@@ -23,15 +56,21 @@ O Vegapunk é uma skill do Claude Code para quem trabalha com Microsoft SQL Serv
 * **Guarda os seus relatórios num Memory Card.** Como o cartão de memória de um videogame: cada relatório pronto vira um save no seu próprio repositório privado do GitHub, com artigo explicando o que faz, versão, motivo de cada mudança e conferência no schema quando a base muda.
 * **Sabe T-SQL de verdade.** Otimização, planos de execução, índices, CTEs, window functions, PIVOT/MERGE/APPLY, transações e segurança, com conferência na documentação oficial da Microsoft quando o recurso depende da versão.
 
-## Como fica na prática
+## JOIN só com prova
 
-> **Você:** quero a lista dos funcionários ativos com o nome da seção de cada um
->
-> **Claude (com o Vegapunk):** busca as tabelas, detalha as colunas e devolve a consulta com os nomes do seu banco, o JOIN provado pela chave composta e um aviso se algum filtro depende de um código que você precisa informar.
+Uma ligação errada não dá erro: ela roda e devolve o número errado. Por isso o Vegapunk só entrega um JOIN quando
+consegue mostrar de onde ele veio. Quando não consegue, não escreve o SQL e pergunta a você.
+
+<img width="100%" alt="A regra da prova. Com prova: F_FUNCIONARIO e F_CARGO ligadas pela FK, JOIN entregue; a prova pode vir da constraint do banco, do dicionário do sistema ou da chave da tabela mãe. Sem prova: entre S_EXAME e S_CANDIDATO não existe caminho de FK, então nenhum JOIN é inventado." src="assets/readme/prova.svg" />
 
 Nada de "acho que a tabela se chama FUNCIONARIO". Se o nome não veio do seu banco, ele não entra no SQL.
 
 ## Resultados
+
+<img width="100%" alt="Resultados medidos com pedidos que o motor nunca tinha visto: pedidos com várias partes de 74% para 94%; com fórmula que executa consulta de 70% para 90%; JOINs de chave composta com prova de 0% para 100%; tabela certa entre as 3 primeiras num ERP real de 57% para 62%; função certa entre as 3 primeiras, 95% nas duas versões." src="assets/readme/resultados.svg" />
+
+<details>
+<summary><strong>Os números em tabela</strong></summary>
 
 Medidos com pedidos que o motor nunca tinha visto, separados antes de qualquer ajuste.
 
@@ -42,6 +81,8 @@ Medidos com pedidos que o motor nunca tinha visto, separados antes de qualquer a
 | JOINs de chave composta entregues com prova | 0% | **100%** |
 | Tabela certa entre as 3 primeiras, num ERP real | 57% | **62%** |
 | Função certa entre as 3 primeiras, na busca de fórmulas | 95% | **95%** |
+
+</details>
 
 No seu banco, os números dependem principalmente da qualidade das descrições do seu dicionário.
 
@@ -171,7 +212,7 @@ Depois é pedir ao Claude: "salve este relatório no Memory Card". Ele mostra a 
 
 ## Como funciona por dentro
 
-<img width="100%" alt="Como o Vegapunk encontra as tabelas e as funções certas" src="assets/vegapunk-sonar.svg" />
+<img width="100%" alt="Por dentro do Vegapunk: a Stella é a porta de entrada; em volta giram Punk Records (a base local), Nomi Nomi no Mi (o motor de busca), York (a única porta de escrita), Shaka (fórmulas), Atlas e Pythagoras (os guardas), Edison e Lilith (calibração) e o Memory Card (seus relatórios)." src="assets/readme/equipe.svg" />
 
 | Peça | O que faz |
 |---|---|
@@ -208,7 +249,8 @@ vegapunk/
 ├── dominios/              # Schema, fórmulas e soluções
 ├── punk_records/          # Importação, migrações, consultas de extração e pacotes
 ├── referencias/           # Fluxos e guias de T-SQL
-├── assets/                # Banners do README
+├── assets/                # Imagens animadas do README
+├── docs/                  # Site do projeto (GitHub Pages)
 ├── casos/                 # Casos e dados fictícios de teste
 └── testes/                # Suíte de testes
 ```
@@ -236,7 +278,7 @@ MIT License, veja [LICENSE](LICENSE) para detalhes.
 
 ---
 
-<p align="center"><strong>Vegapunk</strong>, não adivinha. sabe.</p>
+<p align="center"><strong>Vegapunk</strong>, não adivinha. sabe.<br/><sub><a href="https://tiagocardosobezerra.github.io/vegapunk/">tiagocardosobezerra.github.io/vegapunk</a></sub></p>
 
 ```
                                                                  ░█▒▒▓▓▓▓█                          

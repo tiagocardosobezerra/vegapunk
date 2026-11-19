@@ -1,49 +1,90 @@
-# Vegapunk
+<a href="https://tiagocardosobezerra.github.io/vegapunk/"><img width="100%" alt="Vegapunk: ask in plain language and get the right T-SQL, with the real tables, columns and JOINs from your SQL Server. In the animation, the request finds tables T001042 and T000318, proves the JOIN through the composite key and becomes the query." src="assets/readme/hero-en.svg" /></a>
 
-[Português](README.md) | **English**
+<p align="center">
+  <a href="https://tiagocardosobezerra.github.io/vegapunk/"><strong>Project site</strong></a> (Portuguese) ·
+  <a href="https://tiagocardosobezerra.github.io/vegapunk/#demo"><strong>See the demo</strong></a> ·
+  <a href="#get-started-in-3-steps"><strong>Install</strong></a> ·
+  <a href="#results"><strong>Results</strong></a>
+</p>
 
-**Ask in plain language. Get the right T-SQL, with the real tables, columns and JOINs from your database.**
+<p align="center">
+  <a href="README.md">Português</a> · <strong>English</strong>
+</p>
 
-![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-3776AB?style=flat-square&logo=python&logoColor=white)
-![No dependencies](https://img.shields.io/badge/dependencies-none-2ea44f?style=flat-square)
-![SQL Server 2016–2022](https://img.shields.io/badge/SQL%20Server-2016%E2%80%932022-CC2927?style=flat-square&logo=microsoftsqlserver&logoColor=white)
-![MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
+<p align="center">
+  <img alt="Claude Code skill" src="https://img.shields.io/badge/Claude%20Code-skill-d97757?style=flat-square" />
+  <img alt="Python 3.8+" src="https://img.shields.io/badge/python-3.8%2B-3776AB?style=flat-square&logo=python&logoColor=white" />
+  <img alt="No dependencies" src="https://img.shields.io/badge/dependencies-none-2ea44f?style=flat-square" />
+  <img alt="SQL Server 2016 to 2022" src="https://img.shields.io/badge/SQL%20Server-2016%E2%80%932022-CC2927?style=flat-square&logo=microsoftsqlserver&logoColor=white" />
+  <img alt="346 tests" src="https://img.shields.io/badge/tests-346-2ea44f?style=flat-square" />
+  <img alt="MIT license" src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" />
+</p>
 
-<img width="100%" alt="Vegapunk: SQL with real names and formulas with nothing made up" src="assets/vegapunk-banner-en.svg" />
-
-Vegapunk is a Claude Code skill for people who work with Microsoft SQL Server, especially on systems that give tables coded names (`T000123` instead of `EMPLOYEES`). Instead of letting Claude guess those names, Vegapunk looks them up in a map of **your** database, kept only on your computer, and answers with what actually exists.
+**Vegapunk** is a free [Claude Code](https://claude.com/claude-code) skill for people who work with Microsoft SQL
+Server, especially on systems that give tables coded names (`T000123` instead of `EMPLOYEES`). Instead of letting
+Claude guess those names, Vegapunk looks them up in a map of **your** database, kept only on your computer, and
+answers with what actually exists.
 
 > **Language note:** Vegapunk was built and measured on Portuguese-language requests and data dictionaries. Commands, file names and CSV column names are in Portuguese and are shown here exactly as you type them.
+
+<table>
+  <tr>
+    <td align="center" width="20%"><h3>0</h3><sub>data rows read from your database: structure only</sub></td>
+    <td align="center" width="20%"><h3>3</h3><sub>ready-made catalog queries, with <code>VIEW DEFINITION</code></sub></td>
+    <td align="center" width="20%"><h3>100%</h3><sub>of composite-key JOINs delivered with proof, on the test requests</sub></td>
+    <td align="center" width="20%"><h3>346</h3><sub>automated tests</sub></td>
+    <td align="center" width="20%"><h3>0</h3><sub>dependencies: Python and its standard library</sub></td>
+  </tr>
+</table>
+
+## In 30 seconds
+
+> **You:** salário dos colaboradores por cargo *(employee salary by job title)*
+
+Vegapunk searches your database map, details the columns and returns the proven JOIN. Claude writes the SQL with
+those names only:
+
+<img width="100%" alt="Real Vegapunk output on the fictional test database. The search finds F_FUNCIONARIO and F_CARGO among the critical tables, detail returns the columns and the JOIN proven by the FK, and Claude writes the SQL that sums pay by job title." src="assets/readme/demo-en.svg" />
+
+<p align="center"><sub>Real Stella output (trimmed) on "Sistema Aurora", the 100% fictional database that ships with the tests. <a href="https://tiagocardosobezerra.github.io/vegapunk/#demo">See all four requests on the site</a>, including the one left without SQL for lack of proof.</sub></p>
 
 ## What it does for you
 
 * **Finds the right tables.** You describe what you want ("employee salary by section") and it finds the tables and columns that hold that data, using the business description of each column.
 * **Hands you the JOIN, and only when it has proof.** The link between tables comes from a database constraint, from your system's data dictionary or from the parent table's key, composite keys included. Without proof, it warns you instead of guessing.
 * **Writes system formulas without making things up.** It creates, fixes, validates and explains formulas using only documented functions and syntax. Anything without documented support shows up as a gap, with the reason.
-* **Solves requests with several parts.** "Add up this month's overtime hours and show me which table it comes from": it splits each part, solves them one by one and tells you what you still need to fill in.
+* **Solves requests with several parts.** "Add up this month's overtime hours and show me which table it comes from": it splits the request into parts, solves each one and tells you what you still need to fill in.
 * **Never touches your data.** Only the structure comes in from the database: names, descriptions, types and links. No business rows, no values.
 * **Keeps your reports on a Memory Card.** Like a video game memory card: each finished report becomes a save in your own private GitHub repository, with an article explaining what it does, a version, the reason for each change, and a schema check when the database changes.
 * **Knows T-SQL for real.** Tuning, execution plans, indexes, CTEs, window functions, PIVOT/MERGE/APPLY, transactions and security, checked against Microsoft's official documentation when a feature depends on the version.
 
-## What it looks like
+## JOINs only with proof
 
-> **You:** I want the list of active employees with the name of each one's section
->
-> **Claude (with Vegapunk):** searches the tables, details the columns and returns the query with your database's names, the JOIN proven by the composite key, and a warning if any filter depends on a code you need to provide.
+A wrong link doesn't throw an error: it runs and returns the wrong number. That's why Vegapunk only hands you a JOIN
+when it can show where it came from. When it can't, it writes no SQL and asks you.
+
+<img width="100%" alt="The proof rule. With proof: F_FUNCIONARIO and F_CARGO linked by the FK, JOIN delivered; proof can come from the database constraint, the system dictionary or the parent table key. Without proof: there is no FK path between S_EXAME and S_CANDIDATO, so no JOIN is made up." src="assets/readme/prova-en.svg" />
 
 No "I think the table is called EMPLOYEE". If a name did not come from your database, it does not go into the SQL.
 
 ## Results
 
+<img width="100%" alt="Results measured on requests the engine had never seen: multi-part requests from 74% to 94%; formulas that run a query from 70% to 90%; composite-key JOINs with proof from 0% to 100%; right table in the top 3 on a real ERP from 57% to 62%; right function in the top 3, 95% in both versions." src="assets/readme/resultados-en.svg" />
+
+<details>
+<summary><strong>The numbers as a table</strong></summary>
+
 Measured on requests the engine had never seen, set aside before any tuning.
 
 | What | Previous version | Now |
 |---|---|---|
-| Multi-part requests (formula + table + record) solved | 74% | **94%** |
+| Multi-part requests (formula + table + master data) solved | 74% | **94%** |
 | Requests with a formula that runs a query solved | 70% | **90%** |
 | Composite-key JOINs delivered with proof | 0% | **100%** |
 | Right table in the top 3, on a real ERP | 57% | **62%** |
 | Right function in the top 3, in formula search | 95% | **95%** |
+
+</details>
 
 On your database, the numbers depend mostly on the quality of the descriptions in your dictionary.
 
@@ -173,7 +214,7 @@ Then just ask Claude: "save this report to the Memory Card". It shows a preview 
 
 ## How it works inside
 
-<img width="100%" alt="How Vegapunk finds the right tables and functions" src="assets/vegapunk-sonar-en.svg" />
+<img width="100%" alt="Inside Vegapunk: Stella is the front door; around it orbit Punk Records (the local base), Nomi Nomi no Mi (the search engine), York (the only write path), Shaka (formulas), Atlas and Pythagoras (the guards), Edison and Lilith (calibration) and the Memory Card (your reports)." src="assets/readme/equipe-en.svg" />
 
 | Piece | What it does |
 |---|---|
@@ -210,7 +251,8 @@ vegapunk/
 ├── dominios/              # Schema, formulas and solutions
 ├── punk_records/          # Import, migrations, extraction queries and packs
 ├── referencias/           # Flows and T-SQL guides
-├── assets/                # README banners
+├── assets/                # Animated README images
+├── docs/                  # Project site (GitHub Pages)
 ├── casos/                 # Fictitious test cases and data
 └── testes/                # Test suite
 ```
@@ -238,7 +280,7 @@ MIT License, see [LICENSE](LICENSE) for details.
 
 ---
 
-<p align="center"><strong>Vegapunk</strong> doesn't guess. It knows.</p>
+<p align="center"><strong>Vegapunk</strong> doesn't guess. It knows.<br/><sub><a href="https://tiagocardosobezerra.github.io/vegapunk/">tiagocardosobezerra.github.io/vegapunk</a></sub></p>
 
 ```
                                                                  ░█▒▒▓▓▓▓█                          
