@@ -1,4 +1,4 @@
-<a href="https://tiagocardosobezerra.github.io/vegapunk/"><img width="100%" alt="Vegapunk: pergunte em português e receba o T-SQL certo, com as tabelas, as colunas e os JOINs reais do seu SQL Server. Na animação, o pedido 'funcionários ativos com o nome da seção' encontra as tabelas T001042 e T000318, prova o JOIN pela chave composta e vira a consulta." src="assets/readme/hero.svg" /></a>
+<a href="https://tiagocardosobezerra.github.io/vegapunk/"><img width="100%" alt="Vegapunk: pergunte em português e receba o T-SQL com os nomes reais do seu banco: as tabelas, as colunas e os JOINs reais do seu SQL Server. Na animação, o pedido 'funcionários ativos com o nome da seção' encontra as tabelas T001042 e T000318, prova o JOIN pela chave composta e vira a consulta." src="assets/readme/hero.svg" /></a>
 
 <p align="center">
   <a href="https://tiagocardosobezerra.github.io/vegapunk/"><strong>Site do projeto</strong></a> ·

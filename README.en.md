@@ -1,4 +1,4 @@
-<a href="https://tiagocardosobezerra.github.io/vegapunk/"><img width="100%" alt="Vegapunk: ask in plain language and get the right T-SQL, with the real tables, columns and JOINs from your SQL Server. In the animation, the request finds tables T001042 and T000318, proves the JOIN through the composite key and becomes the query." src="assets/readme/hero-en.svg" /></a>
+<a href="https://tiagocardosobezerra.github.io/vegapunk/"><img width="100%" alt="Vegapunk: ask in plain language and get T-SQL with your database's real names: the real tables, columns and JOINs from your SQL Server. In the animation, the request finds tables T001042 and T000318, proves the JOIN through the composite key and becomes the query." src="assets/readme/hero-en.svg" /></a>
 
 <p align="center">
   <a href="https://tiagocardosobezerra.github.io/vegapunk/"><strong>Project site</strong></a> (Portuguese) ·
