@@ -1,8 +1,8 @@
-<a href="https://tiagocardosobezerra.github.io/vegapunk/"><img width="100%" alt="Vegapunk: pergunte em português e receba o T-SQL com os nomes reais do seu banco: as tabelas, as colunas e os JOINs reais do seu SQL Server. Na animação, o pedido 'funcionários ativos com o nome da seção' encontra as tabelas T001042 e T000318, prova o JOIN pela chave composta e vira a consulta." src="assets/readme/hero.svg" /></a>
+<a href="https://tiagocardosobezerra.github.io/vegapunk/"><img width="100%" alt="Vegapunk: não adivinha, sabe. Pergunte em português e receba o T-SQL com os nomes reais do seu banco. Na animação, o pedido 'salário dos colaboradores por cargo' varre o mapa do banco fictício dos testes (192 tabelas, 246 ligações), destaca F_FUNCIONARIO e F_CARGO e carimba o JOIN provado." src="assets/readme/hero.svg" /></a>
 
 <p align="center">
   <a href="https://tiagocardosobezerra.github.io/vegapunk/"><strong>Site do projeto</strong></a> ·
-  <a href="https://tiagocardosobezerra.github.io/vegapunk/#demo"><strong>Ver a demonstração</strong></a> ·
+  <a href="https://tiagocardosobezerra.github.io/vegapunk/#laboratorio"><strong>Ver o laboratório</strong></a> ·
   <a href="#comece-em-3-passos"><strong>Instalar</strong></a> ·
   <a href="#resultados"><strong>Resultados</strong></a>
 </p>
@@ -37,14 +37,14 @@ responde com o que existe de verdade.
 
 ## Em 30 segundos
 
-> **Você:** quero o salário dos colaboradores por cargo
+> **Você:** quero o motivo do desligamento dos colaboradores
 
-O Vegapunk busca no mapa do seu banco, detalha as colunas e devolve o JOIN provado. O Claude escreve o SQL só com
+O Vegapunk busca no mapa do seu banco, detalha as tabelas e devolve o caminho provado, de dois saltos. O Claude escreve o SQL só com
 esses nomes:
 
-<img width="100%" alt="Saída real do Vegapunk no banco fictício dos testes. A busca encontra F_FUNCIONARIO e F_CARGO entre as tabelas críticas, o detalhar devolve as colunas e o JOIN provado pela FK, e o Claude escreve o SQL que soma a remuneração por cargo." src="assets/readme/demo.svg" />
+<img width="100%" alt="Laboratório: saída real (resumida) da Stella no banco fictício dos testes. Pedido: motivo do desligamento dos colaboradores. A busca ranqueia as tabelas, o detalhar devolve as fichas e o caminho F_FUNCIONARIO, F_DESLIGAMENTO, F_MOTIVO_DESLIGAMENTO, e o passo 3 mostra um SQL de exemplo escrito só com esses nomes." src="assets/readme/demo.svg" />
 
-<p align="center"><sub>Saída real da Stella (resumida) no "Sistema Aurora", o banco 100% fictício que vem nos testes. <a href="https://tiagocardosobezerra.github.io/vegapunk/#demo">Veja os quatro pedidos no site</a>, inclusive o que fica sem SQL por falta de prova.</sub></p>
+<p align="center"><sub>Saída real da Stella (resumida) no "Sistema Aurora", o banco 100% fictício que vem nos testes; o SQL do passo 3 é exemplo. <a href="https://tiagocardosobezerra.github.io/vegapunk/#laboratorio">Veja os seis pedidos no site</a>, inclusive o que fica sem SQL por falta de prova.</sub></p>
 
 ## O que ele faz por você
 
@@ -61,13 +61,13 @@ esses nomes:
 Uma ligação errada não dá erro: ela roda e devolve o número errado. Por isso o Vegapunk só entrega um JOIN quando
 consegue mostrar de onde ele veio. Quando não consegue, não escreve o SQL e pergunta a você.
 
-<img width="100%" alt="A regra da prova. Com prova: F_FUNCIONARIO e F_CARGO ligadas pela FK, JOIN entregue; a prova pode vir da constraint do banco, do dicionário do sistema ou da chave da tabela mãe. Sem prova: entre S_EXAME e S_CANDIDATO não existe caminho de FK, então nenhum JOIN é inventado." src="assets/readme/prova.svg" />
+<img width="100%" alt="JOIN só com prova. A prova vem da constraint do banco, do dicionário do sistema ou da chave da tabela mãe. Sem nenhuma das três, entre S_EXAME e S_CANDIDATO por exemplo, o Vegapunk não inventa a ligação e pergunta." src="assets/readme/prova.svg" />
 
 Nada de "acho que a tabela se chama FUNCIONARIO". Se o nome não veio do seu banco, ele não entra no SQL.
 
 ## Resultados
 
-<img width="100%" alt="Resultados medidos com pedidos que o motor nunca tinha visto: pedidos com várias partes de 74% para 94%; com fórmula que executa consulta de 70% para 90%; JOINs de chave composta com prova de 0% para 100%; tabela certa entre as 3 primeiras num ERP real de 57% para 62%; função certa entre as 3 primeiras, 95% nas duas versões." src="assets/readme/resultados.svg" />
+<img width="100%" alt="Ensaios com pedidos que o motor nunca tinha visto: várias partes de 74% para 94%; fórmula que executa consulta de 70% para 90%; JOINs de chave composta com prova de 0% para 100%; tabela certa entre as 3 primeiras num ERP real de 57% para 62%; função certa entre as 3 primeiras, 95% nas duas versões." src="assets/readme/resultados.svg" />
 
 <details>
 <summary><strong>Os números em tabela</strong></summary>
@@ -212,7 +212,7 @@ Depois é pedir ao Claude: "salve este relatório no Memory Card". Ele mostra a 
 
 ## Como funciona por dentro
 
-<img width="100%" alt="Por dentro do Vegapunk: a Stella é a porta de entrada; em volta giram Punk Records (a base local), Nomi Nomi no Mi (o motor de busca), York (a única porta de escrita), Shaka (fórmulas), Atlas e Pythagoras (os guardas), Edison e Lilith (calibração) e o Memory Card (seus relatórios)." src="assets/readme/equipe.svg" />
+<img width="100%" alt="Lista de peças do Vegapunk, em vista explodida: a Stella no centro, a única porta de entrada, e nove peças numeradas em volta: Punk Records, Nomi Nomi no Mi, York, Shaka, Atlas, Pythagoras, Edison, Lilith e Memory Card." src="assets/readme/equipe.svg" />
 
 | Peça | O que faz |
 |---|---|

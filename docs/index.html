@@ -3,690 +3,664 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vegapunk · T-SQL com os nomes reais do seu banco</title>
+<title>Vegapunk · não adivinha. sabe.</title>
 <meta name="description" content="Skill gratuita do Claude Code para Microsoft SQL Server. Pergunte em português e receba o T-SQL com as tabelas, colunas e JOINs que existem de verdade no seu banco, mesmo quando as tabelas se chamam T000123.">
 <meta property="og:title" content="Vegapunk · não adivinha. sabe.">
-<meta property="og:description" content="Pergunte em português. Receba o T-SQL com os nomes reais do seu banco: as tabelas, as colunas e os JOINs reais do seu SQL Server. Só estrutura, nunca dados.">
+<meta property="og:description" content="Pergunte em português. Receba o T-SQL com os nomes reais do seu SQL Server. Só estrutura, nunca dados. JOIN só com prova.">
 <meta property="og:image" content="https://tiagocardosobezerra.github.io/vegapunk/img/og.png">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="640">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tiagocardosobezerra.github.io/vegapunk/">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0a0f1c">
+<meta name="theme-color" content="#eeebe3">
 <link rel="icon" href="img/icone.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0a0f1c; --bg2:#0c1322; --panel:#0f1729; --surface:#131d33; --surface2:#18243f; --line:#1f2b45; --line2:#2b3a5c;
-  --ink:#e8eef8; --muted:#9aa8bf; --faint:#8090a8;
-  --cy:#22d3ee; --cy2:#0e7490; --vi:#a78bfa; --vi2:#6d28d9; --ok:#4ade80; --am:#fbbf24; --no:#f87171;
-  --dp:'Space Grotesk',system-ui,sans-serif; --tx:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-  --mo:'JetBrains Mono',ui-monospace,Consolas,monospace;
-  --w:1160px; --g:24px;
+  --paper:#eeebe3; --paper2:#e5e1d6; --card:#f7f5ef; --ink:#121212; --ink2:#2e2d2a; --mute:#5f5e57; --faint:#8b897f;
+  --line:rgba(18,18,18,.16); --grid:rgba(31,59,255,.075);
+  --blue:#1f3bff; --blue2:#9aa8ff; --red:#ff3b1f; --redt:#c8250f; --hi:#ffe53b; --ok:#0f8a4b;
+  --sf:'Instrument Serif',Georgia,serif; --tx:'Inter Tight',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mo:'JetBrains Mono',ui-monospace,Consolas,monospace; --hand:'Caveat','Comic Sans MS',cursive;
+  --w:1240px; --g:28px;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:72px}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--tx);-webkit-font-smoothing:antialiased;overflow-x:hidden}
-a{color:var(--cy);text-decoration:none}
-a:hover{text-decoration:underline}
-img,svg{max-width:100%}
-code,kbd,pre{font-family:var(--mo)}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 var(--tx);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:100;opacity:.22;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.28 0 0 0 0 0.25 0 0 0 .35 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+main,header,footer,nav,section,.band{position:relative;z-index:1}
+a{color:inherit}
+code,pre,kbd{font-family:var(--mo)}
 .wrap{max-width:var(--w);margin:0 auto;padding:0 var(--g)}
-h1,h2,h3{font-family:var(--dp);letter-spacing:-.02em;margin:0}
-h2{font-size:clamp(28px,4vw,42px);line-height:1.12;font-weight:700}
-h3{font-size:20px;font-weight:600}
-p{margin:0}
-.kicker{font:600 12px/1 var(--mo);letter-spacing:.14em;text-transform:uppercase;color:var(--cy);display:inline-flex;gap:8px;align-items:center;margin-bottom:16px}
-.kicker::before{content:"";width:18px;height:1px;background:currentColor}
-.sec-head{max-width:760px;margin-bottom:44px}
-.sec-head p{color:var(--muted);font-size:18px;margin-top:14px}
-section{padding:96px 0;position:relative}
-.vi{color:var(--vi)} .cy{color:var(--cy)} .ok{color:var(--ok)} .am{color:var(--am)} .no{color:var(--no)}
-.inst>*,.pane>*,.col>*,.fx>*,.res>*,.mc>*,.crew>*,.cmp>*,.io>*,.hero .wrap>*,.cmd,.term{min-width:0}
+.mono{font-family:var(--mo);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.hand{font-family:var(--hand);color:var(--redt);font-weight:600}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.inst>*,.lab-grid>*,.two>*,.bom>*,.mc>*,.fx>*,.res>*{min-width:0}
 
-/* nav */
-.nav{position:sticky;top:0;z-index:50;background:rgba(10,15,28,.82);backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .2s}
-.nav.scrolled{border-color:var(--line)}
-.nav .wrap{display:flex;align-items:center;gap:28px;height:64px}
-.logo{display:flex;align-items:center;gap:10px;color:var(--ink);font:700 19px var(--dp);letter-spacing:-.01em}
-.logo:hover{text-decoration:none}
-.logo svg{width:30px;height:30px}
-.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
-.nav ul a{color:var(--muted);font-size:14px;font-weight:500}
-.nav ul a:hover{color:var(--ink);text-decoration:none}
-.gh{display:flex;align-items:center;gap:8px;border:1px solid var(--line2);border-radius:8px;padding:7px 12px;color:var(--ink);font-size:14px;font-weight:600}
-.gh:hover{border-color:var(--cy);text-decoration:none}
-.gh svg{width:16px;height:16px;fill:currentColor}
+/* barra do topo: cabeçalho de prancha */
+.top{position:sticky;top:0;z-index:60;background:rgba(238,235,227,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--ink)}
+.top .wrap{display:flex;align-items:center;height:56px;gap:24px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:600 17px var(--tx);letter-spacing:-.01em}
+.brand svg{width:26px;height:26px}
+.sheet{color:var(--mute);border-left:1px solid var(--line);padding-left:16px}
+.top nav{margin-left:auto;display:flex;gap:22px}
+.top nav a{text-decoration:none;color:var(--ink2)}
+.top nav a:hover{color:var(--blue)}
+.gh{display:flex;align-items:center;gap:8px;background:var(--ink);color:var(--paper)!important;text-decoration:none;padding:8px 12px;font:600 13px var(--tx)}
+.gh svg{width:15px;height:15px;fill:currentColor}
+.gh:hover{background:var(--blue)}
 
 /* hero */
-.hero{padding:72px 0 88px;overflow:hidden}
-.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(800px 420px at 78% 30%,rgba(34,211,238,.09),transparent 70%),radial-gradient(600px 400px at 10% 90%,rgba(167,139,250,.07),transparent 70%);pointer-events:none}
-.hero .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:44px 44px;opacity:.28;mask-image:radial-gradient(ellipse at 60% 40%,#000 20%,transparent 72%);pointer-events:none}
-.hero .wrap{display:grid;grid-template-columns:1fr 1.08fr;gap:56px;align-items:center;position:relative}
-.pill{display:inline-flex;gap:10px;align-items:center;border:1px solid var(--line2);background:var(--panel);border-radius:999px;padding:5px 14px 5px 6px;font-size:13px;color:var(--muted)}
-.pill b{background:rgba(34,211,238,.12);color:var(--cy);border-radius:999px;padding:2px 10px;font:600 12px var(--mo)}
-.hero h1{font-size:clamp(38px,5.4vw,62px);line-height:1.04;font-weight:700;margin:22px 0 22px}
-.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--cy),var(--vi));-webkit-background-clip:text;background-clip:text;color:transparent}
-.lead{font-size:19px;color:var(--muted);max-width:540px}
-.lead strong{color:var(--ink);font-weight:600}
-.ctas{display:flex;gap:12px;flex-wrap:wrap;margin:32px 0 26px}
-.btn{display:inline-flex;align-items:center;gap:10px;border-radius:10px;padding:13px 20px;font-weight:600;font-size:15px;border:1px solid transparent;transition:transform .15s,background .15s,border-color .15s}
-.btn:hover{text-decoration:none;transform:translateY(-1px)}
-.btn-cy{background:var(--cy);color:#04232b}
-.btn-cy:hover{background:#5ee3f5}
-.btn-ghost{border-color:var(--line2);color:var(--ink)}
-.btn-ghost:hover{border-color:var(--cy)}
-.hero-meta{display:flex;flex-wrap:wrap;gap:10px 22px;font-size:13px;color:var(--faint)}
-.hero-meta span{display:flex;align-items:center;gap:8px}
-.hero-meta i{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(74,222,128,.15)}
+.hero{padding:40px 0 0;border-bottom:1px solid var(--ink)}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:36px;align-items:stretch}
+.hero-l{display:flex;flex-direction:column;padding-bottom:40px}
+.tag{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--ink);padding:6px 10px;align-self:flex-start;background:var(--card)}
+.tag i{width:8px;height:8px;background:var(--red);border-radius:50%;animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.25}}
+h1{font:400 clamp(64px,9.6vw,148px)/.86 var(--sf);letter-spacing:-.035em;margin:30px 0 0}
+h1 em{font-style:italic;position:relative;display:inline-block}
+h1 em svg{position:absolute;left:-2%;bottom:-.12em;width:104%;height:.32em;overflow:visible}
+h1 em svg path{stroke:var(--red);stroke-width:5;fill:none;stroke-linecap:round;stroke-dasharray:600;stroke-dashoffset:600;animation:draw 1.1s .9s cubic-bezier(.6,.1,.2,1) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.lead{font-size:19px;line-height:1.5;color:var(--ink2);max-width:520px;margin:34px 0 0}
+.lead b{font-weight:600;color:var(--ink)}
+.lead code{background:var(--hi);padding:0 4px;font-size:.88em}
+.ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.btn{display:inline-flex;align-items:center;gap:12px;padding:15px 20px;font:600 15px var(--tx);text-decoration:none;border:1.5px solid var(--ink);transition:transform .15s,box-shadow .15s,background .15s}
+.btn-ink{background:var(--ink);color:var(--paper)}
+.btn-ink:hover{background:var(--blue);border-color:var(--blue)}
+.btn-ghost{background:transparent}
+.btn:hover{transform:translate(-3px,-3px);box-shadow:3px 3px 0 var(--ink)}
+.btn-ink:hover{box-shadow:3px 3px 0 var(--red)}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ink);margin-top:auto;padding-top:0}
+.facts div{padding:16px 14px 0 0}
+.facts div+div{border-left:1px solid var(--line);padding-left:14px}
+.facts b{font:400 40px/1 var(--sf);display:block}
+.facts span{font-size:13px;color:var(--mute);display:block;margin-top:6px;line-height:1.35}
+.hero-r{position:relative;border-left:1px solid var(--ink);padding:0 0 0 0;display:flex;flex-direction:column}
+.fig-head{display:flex;justify-content:space-between;align-items:center;padding:10px 0 10px 18px;border-bottom:1px solid var(--line);color:var(--mute)}
+.fig-head b{color:var(--ink);font-weight:500}
+.mapbox{position:relative;flex:1;min-height:520px;cursor:crosshair}
+.mapbox canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.readout{position:absolute;right:12px;bottom:10px;color:var(--mute);background:rgba(238,235,227,.85);padding:2px 6px}
+.ask{position:absolute;left:18px;top:16px;right:18px;display:flex;gap:10px;align-items:baseline;font:500 15px var(--mo);background:var(--card);border:1px solid var(--ink);padding:10px 12px;box-shadow:4px 4px 0 var(--ink)}
+.ask .who{color:var(--blue);flex:none}
+.ask .car{display:inline-block;width:8px;height:16px;background:var(--red);vertical-align:-2px;animation:pulse 1s steps(1) infinite}
+.stamp{position:absolute;font:700 15px/1 var(--mo);letter-spacing:.12em;text-transform:uppercase;color:var(--red);border:3px solid var(--red);padding:10px 14px;transform:rotate(-8deg) scale(2.4);opacity:0;pointer-events:none;mix-blend-mode:multiply;border-radius:4px}
+.stamp small{display:block;font-size:10px;letter-spacing:.08em;margin-top:5px;font-weight:500}
+.stamp.on{animation:stamp .32s cubic-bezier(.3,1.6,.5,1) forwards}
+.stamp.blue{color:var(--blue);border-color:var(--blue)}
+@keyframes stamp{0%{opacity:0;transform:rotate(-8deg) scale(2.4)}100%{opacity:.92;transform:rotate(-8deg) scale(1)}}
+.note{position:absolute;font:600 22px/1.05 var(--hand);color:var(--red);transform:rotate(-4deg);pointer-events:none}
+.cap{padding:10px 0 12px 18px;border-top:1px solid var(--line);color:var(--mute);font-size:13px}
+.cap b{color:var(--ink);font-weight:600}
+.sound{position:absolute;right:12px;top:-34px;background:none;border:1px solid var(--line);font:500 11px var(--mo);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);padding:4px 8px;cursor:pointer}
+.sound[aria-pressed=true]{color:var(--red);border-color:var(--red)}
 
-/* console do hero */
-.console{background:linear-gradient(180deg,var(--panel),#0b1222);border:1px solid var(--line2);border-radius:16px;box-shadow:0 30px 80px -30px rgba(0,0,0,.8),0 0 0 1px rgba(34,211,238,.04) inset;overflow:hidden;position:relative}
-.console .bar{white-space:nowrap;display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);font:500 12px var(--mo);color:var(--faint)}
-.console .bar i{width:10px;height:10px;border-radius:50%;background:var(--line2)}
-.console .bar span{margin-left:8px}
-.console .bar b{margin-left:auto;color:var(--cy);font-weight:500}
-.c-body{padding:18px 18px 20px;min-height:430px;display:flex;flex-direction:column;gap:14px}
-.ask{font:500 14px/1.5 var(--mo);color:var(--ink);display:flex;gap:10px;min-height:22px}
-.ask .who{color:var(--vi);flex:none}
-.caret{display:inline-block;width:8px;height:16px;background:var(--cy);vertical-align:-3px;margin-left:2px;animation:blink 1s steps(1) infinite}
-@keyframes blink{50%{opacity:0}}
-.codes{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
-.codes span{font:500 11.5px var(--mo);color:var(--faint);background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:6px 0;text-align:center;transition:all .35s}
-.codes span.scan{color:var(--muted);border-color:var(--line2)}
-.codes span.hit{color:#04232b;background:var(--cy);border-color:var(--cy);font-weight:700}
-.codes span.hit2{color:#1c0f3d;background:var(--vi);border-color:var(--vi);font-weight:700}
-.found{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;opacity:0;transform:translateY(8px);transition:all .45s}
-.found.on{opacity:1;transform:none}
-.tcard{background:var(--bg2);border:1px solid var(--line2);border-radius:10px;padding:10px 12px}
-.tcard b{font:700 13px var(--mo);display:block}
-.tcard small{color:var(--muted);font-size:12px;line-height:1.35;display:block;margin-top:2px}
-.tcard.a{border-color:rgba(34,211,238,.5)} .tcard.a b{color:var(--cy)}
-.tcard.b{border-color:rgba(167,139,250,.5)} .tcard.b b{color:var(--vi)}
-.link{display:flex;flex-direction:column;align-items:center;gap:4px}
-.link .ln{width:56px;height:2px;background:linear-gradient(90deg,var(--cy),var(--vi));position:relative}
-.link .ln::after{content:"";position:absolute;right:-1px;top:-3px;border:4px solid transparent;border-left:6px solid var(--vi)}
-.proof{font:600 10.5px var(--mo);color:var(--ok);border:1px solid rgba(74,222,128,.4);background:rgba(74,222,128,.08);border-radius:999px;padding:2px 8px;white-space:nowrap}
-.sql{font:13px/1.65 var(--mo);background:#080d19;border:1px solid var(--line);border-radius:10px;padding:12px 14px;white-space:pre;overflow-x:auto;opacity:0;transition:opacity .4s;color:var(--ink)}
-.sql.on{opacity:1}
-.k{color:var(--vi)} .t{color:var(--cy)} .s{color:var(--am)} .cm{color:var(--faint)} .n{color:var(--ok)}
-.c-note{font-size:11.5px;color:var(--faint);padding:0 18px 14px;margin-top:-6px}
+/* faixa */
+.band{background:var(--ink);color:var(--paper);overflow:hidden;border-bottom:1px solid var(--ink)}
+.band .track{display:flex;gap:0;white-space:nowrap;animation:mq 38s linear infinite;width:max-content}
+.band span{font:400 30px/1 var(--sf);padding:16px 22px;display:flex;align-items:center;gap:22px}
+.band span i{font-style:normal;color:var(--red);font:500 16px var(--mo)}
+@keyframes mq{to{transform:translateX(-50%)}}
 
-/* faixa de números */
-.facts{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg2)}
-.facts .wrap{display:grid;grid-template-columns:repeat(5,1fr)}
-.fact{padding:26px 18px;border-left:1px solid var(--line)}
-.fact:first-child{border-left:none;padding-left:0}
-.fact b{font:700 30px/1 var(--dp);display:block;color:var(--ink);letter-spacing:-.02em}
-.fact span{font-size:13px;color:var(--muted);display:block;margin-top:8px;line-height:1.4}
+/* seções */
+section{padding:110px 0;border-bottom:1px solid var(--ink)}
+.sec-h{display:grid;grid-template-columns:150px 1fr;gap:24px;margin-bottom:56px}
+.sec-n{font:400 15px var(--mo);color:var(--blue);padding-top:14px;border-top:2px solid var(--blue);align-self:start}
+.sec-n b{display:block;font:400 64px/1 var(--sf);color:var(--ink);margin-top:8px;letter-spacing:-.03em}
+h2{font:400 clamp(42px,5.6vw,84px)/.95 var(--sf);letter-spacing:-.03em;margin:0}
+h2 em{font-style:italic;color:var(--blue)}
+.sec-h p{font-size:19px;color:var(--ink2);max-width:640px;margin:22px 0 0}
+h3{font:600 19px/1.25 var(--tx);margin:0;letter-spacing:-.01em}
 
 /* problema */
-.cmp{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px}
-.cmp .card header{display:flex;align-items:center;gap:10px;margin-bottom:14px;font:600 14px var(--tx)}
-.dot{width:9px;height:9px;border-radius:50%}
-.cmp pre{margin:0;font-size:13px;line-height:1.7;background:#080d19;border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto}
-.err{margin-top:12px;font:500 13px var(--mo);color:var(--no);background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.3);border-radius:8px;padding:10px 12px}
-.good{margin-top:12px;font:500 13px var(--mo);color:var(--ok);background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.3);border-radius:8px;padding:10px 12px}
-.cmp .card p{color:var(--muted);font-size:15px;margin-top:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start}
+.paper{background:var(--card);border:1px solid var(--ink);padding:24px 26px;position:relative;box-shadow:6px 6px 0 rgba(18,18,18,.9)}
+.paper.tilt-l{transform:rotate(-1.2deg)}
+.paper.tilt-r{transform:rotate(.9deg);margin-top:34px}
+.paper .lbl{display:flex;justify-content:space-between;color:var(--mute);margin-bottom:16px}
+.paper pre{margin:0;font-size:14.5px;line-height:1.75;white-space:pre-wrap}
+.k{color:var(--blue);font-weight:500}.t{color:var(--ink);font-weight:700}.c{color:var(--faint)}.v{color:#b3261e}
+.strike{position:relative}
+.strike::after{content:"";position:absolute;left:-6px;right:-6px;top:52%;height:3px;background:var(--red);transform:rotate(-2deg) scaleX(0);transform-origin:left;transition:transform .6s .2s cubic-bezier(.6,.1,.2,1)}
+.in .strike::after{transform:rotate(-2deg) scaleX(1)}
+.err{margin-top:16px;font:500 13.5px var(--mo);color:#b3261e;border-top:1px dashed var(--line);padding-top:12px}
+.paper p{color:var(--ink2);font-size:15.5px;margin:14px 0 0}
+.paper .hand{position:absolute;font-size:28px;line-height:1}
+.mark{background:linear-gradient(transparent 55%,var(--hi) 55%,var(--hi) 92%,transparent 92%);padding:0 2px}
 
-/* passos */
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;counter-reset:s}
-.step{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px 22px;position:relative}
-.step .num{font:700 13px var(--mo);color:var(--cy);border:1px solid rgba(34,211,238,.35);border-radius:8px;width:34px;height:34px;display:grid;place-items:center;margin-bottom:18px}
-.step h3{font-size:18px;margin-bottom:8px}
-.step p{color:var(--muted);font-size:14.5px}
-.step code{font-size:12.5px;color:var(--ink);background:var(--surface);border-radius:5px;padding:1px 5px}
-.step .who{display:inline-block;margin-top:14px;font:600 11px var(--mo);letter-spacing:.06em;text-transform:uppercase;color:var(--vi)}
-
-/* demo */
-.demo{background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
-.tabs button{font:500 14px var(--tx);color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;text-align:left;transition:all .15s}
-.tabs button:hover{color:var(--ink);border-color:var(--line2)}
-.tabs button[aria-selected=true]{color:var(--ink);border-color:var(--cy);background:rgba(34,211,238,.07)}
-.tabs button small{display:block;font:600 10.5px var(--mo);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
-.pane{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.term{background:#080d19;border:1px solid var(--line2);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
-.term .tbar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);font:500 12px var(--mo);color:var(--faint)}
-.term .tbar b{color:var(--ink);font-weight:500}
-.term .tbar .st{margin-left:auto;font-weight:600}
-.term pre{margin:0;padding:14px 16px;font-size:12.5px;line-height:1.65;overflow-x:auto;color:#c9d4e6;flex:1}
-.stage-l{font:600 11px var(--mo);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin:0 0 8px 2px;display:flex;gap:8px;align-items:center}
-.stage-l b{color:var(--cy);font-weight:600}
-.col{display:flex;flex-direction:column;gap:16px}
-.rank{display:flex;flex-direction:column;gap:8px;padding:14px 16px}
-.rk{display:grid;grid-template-columns:22px 1fr 64px;gap:10px;align-items:center;font:12.5px var(--mo)}
-.rk .nm{color:var(--ink);font-weight:500;display:flex;flex-direction:column;gap:5px}
-.rk .nm small{color:var(--faint);font:400 11px var(--mo)}
-.rk .bar{display:block;height:6px;background:var(--line);border-radius:4px;overflow:hidden}
-.rk .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--cy2),var(--cy));border-radius:4px;width:0;transition:width .9s cubic-bezier(.2,.8,.2,1)}
-.rk .sc{text-align:right;color:var(--muted)}
-.rk .pos{color:var(--faint)}
-.meta-line{padding:0 16px 14px;font:12px var(--mo);color:var(--faint)}
-.meta-line b{color:var(--muted);font-weight:500}
-.verdict-box{border-radius:12px;padding:14px 16px;font-size:14.5px;display:flex;gap:12px;align-items:flex-start}
-.verdict-box svg{flex:none;margin-top:2px}
-.verdict-box.ok{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.3);color:#c8f5d6}
-.verdict-box.warn{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.35);color:#fde9b0}
-.verdict-box.bad{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.3);color:#fdd0d0}
-.demo-foot{margin-top:18px;font-size:13px;color:var(--faint)}
+/* laboratório */
+.lab{background:var(--ink);color:var(--paper)}
+.lab::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(154,168,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(154,168,255,.08) 1px,transparent 1px);background-size:24px 24px;pointer-events:none}
+.lab .sec-n{color:var(--blue2);border-color:var(--blue2)}
+.lab .sec-n b,.lab h2{color:var(--paper)}
+.lab h2 em{color:var(--blue2)}
+.lab .sec-h p{color:#c9c6bc}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.chips button{font:500 14px var(--mo);background:transparent;color:#d9d6cc;border:1px solid #4a4944;padding:9px 12px;cursor:pointer;text-align:left;transition:all .15s}
+.chips button small{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8d8b82;margin-bottom:3px}
+.chips button:hover{border-color:var(--paper);color:var(--paper)}
+.chips button[aria-pressed=true]{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.chips button[aria-pressed=true] small{color:var(--red)}
+.lab-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:20px}
+.bench{border:1px solid #4a4944;position:relative;background:rgba(255,255,255,.02);display:flex;flex-direction:column}
+.bench .cvs{position:relative;flex:1;min-height:400px}
+.bench canvas{position:absolute;inset:0;width:100%;height:100%}
+.bench .fig-head{color:#8d8b82;border-color:#33322e;padding-left:14px;position:relative;z-index:2;background:rgba(18,18,18,.6)}
+.bench .fig-head b{color:var(--paper)}
+.steps{display:flex;gap:6px;padding:0 14px 14px}
+.steps span{flex:1;border-top:2px solid #3b3a36;padding-top:6px;color:#8d8b82;transition:all .3s}
+.steps span.on{border-color:var(--red);color:var(--paper)}
+.rank{list-style:none;margin:0;padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;column-gap:22px;border-bottom:1px solid #33322e}
+.rank li{display:grid;grid-template-columns:18px 1fr 50px;gap:8px;font:12px var(--mo);color:#b6b3a8;padding:4px 0;align-items:center;opacity:0;transform:translateX(-8px);transition:all .3s}
+.rank li.on{opacity:1;transform:none}
+.rank li b{color:var(--paper);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank li i{display:block;height:3px;background:#3b3a36;margin-top:4px}
+.rank li i::after{content:"";display:block;height:100%;width:var(--w,0%);background:var(--blue2);transition:width .8s}
+.rank li.hot i::after{background:var(--red)}
+.rank li em{font-style:normal;text-align:right}
+.out{display:flex;flex-direction:column;gap:14px}
+.cards{position:relative}
+.ficha{background:var(--card);color:var(--ink);border:1px solid var(--ink);padding:0;font:12.5px/1.5 var(--mo);box-shadow:4px 4px 0 rgba(0,0,0,.5);opacity:0;transform:translateY(16px) rotate(var(--r,0deg));transition:all .45s cubic-bezier(.2,.8,.2,1);margin-bottom:10px}
+.ficha.on{opacity:1;transform:rotate(var(--r,0deg))}
+.ficha header{display:flex;flex-wrap:wrap;gap:2px 12px;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--ink);padding:8px 12px;background:repeating-linear-gradient(0deg,transparent 0 21px,rgba(31,59,255,.12) 21px 22px)}
+.ficha header b{font-size:14px}
+.ficha header small{color:var(--mute);flex-basis:100%}
+.ficha ul{list-style:none;margin:0;padding:8px 12px 10px;background:repeating-linear-gradient(transparent 0 21px,rgba(31,59,255,.14) 21px 22px);background-position:0 8px}
+.ficha li{display:grid;grid-template-columns:minmax(0,1.1fr) 92px;gap:8px;line-height:22px}
+.ficha li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ficha li em{font-style:normal;color:var(--mute);text-align:right}
+.ficha li.pk span::before{content:"🔑 ";filter:grayscale(1)}
+.ficha li.hit span{background:var(--hi);padding:0 4px;line-height:20px;align-self:center}
+.receipt{background:var(--card);color:var(--ink);border:1px solid var(--ink);position:relative;padding:16px 18px 18px;font:13px/1.65 var(--mo);min-height:170px;box-shadow:4px 4px 0 rgba(0,0,0,.5);-webkit-mask:radial-gradient(circle at 8px 0,transparent 6px,#000 6.5px) 0 0/16px 51% repeat-x,linear-gradient(#000,#000) 0 8px/100% 100% no-repeat}
+.receipt .lbl{display:flex;justify-content:space-between;color:var(--mute);border-bottom:1px dashed var(--ink);padding-bottom:8px;margin-bottom:10px;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.receipt pre{margin:0;white-space:pre-wrap;word-break:break-word;min-height:110px;padding-bottom:64px}
+.receipt .stamp{right:16px;bottom:14px;transform-origin:center;background:var(--card)}
+.receipt{margin-bottom:26px}
+.warn{border:1px solid var(--red);color:#ffd2c9;padding:12px 14px;font-size:14.5px;display:none}
+.warn.on{display:block}
+.warn b{color:var(--red);font:700 12px var(--mo);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:4px}
+.lab-foot{margin-top:20px;color:#8d8b82;font-size:13px}
 
 /* prova */
-.proofs{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.pf{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
-.pf .ic{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;margin-bottom:16px}
-.pf h3{font-size:17px;margin-bottom:8px}
-.pf p{color:var(--muted);font-size:14.5px}
-.pf.stop{border-color:rgba(251,191,36,.35);background:linear-gradient(180deg,rgba(251,191,36,.05),var(--panel))}
+.proofs{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--ink);border-left:1px solid var(--ink)}
+.pf{border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:24px 22px 26px;background:var(--paper);position:relative}
+.pf .mono{color:var(--blue)}
+.pf svg{display:block;width:100%;height:120px;margin:16px 0 18px}
+.pf p{color:var(--ink2);font-size:15px;margin:8px 0 0}
+.pf.no{background:repeating-linear-gradient(-45deg,var(--paper) 0 14px,#f3e2d9 14px 28px)}
+.pf.no .mono{color:var(--red)}
+.draw path,.draw line,.draw rect,.draw circle,.draw ellipse{stroke-dasharray:3000;stroke-dashoffset:3000;transition:stroke-dashoffset 1.2s cubic-bezier(.6,.1,.2,1)}
+.in .draw path,.in .draw line,.in .draw rect,.in .draw circle,.in .draw ellipse,.draw.in path,.draw.in line,.draw.in rect,.draw.in circle,.draw.in ellipse{stroke-dashoffset:0}
 
 /* fórmulas */
-.fx{display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;align-items:center}
-.fx ul{list-style:none;padding:0;margin:24px 0 0;display:flex;flex-direction:column;gap:14px}
-.fx li{display:flex;gap:12px;color:var(--muted)}
-.fx li b{color:var(--ink);font-weight:600}
-.fx li svg{flex:none;margin-top:4px}
-.fx .col .term pre{font-size:12.5px}
+.fx{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.big-fx{font:400 clamp(70px,11vw,170px)/.9 var(--sf);letter-spacing:-.04em}
+.big-fx .bad{color:var(--faint)}
+.big-fx .good{display:block;color:var(--blue);font-style:italic}
+.fx ul{list-style:none;padding:0;margin:28px 0 0;border-top:1px solid var(--ink)}
+.fx li{padding:14px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:40px 1fr;font-size:16px;color:var(--ink2)}
+.fx li b{color:var(--ink)}
+.fx li span.mono{color:var(--blue);padding-top:3px}
+.print{background:var(--card);border:1px solid var(--ink);padding:18px 20px;font:13px/1.7 var(--mo);white-space:pre-wrap;margin:0;box-shadow:6px 6px 0 var(--ink)}
+.print + .print{margin-top:22px}
 
 /* privacidade */
-.priv{background:radial-gradient(700px 300px at 50% 0%,rgba(74,222,128,.06),transparent 70%)}
-.io{display:grid;grid-template-columns:1fr auto 1fr;gap:20px;align-items:stretch}
-.io .card h3{display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:18px}
-.io ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
-.io li{display:flex;gap:10px;font-size:15px;color:var(--muted);align-items:flex-start}
-.io li code{color:var(--ink);font-size:13px}
-.io li svg{flex:none;margin-top:5px}
-.io .mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--faint);font:600 11px var(--mo);letter-spacing:.08em;text-transform:uppercase;text-align:center}
-.io .mid .shield{width:74px;height:74px;border-radius:20px;background:var(--panel);border:1px solid var(--line2);display:grid;place-items:center}
-.notes{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
-.notes div{border:1px dashed var(--line2);border-radius:12px;padding:16px 18px;font-size:14px;color:var(--muted)}
-.notes b{color:var(--ink);display:block;margin-bottom:4px;font-weight:600}
+.cut{width:100%;height:auto;display:block;margin-bottom:40px}
+.ledger{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink)}
+.ledger>div{padding:22px 26px}
+.ledger>div+div{border-left:1px solid var(--ink);background:repeating-linear-gradient(-45deg,transparent 0 14px,rgba(255,59,31,.06) 14px 28px)}
+.ledger h3{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.ledger ul{list-style:none;margin:0;padding:0}
+.ledger li{padding:9px 0;border-bottom:1px dashed var(--line);display:flex;gap:12px;font-size:15.5px}
+.ledger li:last-child{border-bottom:none}
+.ledger li .mono{flex:none;width:28px;color:var(--blue);padding-top:3px}
+.ledger .no li .mono{color:var(--red)}
 
-/* equipe / órbita */
-.crew{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
-.orbit{position:relative;aspect-ratio:1;max-width:520px;width:100%;margin:0 auto}
-.orbit svg.rings{position:absolute;inset:0;width:100%;height:100%}
-.orbit .spin{position:absolute;inset:0;animation:spin 80s linear infinite}
-.orbit .spin.r2{animation-duration:120s;animation-direction:reverse}
-@keyframes spin{to{transform:rotate(360deg)}}
-.sat{position:absolute;transform:translate(-50%,-50%);}
-.sat button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;animation:spin 80s linear infinite reverse}
-.r2 .sat button{animation:spin 120s linear infinite}
-.sat .o{width:46px;height:46px;border-radius:50%;background:var(--panel);border:1.5px solid var(--line2);display:grid;place-items:center;font:700 14px var(--dp);transition:all .2s;color:var(--muted)}
-.sat span{font:600 11.5px var(--mo);color:var(--muted);background:rgba(10,15,28,.85);padding:1px 6px;border-radius:5px;white-space:nowrap}
-.sat button:hover .o,.sat button[aria-pressed=true] .o{border-color:var(--cy);color:var(--cy);box-shadow:0 0 0 6px rgba(34,211,238,.12)}
-.sat button[aria-pressed=true] span{color:var(--ink)}
-.sat button:focus-visible .o{outline:2px solid var(--cy);outline-offset:3px}
-.core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:132px;height:132px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#1a2a4a,#0c1424);border:1.5px solid rgba(34,211,238,.5);display:grid;place-items:center;text-align:center;box-shadow:0 0 60px rgba(34,211,238,.18)}
-.core button{all:unset;cursor:pointer;display:block}
-.core b{font:700 20px var(--dp);display:block}
-.core small{font:500 11px var(--mo);color:var(--cy)}
-.crew-info{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px;min-height:230px}
-.crew-info .role{font:600 11px var(--mo);letter-spacing:.1em;text-transform:uppercase;color:var(--vi)}
-.crew-info h3{font-size:26px;margin:6px 0 10px}
-.crew-info p{color:var(--muted)}
-.crew-info code{color:var(--ink);font-size:13px;background:var(--surface);padding:1px 6px;border-radius:5px}
-.crew-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
-.crew-list button{font:500 13px var(--tx);color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer}
-.crew-list button[aria-pressed=true]{color:var(--ink);border-color:var(--cy)}
+/* lista de peças */
+.bom{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.exploded{width:100%;height:auto;display:block}
+.exploded .part{cursor:pointer}
+.exploded .part rect,.exploded .part circle.body{transition:fill .2s,stroke .2s}
+.exploded .part.on rect,.exploded .part.on circle.body{fill:var(--hi)}
+.exploded .part.on .ld{stroke:var(--red)}
+.exploded .part.on .num{fill:var(--red)}
+table.parts{width:100%;border-collapse:collapse;font-size:14.5px}
+table.parts th{font:500 11px var(--mo);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);text-align:left;border-bottom:2px solid var(--ink);padding:8px 8px 8px 0}
+table.parts td{border-bottom:1px solid var(--line);padding:10px 8px 10px 0;vertical-align:top}
+table.parts td:first-child{font:500 13px var(--mo);color:var(--blue);width:36px}
+table.parts td:nth-child(2){font-weight:600;white-space:nowrap}
+table.parts td:last-child{font:12px var(--mo);color:var(--mute)}
+table.parts tr{cursor:pointer;transition:background .15s}
+table.parts tr.on{background:var(--hi)}
+table.parts tr.on td:first-child{color:var(--red)}
 
 /* memory card */
-.mc{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
-.slots{background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:18px}
-.slots header{display:flex;justify-content:space-between;align-items:center;font:600 12px var(--mo);color:var(--faint);margin-bottom:12px;letter-spacing:.06em;text-transform:uppercase}
-.slots header b{color:var(--ok)}
-.slot{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg2);margin-top:8px}
-.slot .ic{width:44px;height:44px;border-radius:9px;display:grid;place-items:center;font:700 13px var(--mo)}
-.slot b{display:block;font-size:14.5px;font-weight:600}
-.slot small{color:var(--faint);font:12px var(--mo)}
-.slot .v{font:600 12px var(--mo);color:var(--muted);text-align:right}
-.slot .v em{display:block;font-style:normal;color:var(--ok);font-weight:500;font-size:11px}
-.slot.new{border-style:dashed;color:var(--faint);grid-template-columns:44px 1fr}
-.mc ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:12px}
-.mc li{display:flex;gap:12px;color:var(--muted)}
-.mc li b{color:var(--ink);font-weight:600}
-.mc li svg{flex:none;margin-top:4px}
+.mc{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center}
+.cart{width:100%;max-width:460px;height:auto;display:block;margin:0 auto}
+.mc ul{list-style:none;padding:0;margin:26px 0 0;border-top:1px solid var(--ink)}
+.mc li{padding:13px 0;border-bottom:1px solid var(--line);color:var(--ink2);font-size:16px}
+.mc li b{color:var(--ink)}
 
 /* resultados */
-.res{display:grid;grid-template-columns:1.3fr .7fr;gap:32px;align-items:start}
-.bars{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:8px 24px}
-.br{padding:18px 0;border-top:1px solid var(--line)}
-.br:first-child{border-top:none}
-.br p{font-size:15px;margin-bottom:10px}
-.br .row{display:grid;grid-template-columns:76px 1fr 52px;gap:12px;align-items:center;font:12px var(--mo);color:var(--faint);margin-top:6px}
-.br .track{display:block;height:10px;background:var(--bg2);border-radius:6px;overflow:hidden}
-.br .track i{display:block;height:100%;border-radius:6px;width:0;transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
-.br .old i{background:var(--line2)}
-.br .new i{background:linear-gradient(90deg,var(--cy2),var(--cy))}
-.br .new b{color:var(--ink)}
-.br .row b{text-align:right}
-.res aside{display:flex;flex-direction:column;gap:16px}
-.res aside .card p{color:var(--muted);font-size:14.5px}
-.res aside .card b{color:var(--ink)}
-.big{font:700 44px/1 var(--dp);color:var(--cy);letter-spacing:-.03em;display:block;margin-bottom:8px}
+.res{display:grid;grid-template-columns:1.35fr .65fr;gap:40px;align-items:start}
+.chart{border:1px solid var(--ink);background:var(--card);padding:26px 26px 18px;position:relative;background-image:linear-gradient(rgba(31,59,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(31,59,255,.09) 1px,transparent 1px);background-size:10% 20px;background-position:0 0}
+.bar{padding:12px 0;border-bottom:1px dashed var(--line)}
+.bar:last-of-type{border-bottom:none}
+.bar p{margin:0 0 8px;font-size:15px}
+.row{display:grid;grid-template-columns:62px 1fr 52px;gap:10px;align-items:center;font:12px var(--mo);color:var(--mute);margin-top:4px}
+.row .tr{height:14px;position:relative}
+.row .tr i{position:absolute;inset:0 auto 0 0;width:0;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+.row.old .tr i{background:repeating-linear-gradient(-45deg,var(--faint) 0 2px,transparent 2px 6px);border:1px solid var(--faint)}
+.row.new .tr i{background:var(--blue)}
+.row.new b{color:var(--ink)}
+.row b{text-align:right}
+.circle62{position:absolute;pointer-events:none}
+.res aside{display:flex;flex-direction:column;gap:20px}
+.res aside .paper p{margin-top:6px}
+.huge{font:400 96px/.9 var(--sf);letter-spacing:-.04em;display:block}
 
 /* instalar */
-.inst{display:grid;grid-template-columns:.8fr 1.2fr;gap:48px;align-items:start}
-.req{margin-top:22px;display:flex;flex-direction:column;gap:10px;color:var(--muted);font-size:15px}
-.req div{display:flex;gap:10px;align-items:flex-start}
-.req svg{flex:none;margin-top:5px}
-.os{display:inline-flex;border:1px solid var(--line2);border-radius:10px;padding:3px;margin-bottom:16px;background:var(--panel)}
-.os button{font:600 13px var(--tx);color:var(--muted);background:transparent;border:0;border-radius:7px;padding:7px 14px;cursor:pointer}
-.os button[aria-selected=true]{background:var(--surface2);color:var(--ink)}
-.cmd{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden}
-.cmd header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
-.cmd header .num{font:700 12px var(--mo);color:var(--cy);border:1px solid rgba(34,211,238,.35);border-radius:6px;width:26px;height:26px;display:grid;place-items:center}
-.cmd header b{font-size:15px}
-.cmd header small{color:var(--faint);font-size:13px}
-.cmd .copy{margin-left:auto;font:600 12px var(--tx);color:var(--muted);background:var(--surface);border:1px solid var(--line2);border-radius:7px;padding:5px 10px;cursor:pointer}
-.cmd .copy:hover{color:var(--ink);border-color:var(--cy)}
-.cmd pre{white-space:pre-wrap;word-break:break-all;margin:0;padding:14px 16px;font-size:12.8px;line-height:1.7;overflow-x:auto;color:#c9d4e6}
-.cmd p{padding:0 16px 14px;color:var(--faint);font-size:13.5px}
-.cmd p code{color:var(--muted)}
+.inst{display:grid;grid-template-columns:.75fr 1.25fr;gap:56px;align-items:start}
+.req{list-style:none;padding:0;margin:26px 0 0;border-top:1px solid var(--ink)}
+.req li{padding:11px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;font-size:15px}
+.req li span.mono{color:var(--mute)}
+.os{display:inline-flex;border:1px solid var(--ink);margin-bottom:18px}
+.os button{font:600 13px var(--tx);background:transparent;border:0;padding:9px 16px;cursor:pointer;color:var(--ink2)}
+.os button[aria-selected=true]{background:var(--ink);color:var(--paper)}
+.cmd{border:1px solid var(--ink);background:var(--card);margin-bottom:16px}
+.cmd header{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid var(--ink)}
+.cmd header .n{font:400 34px/1 var(--sf);width:34px}
+.cmd header small{display:block;color:var(--mute);font-size:13px}
+.cmd .copy{margin-left:auto;font:500 11px var(--mo);letter-spacing:.08em;text-transform:uppercase;background:var(--paper);border:1px solid var(--ink);padding:6px 10px;cursor:pointer}
+.cmd .copy:hover{background:var(--ink);color:var(--paper)}
+.cmd pre{margin:0;padding:14px 16px;font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-all;color:var(--ink2)}
+.cmd p{margin:0;padding:0 16px 14px;font-size:13.5px;color:var(--mute)}
 
-/* limites */
-.limits{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.lm{border:1px solid var(--line);border-radius:14px;padding:20px 22px;background:var(--bg2)}
-.lm h3{font-size:16.5px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
-.lm p{color:var(--muted);font-size:14.5px}
+/* advertências */
+.warns{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--ink);border-left:1px solid var(--ink)}
+.wn{border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:22px 22px 24px}
+.wn .mono{display:inline-block;background:var(--ink);color:var(--hi);padding:3px 7px;margin-bottom:14px}
+.wn p{color:var(--ink2);font-size:15px;margin:8px 0 0}
+.stripe{height:14px;background:repeating-linear-gradient(-45deg,var(--ink) 0 12px,var(--hi) 12px 24px);border:1px solid var(--ink);border-bottom:none}
 
 /* final */
-.final{text-align:center;padding:110px 0;overflow:hidden}
-.final::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 300px at 50% 60%,rgba(34,211,238,.1),transparent 70%);pointer-events:none}
-.final h2{font-size:clamp(32px,4.6vw,52px);max-width:780px;margin:0 auto}
-.final p{color:var(--muted);font-size:18px;margin:18px auto 0;max-width:600px}
-.final .ctas{justify-content:center}
-.tagline{font:500 15px var(--mo);color:var(--faint);margin-top:28px}
-.tagline b{color:var(--ink);font-weight:600}
+.final{text-align:center;padding:140px 0 120px}
+.final h2{font-size:clamp(56px,9vw,140px);max-width:1100px;margin:0 auto}
+.final p{font-size:19px;color:var(--ink2);margin:26px auto 0;max-width:600px}
+.final .ctas{justify-content:center;margin-top:36px}
 
-footer.site{border-top:1px solid var(--line);padding:44px 0 56px;font-size:14px;color:var(--faint)}
-footer.site .wrap{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:32px}
-footer.site h4{font:600 12px var(--mo);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
-footer.site ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-footer.site a{color:var(--muted)}
-footer.site p{line-height:1.6}
+/* carimbo de prancha (rodapé) */
+footer{padding:44px 0 60px}
+.tb{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;border:1.5px solid var(--ink);background:var(--card)}
+.tb>div{padding:14px 16px;border-right:1px solid var(--ink)}
+.tb>div:last-child{border-right:none}
+.tb .mono{display:block;color:var(--mute);font-size:10.5px;margin-bottom:6px}
+.tb b{font-weight:600}
+.tb a{color:var(--ink)}
+.tb a:hover{color:var(--blue)}
+.tb .r2{grid-column:1/-1;border-top:1px solid var(--ink);border-right:none;display:flex;flex-wrap:wrap;gap:8px 28px;font-size:13.5px;color:var(--ink2)}
+.tb ul{list-style:none;margin:0;padding:0;font-size:14px;line-height:1.7}
 
-/* revelar ao rolar */
-.rv{opacity:0;transform:translateY(18px);transition:opacity .7s,transform .7s cubic-bezier(.2,.8,.2,1)}
+/* revelar */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .8s,transform .8s cubic-bezier(.2,.8,.2,1)}
 .rv.in{opacity:1;transform:none}
 
-@media (max-width:1020px){
-  .nav ul{display:none}
-  .gh{margin-left:auto}
-  .hero .wrap,.fx,.crew,.mc,.res,.inst{grid-template-columns:1fr}
-  .steps,.proofs{grid-template-columns:1fr 1fr}
-  .facts .wrap{grid-template-columns:repeat(3,1fr)}
-  .fact:nth-child(4){border-left:none;padding-left:0}
-  .fact:nth-child(n+4){border-top:1px solid var(--line)}
-  .pane{grid-template-columns:1fr}
-  .limits,.notes{grid-template-columns:1fr 1fr}
+@media (max-width:1060px){
+  .top nav{display:none}.gh{margin-left:auto}
+  .hero .wrap,.lab-grid,.fx,.bom,.mc,.res,.inst{grid-template-columns:1fr}
+  .hero-r{border-left:none;border-top:1px solid var(--ink);margin:0 calc(-1*var(--g))}
+  .mapbox{min-height:440px}
+  .proofs{grid-template-columns:1fr 1fr}
+  .warns{grid-template-columns:1fr 1fr}
+  .sec-h{grid-template-columns:1fr;gap:16px}
+  .sec-n{display:flex;align-items:baseline;gap:14px}.sec-n b{font-size:40px;margin:0}
 }
 @media (max-width:680px){
+  .rank{grid-template-columns:1fr}
   :root{--g:16px}
-  section{padding:68px 0}
-  .hero{padding:44px 0 64px}
+  section{padding:72px 0}
+  .sheet{display:none}
+  h1{margin-top:22px}
   .lead{font-size:17px}
-  .cmp,.steps,.proofs,.limits,.notes{grid-template-columns:1fr}
-  .io{grid-template-columns:1fr}
-  .io .mid{flex-direction:row}
-  .io .mid .shield{width:54px;height:54px}
-  .facts .wrap{grid-template-columns:1fr 1fr}
-  .fact{padding:20px 12px 20px 0;border-left:none!important}
-  .fact:nth-child(even){padding-left:14px;border-left:1px solid var(--line)!important}
-  .fact:nth-child(n+3){border-top:1px solid var(--line)}
-  .fact:nth-child(5){grid-column:1/-1;padding-left:0;border-left:none!important}
-  .codes{grid-template-columns:repeat(4,1fr)}
-  .codes span:nth-child(n+17){display:none}
-  .found{grid-template-columns:1fr;justify-items:stretch}
-  .link{flex-direction:row;justify-content:center}
-  .link .ln{width:2px;height:22px;background:linear-gradient(180deg,var(--cy),var(--vi))}
-  .link .ln::after{display:none}
-  .c-body{min-height:0}
-  .console .bar span{display:none}
+  .two,.proofs,.warns,.ledger{grid-template-columns:1fr}
+  .ledger>div+div{border-left:none;border-top:1px solid var(--ink)}
+  .paper.tilt-r{margin-top:0}
   .btn{width:100%;justify-content:center}
   .gh span{display:none}
-  footer.site .wrap{grid-template-columns:1fr}
-  .tabs button{flex:1 1 calc(50% - 8px)}
-  .sat span{font-size:10px}
-  .sat .o{width:38px;height:38px;font-size:12px}
-  .core{width:100px;height:100px}
-  .core b{font-size:16px}
+  .facts b{font-size:30px}
+  .mapbox{min-height:380px}
+  .ask{font-size:13px;top:10px;left:10px;right:10px}
+  .bench .cvs{min-height:340px}
+  .tb{grid-template-columns:1fr 1fr}
+  .tb>div:nth-child(2){border-right:none}
+  .tb>div:nth-child(-n+2){border-bottom:1px solid var(--ink)}
+  .huge{font-size:72px}
+  .band span{font-size:24px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
-  html{scroll-behavior:auto}
   .rv{opacity:1;transform:none}
+  h1 em svg path{stroke-dashoffset:0}
+  .draw path,.draw line,.draw rect,.draw circle,.draw ellipse{stroke-dashoffset:0}
+  .strike::after{transform:rotate(-2deg) scaleX(1)}
+  html{scroll-behavior:auto}
 }
 </style>
 </head>
 <body>
 
-<nav class="nav" id="nav">
+<div class="top">
   <div class="wrap">
-    <a class="logo" href="#topo" aria-label="Vegapunk, início">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0f1729" stroke="#2b3a5c"/><path d="M8.5 9.5 16 22.5" stroke="#22d3ee" stroke-width="2.6" stroke-linecap="round"/><path d="M23.5 9.5 16 22.5" stroke="#a78bfa" stroke-width="2.6" stroke-linecap="round"/><circle cx="8.5" cy="9.5" r="3" fill="#22d3ee"/><circle cx="23.5" cy="9.5" r="3" fill="#a78bfa"/><circle cx="16" cy="22.5" r="3.6" fill="#4ade80" stroke="#0f1729" stroke-width="1.4"/></svg>
-      <span>Vegapunk</span>
+    <a class="brand" href="#topo" aria-label="Vegapunk, início">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" fill="#121212"/><path d="M8.5 9.5 16 22.5 23.5 9.5" stroke="#eeebe3" stroke-width="2.4" fill="none" stroke-linejoin="miter"/><circle cx="8.5" cy="9.5" r="2.6" fill="#eeebe3"/><circle cx="23.5" cy="9.5" r="2.6" fill="#eeebe3"/><circle cx="16" cy="22.5" r="3.4" fill="#ff3b1f"/></svg>
+      Vegapunk
     </a>
-    <ul>
-      <li><a href="#como">Como funciona</a></li>
-      <li><a href="#demo">Demonstração</a></li>
-      <li><a href="#privacidade">Privacidade</a></li>
-      <li><a href="#resultados">Resultados</a></li>
-      <li><a href="#instalar">Instalar</a></li>
-    </ul>
+    <span class="sheet mono">Prancha VP-001 · Skill do Claude Code</span>
+    <nav class="mono" aria-label="Seções">
+      <a href="#laboratorio">Laboratório</a>
+      <a href="#prova">Prova</a>
+      <a href="#privacidade">Privacidade</a>
+      <a href="#pecas">Peças</a>
+      <a href="#instalar">Instalar</a>
+    </nav>
     <a class="gh" href="https://github.com/tiagocardosobezerra/vegapunk">
       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
       <span>GitHub</span>
     </a>
   </div>
-</nav>
+</div>
 
 <header class="hero" id="topo">
-  <div class="grid-bg"></div>
   <div class="wrap">
-    <div>
-      <span class="pill"><b>SQL Server</b> Skill gratuita para o Claude Code</span>
-      <h1>Pergunte em português. Receba o T&#8209;SQL com os <em>nomes reais do seu banco.</em></h1>
-      <p class="lead">O Vegapunk consulta um mapa do <strong>seu</strong> banco, guardado só no seu computador, e responde com as tabelas, as colunas e os JOINs que <strong>existem de verdade</strong>. Mesmo quando as tabelas se chamam <code style="color:var(--ink)">T000123</code>.</p>
+    <div class="hero-l">
+      <span class="tag mono"><i></i>T-SQL · Microsoft SQL Server · grátis</span>
+      <h1>Não adivinha.<br><em>Sabe.<svg viewBox="0 0 300 30" preserveAspectRatio="none" aria-hidden="true"><path d="M4 20 C 60 6, 140 28, 200 14 S 280 8, 296 18"/></svg></em></h1>
+      <p class="lead">Você pergunta em português. O Vegapunk consulta o mapa do <b>seu</b> SQL Server, guardado no seu computador, e o Claude escreve o T-SQL com as tabelas, as colunas e os JOINs que <b>existem de verdade</b>. Mesmo quando as tabelas se chamam <code>T000123</code>.</p>
       <div class="ctas">
-        <a class="btn btn-cy" href="#demo">
-          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 1l11 6-11 6z" fill="currentColor"/></svg>
-          Ver uma consulta nascer
-        </a>
+        <a class="btn btn-ink" href="#laboratorio">Abrir o laboratório <span aria-hidden="true">↘</span></a>
         <a class="btn btn-ghost" href="#instalar">Instalar em 3 passos</a>
       </div>
-      <div class="hero-meta">
-        <span><i></i>Python puro, sem dependências</span>
-        <span><i></i>346 testes</span>
-        <span><i></i>Licença MIT</span>
+      <div class="facts" style="margin-top:44px">
+        <div><b>0</b><span>linhas de dados lidas: só a estrutura</span></div>
+        <div><b>346</b><span>testes automatizados</span></div>
+        <div><b>0</b><span>dependências: Python puro</span></div>
       </div>
     </div>
-
-    <div class="console" aria-label="Ilustração: um pedido em português vira uma consulta T-SQL com tabelas de nome em código.">
-      <div class="bar"><i></i><i></i><i></i><span>claude · vegapunk</span><b id="hstate">buscando…</b></div>
-      <div class="c-body">
-        <div class="ask"><span class="who">você ›</span><span><span id="htype"></span><span class="caret"></span></span></div>
-        <div class="codes" id="hcodes" aria-hidden="true"></div>
-        <div class="found" id="hfound">
-          <div class="tcard a"><b>T001042</b><small>Cadastro de funcionários</small></div>
-          <div class="link"><div class="ln"></div><span class="proof">✓ provado · FK composta</span></div>
-          <div class="tcard b"><b>T000318</b><small>Seções da empresa</small></div>
-        </div>
-<pre class="sql" id="hsql"><span class="k">SELECT</span> f.<span class="t">NOME</span>, s.<span class="t">DESCRICAO</span> <span class="k">AS</span> secao
-<span class="k">FROM</span> <span class="t">T001042</span> <span class="k">AS</span> f
-<span class="k">INNER JOIN</span> <span class="t">T000318</span> <span class="k">AS</span> s
-  <span class="k">ON</span> s.<span class="t">CODEMP</span> = f.<span class="t">CODEMP</span>
- <span class="k">AND</span> s.<span class="t">CODSECAO</span> = f.<span class="t">CODSECAO</span>
-<span class="k">WHERE</span> f.<span class="t">SITUACAO</span> = <span class="s">@ativo</span>  <span class="cm">-- código a informar</span></pre>
+    <div class="hero-r">
+      <div class="fig-head mono"><span><b>Fig. 01</b> · o mapa</span><span>192 tabelas · 246 ligações</span></div>
+      <div class="mapbox" id="heroMap">
+        <canvas aria-hidden="true"></canvas>
+        <div class="ask" aria-live="polite"><span class="who">você ›</span><span><span class="typed"></span><span class="car"></span></span></div>
+        <div class="stamp" id="heroStamp">JOIN provado<small>FK_F_FUNCIONARIO_F_CARGO</small></div>
+        <span class="readout mono" id="readout">x 000 · y 000</span>
       </div>
-      <p class="c-note">Ilustração. No seu banco, os nomes e as descrições vêm do catálogo que você importou.</p>
+      <p class="cap"><b>Fig. 01.</b> O "Sistema Aurora", banco 100% fictício que vem nos testes: cada ponto é uma tabela, cada traço uma ligação. Os destaques são o que a Stella devolveu de verdade.</p>
     </div>
   </div>
 </header>
 
-<div class="facts">
-  <div class="wrap">
-    <div class="fact rv"><b>0</b><span>linhas de dados lidas do seu banco: só a estrutura</span></div>
-    <div class="fact rv"><b>3</b><span>consultas prontas ao catálogo <code>sys.*</code>, com <code>VIEW DEFINITION</code></span></div>
-    <div class="fact rv"><b>100%</b><span>dos JOINs de chave composta entregues com prova, nos pedidos de teste</span></div>
-    <div class="fact rv"><b>346</b><span>testes automatizados na suíte da skill</span></div>
-    <div class="fact rv"><b>0</b><span>dependências: Python 3.8+ e a biblioteca padrão</span></div>
-  </div>
-</div>
+<div class="band" aria-hidden="true"><div class="track">
+  <span>só estrutura <i>✕</i></span><span>nunca dados <i>✕</i></span><span>JOIN só com prova <i>✕</i></span><span>na dúvida, pergunta <i>✕</i></span><span>Python puro <i>✕</i></span><span>fórmula sem invenção <i>✕</i></span>
+  <span>só estrutura <i>✕</i></span><span>nunca dados <i>✕</i></span><span>JOIN só com prova <i>✕</i></span><span>na dúvida, pergunta <i>✕</i></span><span>Python puro <i>✕</i></span><span>fórmula sem invenção <i>✕</i></span>
+</div></div>
 
+<main>
 <section id="problema">
   <div class="wrap">
-    <div class="sec-head rv">
-      <span class="kicker">O problema</span>
-      <h2>O Claude escreve ótimo SQL. Só que ele nunca viu o seu banco.</h2>
-      <p>Num ERP de verdade, a tabela de funcionários não se chama <code>FUNCIONARIOS</code>. Sem um mapa do seu banco, qualquer assistente chuta um nome plausível, e o erro só aparece quando você roda.</p>
+    <div class="sec-h rv">
+      <div class="sec-n">§ 01<b>01</b></div>
+      <div>
+        <h2>Todo assistente sabe SQL. <em>Sem um mapa, não conhece o seu banco.</em></h2>
+        <p>Num ERP de verdade, a tabela de funcionários costuma não se chamar <code>FUNCIONARIOS</code>. Sem um mapa, o assistente chuta um nome plausível. O erro só aparece quando você roda, ou pior: não aparece.</p>
+      </div>
     </div>
-    <div class="cmp">
-      <div class="card rv">
-        <header><span class="dot" style="background:var(--no)"></span>Sem o Vegapunk: um nome plausível</header>
+    <div class="two">
+      <div class="paper tilt-l rv">
+        <div class="lbl mono"><span>Sem o Vegapunk</span><span>o chute</span></div>
 <pre><span class="k">SELECT</span> f.NOME, s.NOME
-<span class="k">FROM</span> FUNCIONARIO f
-<span class="k">JOIN</span> SECAO s <span class="k">ON</span> s.ID = f.SECAO_ID</pre>
+<span class="k">FROM</span> <span class="strike">FUNCIONARIO</span> f
+<span class="k">JOIN</span> <span class="strike">SECAO</span> s <span class="k">ON</span> s.ID = f.SECAO_ID</pre>
         <div class="err">Msg 208: Invalid object name 'FUNCIONARIO'.</div>
-        <p>A tabela, as colunas e a ligação foram adivinhadas. Em chave composta, o chute pode esquecer metade da chave, e aí a consulta roda e devolve linhas duplicadas.</p>
+        <p>Tabela, colunas e ligação adivinhadas. Numa chave composta, o chute pode esquecer metade da chave: a consulta roda e devolve linhas duplicadas.</p>
+        <span class="hand" style="right:22px;top:-22px;transform:rotate(6deg)">nome inventado!</span>
       </div>
-      <div class="card rv">
-        <header><span class="dot" style="background:var(--ok)"></span>Com o Vegapunk: o nome que existe</header>
+      <div class="paper tilt-r rv">
+        <div class="lbl mono"><span>Com o Vegapunk</span><span>do seu catálogo</span></div>
 <pre><span class="k">SELECT</span> f.<span class="t">NOME</span>, s.<span class="t">DESCRICAO</span>
-<span class="k">FROM</span> <span class="t">T001042</span> f
-<span class="k">JOIN</span> <span class="t">T000318</span> s <span class="k">ON</span> s.<span class="t">CODEMP</span> = f.<span class="t">CODEMP</span>
-                <span class="k">AND</span> s.<span class="t">CODSECAO</span> = f.<span class="t">CODSECAO</span></pre>
-        <div class="good">✓ tabelas, colunas e JOIN vindos do seu catálogo</div>
-        <p>Cada nome saiu do mapa do seu banco. O JOIN veio de uma prova: a constraint, o dicionário do sistema ou a chave da tabela mãe. Se o nome não veio do seu banco, ele não entra no SQL.</p>
-        <p style="font-size:12px;color:var(--faint)">Ilustração. No seu banco, os nomes vêm do catálogo que você importou.</p>
+<span class="k">FROM</span> <span class="mark t">T001042</span> f
+<span class="k">JOIN</span> <span class="mark t">T000318</span> s
+  <span class="k">ON</span> s.<span class="t">CODEMP</span> = f.<span class="t">CODEMP</span>
+ <span class="k">AND</span> s.<span class="t">CODSECAO</span> = f.<span class="t">CODSECAO</span></pre>
+        <p>Cada nome saiu do mapa. O JOIN veio de uma prova, com a chave inteira. Se um nome não veio do seu banco, ele não entra no SQL.</p>
+        <p class="mono" style="font-size:12px;color:var(--mute)">Ilustração. No seu banco, os nomes vêm do catálogo que você importou.</p>
+        <div class="stamp" style="right:22px;bottom:-26px;opacity:.95;transform:rotate(-8deg);background:var(--card)">Provado</div>
       </div>
     </div>
   </div>
 </section>
 
-<section id="como" style="padding-top:24px">
+<section id="laboratorio" class="lab">
   <div class="wrap">
-    <div class="sec-head rv">
-      <span class="kicker">Como funciona</span>
-      <h2>Você importa o mapa uma vez. Depois é só pedir.</h2>
-      <p>Tudo roda na sua máquina, com Python puro. O Claude lê a skill e segue o fluxo sozinho.</p>
-    </div>
-    <div class="steps">
-      <div class="step rv">
-        <div class="num">01</div>
-        <h3>Extrai a estrutura</h3>
-        <p>Três consultas prontas leem só o catálogo do SQL Server: nomes, tipos, chaves e descrições. Basta <code>VIEW DEFINITION</code>.</p>
-        <span class="who">você · sqlcmd ou SSMS</span>
-      </div>
-      <div class="step rv">
-        <div class="num">02</div>
-        <h3>Importa o mapa</h3>
-        <p>O import calcula as ligações, a relevância e o ranking de cada tabela, e avisa se alguma ligação aponta para o que não existe.</p>
-        <span class="who">York</span>
-      </div>
-      <div class="step rv">
-        <div class="num">03</div>
-        <h3>Acha as tabelas</h3>
-        <p>Seu pedido é casado com a descrição de negócio de cada coluna, com sinônimos, e o peso de cada tabela vem das ligações dela.</p>
-        <span class="who">Stella · buscar</span>
-      </div>
-      <div class="step rv">
-        <div class="num">04</div>
-        <h3>Entrega com prova</h3>
-        <p>As colunas exatas e o JOIN pronto, só quando existe prova. O Claude escreve o T-SQL com esses nomes, e o que você usou calibra a próxima busca.</p>
-        <span class="who">Stella · detalhar</span>
+    <div class="sec-h rv">
+      <div class="sec-n">§ 02<b>02</b></div>
+      <div>
+        <h2>O laboratório. <em>Saídas reais do motor.</em></h2>
+        <p>Escolha um pedido. A Stella busca no mapa do Sistema Aurora, detalha as tabelas e devolve o caminho. O ranking, as fichas, o caminho e os avisos são o que ela respondeu, inclusive quando a resposta é "não sei, pergunte". O SQL do recibo é um exemplo escrito com esses nomes.</p>
       </div>
     </div>
-  </div>
-</section>
-
-<section id="demo" class="demo">
-  <div class="wrap">
-    <div class="sec-head rv">
-      <span class="kicker">Demonstração</span>
-      <h2>Quatro pedidos, saídas reais do motor.</h2>
-      <p>Rodado no "Sistema Aurora", o banco 100% fictício que vem nos testes do Vegapunk. As tabelas, as pontuações, os JOINs e os avisos abaixo são o que a Stella devolveu.</p>
+    <div class="chips" id="chips" role="group" aria-label="Pedidos de exemplo"></div>
+    <div class="lab-grid">
+      <div class="bench" id="labMap">
+        <div class="fig-head mono"><span><b>Fig. 02</b> · bancada</span><span id="labMod" style="margin-left:auto">módulo</span></div>
+        <ol class="rank" id="rank" aria-label="Tabelas críticas da busca"></ol>
+        <div class="cvs" id="labCvs"><canvas aria-hidden="true"></canvas></div>
+        <p class="mono" style="margin:0;padding:8px 14px 10px;color:#b6b3a8;font-size:11px"><span style="background:var(--hi);color:var(--ink);padding:0 5px">amarelo</span> nas fichas = colunas que a busca marcou para o pedido</p>
+        <div class="steps mono"><span data-s="1">1 · buscar</span><span data-s="2">2 · detalhar</span><span data-s="3">3 · escrever</span></div>
+      </div>
+      <div class="out">
+        <div class="cards" id="cards" aria-live="polite"></div>
+        <div class="warn" id="warn"></div>
+        <div class="receipt" id="receipt">
+          <div class="lbl"><span>Exemplo de SQL com os nomes devolvidos</span><span id="rcptN">nº 000</span></div>
+          <pre id="sql"></pre>
+          <div class="stamp" id="labStamp">Provado</div>
+        </div>
+      </div>
     </div>
-    <div class="tabs" role="tablist" aria-label="Pedidos de exemplo">
-      <button role="tab" aria-selected="true" data-k="salario"><small class="cy">JOIN direto</small>salário por cargo</button>
-      <button role="tab" aria-selected="false" data-k="deslig"><small class="cy">dois saltos</small>motivo do desligamento</button>
-      <button role="tab" aria-selected="false" data-k="exame"><small class="am">sem prova</small>exames dos candidatos</button>
-      <button role="tab" aria-selected="false" data-k="formula"><small class="vi">fórmula</small>função que não existe</button>
-    </div>
-    <div class="pane" id="pane" role="tabpanel"></div>
-    <p class="demo-foot">O SQL final é escrito pelo Claude com os nomes e o JOIN que a Stella devolveu; a Stella não executa nada no seu banco.</p>
+    <p class="lab-foot">A Stella não executa nada no seu banco: ela lê o mapa local. No uso real, quem escreve o SQL é o Claude, com os nomes e o JOIN que ela devolveu. Aqui, o recibo é um exemplo com esses mesmos nomes.</p>
   </div>
 </section>
 
 <section id="prova">
   <div class="wrap">
-    <div class="sec-head rv">
-      <span class="kicker">A regra da prova</span>
-      <h2>JOIN só com prova. Sem prova, ele avisa.</h2>
-      <p>Uma ligação errada não dá erro: ela roda e devolve o número errado. Por isso o Vegapunk só entrega um JOIN quando consegue mostrar de onde ele veio, inclusive em chave composta.</p>
+    <div class="sec-h rv">
+      <div class="sec-n">§ 03<b>03</b></div>
+      <div>
+        <h2>JOIN só com prova. <em>Sem prova, ele pergunta.</em></h2>
+        <p>Uma ligação errada não dá erro: ela roda e devolve o número errado. Por isso o Vegapunk só entrega um JOIN quando consegue mostrar de onde ele veio.</p>
+      </div>
     </div>
     <div class="proofs">
       <div class="pf rv">
-        <div class="ic" style="background:rgba(34,211,238,.1)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#22d3ee" stroke-width="1.8"><rect x="2" y="3" width="7" height="6" rx="1.5"/><rect x="11" y="11" width="7" height="6" rx="1.5"/><path d="M5.5 9v5h5.5"/></svg></div>
+        <span class="mono">Prova A</span>
+        <svg class="draw" viewBox="0 0 220 120" fill="none" stroke="#121212" stroke-width="1.6"><rect x="10" y="20" width="70" height="80"/><line x1="10" y1="40" x2="80" y2="40"/><rect x="140" y="20" width="70" height="80"/><line x1="140" y1="40" x2="210" y2="40"/><path d="M80 70 H140" stroke="#1f3bff" stroke-width="2.4"/><circle cx="110" cy="70" r="7" stroke="#1f3bff"/><path d="M20 56h40M20 72h30M150 56h40M150 72h30" stroke-width="1"/></svg>
         <h3>A constraint do banco</h3>
         <p>A chave estrangeira declarada no SQL Server, campo a campo e na ordem certa.</p>
       </div>
       <div class="pf rv">
-        <div class="ic" style="background:rgba(167,139,250,.1)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#a78bfa" stroke-width="1.8"><path d="M4 3h9l3 3v11H4z"/><path d="M7 8h6M7 11h6M7 14h4"/></svg></div>
+        <span class="mono">Prova B</span>
+        <svg class="draw" viewBox="0 0 220 120" fill="none" stroke="#121212" stroke-width="1.6"><path d="M40 16h100l30 22v68H40z"/><path d="M140 16v22h30"/><path d="M58 52h90M58 66h90M58 80h60" stroke-width="1"/><path d="M58 94h40" stroke="#1f3bff" stroke-width="2.4"/></svg>
         <h3>O dicionário do sistema</h3>
-        <p>Muitos ERPs guardam ligações que não existem como constraint. Se você importar o dicionário, elas valem como prova.</p>
+        <p>Muitos ERPs guardam ligações que não existem como constraint. Importado o dicionário, elas valem como prova.</p>
       </div>
       <div class="pf rv">
-        <div class="ic" style="background:rgba(74,222,128,.1)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#4ade80" stroke-width="1.8"><circle cx="7" cy="10" r="3.5"/><path d="M10.5 10H18M15 10v3M17.5 10v2"/></svg></div>
+        <span class="mono">Prova C</span>
+        <svg class="draw" viewBox="0 0 220 120" fill="none" stroke="#121212" stroke-width="1.6"><circle cx="50" cy="60" r="22"/><circle cx="50" cy="60" r="8"/><path d="M72 60h120M160 60v18M180 60v12" stroke="#1f3bff" stroke-width="2.4"/></svg>
         <h3>A chave da tabela mãe</h3>
         <p>Quando a chave primária da mãe aparece inteira na filha, com os mesmos campos, a ligação está provada.</p>
       </div>
-      <div class="pf stop rv">
-        <div class="ic" style="background:rgba(251,191,36,.12)"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#fbbf24" stroke-width="1.8"><path d="M10 2.5 18 17H2z"/><path d="M10 8v4M10 14.5v.5"/></svg></div>
+      <div class="pf no rv">
+        <span class="mono">Sem prova</span>
+        <svg class="draw" viewBox="0 0 220 120" fill="none" stroke="#121212" stroke-width="1.6"><rect x="10" y="30" width="60" height="60"/><rect x="150" y="30" width="60" height="60"/><path d="M70 60h80" stroke-dasharray="6 6" stroke="#ff3b1f"/><circle cx="110" cy="60" r="14" stroke="#ff3b1f" stroke-width="2.4"/><path d="M105 55c0-6 10-6 10 0 0 4-5 4-5 8M110 67v1" stroke="#ff3b1f" stroke-width="2"/></svg>
         <h3>Nenhuma das três?</h3>
-        <p>Ele não inventa a ligação. Diz que não achou caminho e pergunta a você como as tabelas se relacionam.</p>
+        <p>Ele não inventa a ligação. Diz que não achou caminho e pergunta como as tabelas se relacionam.</p>
       </div>
     </div>
   </div>
 </section>
 
-<section id="formulas" style="padding-top:24px">
+<section id="formulas">
   <div class="wrap fx">
     <div class="rv">
-      <span class="kicker" style="color:var(--vi)">Fórmulas de sistema</span>
-      <h2>Fórmula que só parece válida não sai.</h2>
-      <p style="color:var(--muted);font-size:18px;margin-top:14px">Muitos sistemas têm uma linguagem própria de fórmulas. O Vegapunk cria, corrige, valida e explica fórmulas usando só funções e sintaxe que estão documentadas.</p>
+      <div class="sec-n" style="margin-bottom:28px;display:inline-block;min-width:150px">§ 04</div>
+      <div class="big-fx" aria-label="SOMA3 não existe; SOMA2 existe"><span class="bad strike">SOMA3</span><span class="good">SOMA2.</span></div>
       <ul>
-        <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span><b>Valida antes de entregar.</b> Com erro de validação, a fórmula não sai.</span></li>
-        <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span><b>Cita a fonte</b> de cada função usada, da documentação.</span></li>
-        <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span><b>Lacuna é lacuna.</b> O que não tem suporte documentado aparece como lacuna, com o motivo, e não é preenchido de memória.</span></li>
-        <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span><b>Suas regras ficam suas.</b> Funções internas da empresa vão numa camada privada, fora do git.</span></li>
+        <li><span class="mono">a</span><span><b>Fórmula que só parece válida não sai.</b> Com erro de validação, ela não é entregue.</span></li>
+        <li><span class="mono">b</span><span><b>Cada função tem fonte:</b> o link da documentação vem junto.</span></li>
+        <li><span class="mono">c</span><span><b>Lacuna é lacuna.</b> Sem suporte documentado, aparece o motivo, e nada é preenchido de memória.</span></li>
+        <li><span class="mono">d</span><span><b>Suas regras ficam suas:</b> funções internas da empresa vão numa camada privada, fora do git.</span></li>
       </ul>
     </div>
-    <div class="col rv">
-      <div class="term">
-        <div class="tbar"><b>stella.py explicar</b><span class="st ok">explicada</span></div>
-<pre><span class="t">SOMA2</span>(10, <span class="t">ANODE</span>(<span class="t">HOJE</span>))
-• <span class="t">SOMA2</span>(2 arg.): Soma dois números quaisquer. <span class="cm">[retorno: numero]</span>
-    1. NUM: constante numero: <span class="n">10</span>
-    2. NUM:
-      • <span class="t">ANODE</span>(1 arg.): Ano de uma data informada.
-          1. DATA:
-            • <span class="t">HOJE</span>: Data corrente do sistema.
-
-<span class="cm">Fontes:</span>
-  SOMA2 (BASE/publico): https://exemplo.invalid/soma2
-  ANODE (BASE/publico): https://exemplo.invalid/anode</pre>
-      </div>
-      <p style="font-size:13px;color:var(--faint)">Saída real, com o pacote de fórmulas fictício dos testes.</p>
-    </div>
-  </div>
-</section>
-
-<section id="privacidade" class="priv">
-  <div class="wrap">
-    <div class="sec-head rv">
-      <span class="kicker" style="color:var(--ok)">Privacidade</span>
-      <h2>Só estrutura. Nunca dados.</h2>
-      <p>Do banco entra o desenho: nomes, descrições, tipos e ligações. Nenhum cadastro, nenhum valor, nenhuma contagem de linhas. O mapa fica no seu computador; na conversa, o Claude vê só os nomes e as descrições que a Stella devolve para cada pedido.</p>
-    </div>
-    <div class="io">
-      <div class="card rv">
-        <h3><span class="dot" style="background:var(--ok)"></span>Entra no mapa</h3>
-        <ul>
-          <li><svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg><span>Nomes de tabela e de coluna</span></li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg><span>Descrições de negócio (<code>MS_Description</code> ou o dicionário do sistema)</span></li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg><span>Tipos, tamanhos e chaves</span></li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg><span>As ligações entre as tabelas</span></li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg><span><em>Se</em> cada tabela tem alguma linha (sim ou não)</span></li>
-        </ul>
-      </div>
-      <div class="mid rv" aria-hidden="true">
-        <div class="shield"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="1.6"><path d="M12 2.5 20 6v6c0 4.7-3.4 8.4-8 9.5-4.6-1.1-8-4.8-8-9.5V6z"/><path d="M8.5 12.2 11 14.6l4.6-5"/></svg></div>
-        <span>filtro</span>
-      </div>
-      <div class="card rv">
-        <h3><span class="dot" style="background:var(--no)"></span>Nunca entra</h3>
-        <ul>
-          <li><svg width="14" height="14" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" stroke="#f87171" stroke-width="2.2" stroke-linecap="round"/></svg><span>Nenhuma linha de cadastro</span></li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" stroke="#f87171" stroke-width="2.2" stroke-linecap="round"/></svg><span>Nenhum valor: salário, CPF, nome de pessoa</span></li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" stroke="#f87171" stroke-width="2.2" stroke-linecap="round"/></svg><span>Quantas linhas cada tabela tem</span></li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" stroke="#f87171" stroke-width="2.2" stroke-linecap="round"/></svg><span>Fórmulas e consultas que já existem no sistema</span></li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" stroke="#f87171" stroke-width="2.2" stroke-linecap="round"/></svg><span>O mapa inteiro na conversa: o Claude só vê o que a Stella devolve</span></li>
-        </ul>
-      </div>
-    </div>
-    <div class="notes">
-      <div class="rv"><b>Permissão mínima</b>As consultas do catálogo precisam só de <code>VIEW DEFINITION</code>. Nada de acesso às tabelas de negócio.</div>
-      <div class="rv"><b>Fora do controle de versão</b>O mapa fica em <code>egghead/</code>, que o <code>.gitignore</code> já mantém fora do git.</div>
-      <div class="rv"><b>Um mapa por banco</b>Cada banco tem a sua instância, e o Vegapunk diz qual usou em cada resposta.</div>
-    </div>
-  </div>
-</section>
-
-<section id="equipe">
-  <div class="wrap crew">
-    <div class="orbit rv" id="orbit">
-      <svg class="rings" viewBox="0 0 100 100" aria-hidden="true">
-        <circle cx="50" cy="50" r="34" fill="none" stroke="#1f2b45" stroke-width=".35" stroke-dasharray="1 1.4"/>
-        <circle cx="50" cy="50" r="46" fill="none" stroke="#1f2b45" stroke-width=".35"/>
-      </svg>
-      <div class="spin r1" id="r1"></div>
-      <div class="spin r2" id="r2"></div>
-      <div class="core"><button data-id="stella" aria-label="Stella"><b>Stella</b><small>stella.py</small></button></div>
-    </div>
-    <div>
-      <div class="sec-head rv" style="margin-bottom:24px">
-        <span class="kicker">Por dentro</span>
-        <h2>Uma porta de entrada e os satélites em volta.</h2>
-      </div>
-      <div class="crew-info rv" id="crewInfo" aria-live="polite"></div>
-      <div class="crew-list" id="crewList"></div>
-    </div>
-  </div>
-</section>
-
-<section id="memory-card" style="padding-top:24px">
-  <div class="wrap mc">
     <div class="rv">
-      <span class="kicker" style="color:var(--vi)">Memory Card</span>
-      <h2>Relatório pronto vira um save.</h2>
-      <p style="color:var(--muted);font-size:18px;margin-top:14px">Como o cartão de memória de um videogame: cada relatório fica num repositório <strong style="color:var(--ink)">seu</strong> no GitHub, privado por padrão, organizado em solução, categoria, seção e artigo.</p>
-      <ul>
-        <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span><b>Prévia antes de salvar:</b> o artigo, a versão, o diff da mudança e a conferência no schema. Só envia com o seu "sim".</span></li>
-        <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span><b>Versão com motivo:</b> cada mudança registra por que mudou.</span></li>
-        <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span><b>Procura antes de escrever:</b> se já existe algo parecido no cartão, ele mostra.</span></li>
-        <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span><b>Confere quando a base muda:</b> tabelas, colunas e JOINs do relatório contra o schema atual.</span></li>
-      </ul>
-    </div>
-    <div class="slots rv" aria-label="Ilustração de um Memory Card com relatórios salvos">
-      <header><span>memory card · privado</span><b>● sincronizado</b></header>
-      <div class="slot"><div class="ic" style="background:rgba(34,211,238,.12);color:var(--cy)">SQL</div><div><b>Funcionários ativos por seção</b><small>folha › cadastro › ativos</small></div><div class="v">v3<em>✓ schema ok</em></div></div>
-      <div class="slot"><div class="ic" style="background:rgba(167,139,250,.12);color:var(--vi)">fx</div><div><b>Adicional por tempo de casa</b><small>folha › fórmulas › adicionais</small></div><div class="v">v2<em>✓ schema ok</em></div></div>
-      <div class="slot"><div class="ic" style="background:rgba(34,211,238,.12);color:var(--cy)">SQL</div><div><b>Horas extras do mês</b><small>ponto › apuração › extras</small></div><div class="v">v1<em>✓ schema ok</em></div></div>
-      <div class="slot new"><div class="ic" style="border:1px dashed var(--line2)">+</div><div style="font-size:14px">"salve este relatório no Memory Card"</div></div>
-      <p style="font-size:12px;color:var(--faint);margin-top:12px">Ilustração com títulos de exemplo.</p>
+<pre class="print"><span class="c">$ stella.py validar "SOMA3(1, 2, 3)"</span>
+
+<span class="v">INVÁLIDA</span> — contexto (todos)
+  ERRO [funcao_inexistente] (linha 1, col 1):
+  "SOMA3" não existe no dicionário de fórmulas
+  (parecidas: SOMA2). Não há suporte
+  documentado — não use.</pre>
+<pre class="print"><span class="c">$ stella.py explicar "SOMA2(10, ANODE(HOJE))"</span>
+
+• <span class="k">SOMA2</span>(2 arg.): Soma dois números quaisquer.
+    1. NUM: constante numero: 10
+    2. NUM: • <span class="k">ANODE</span>(1 arg.): Ano de uma data.
+              1. DATA: • <span class="k">HOJE</span>: Data corrente.
+<span class="c">Fontes: SOMA2, ANODE, HOJE (BASE/publico)</span></pre>
+      <p class="mono" style="font-size:12px;color:var(--mute);margin-top:14px">Saída real (resumida), com o pacote de fórmulas fictício dos testes.</p>
     </div>
   </div>
 </section>
 
-<section id="resultados" class="demo">
+<section id="privacidade">
   <div class="wrap">
-    <div class="sec-head rv">
-      <span class="kicker">Resultados medidos</span>
-      <h2>Números de pedidos que o motor nunca tinha visto.</h2>
-      <p>Os pedidos de teste foram separados antes de qualquer ajuste. Inclusive os números que ainda não são bons.</p>
+    <div class="sec-h rv">
+      <div class="sec-n">§ 05<b>05</b></div>
+      <div>
+        <h2>Só estrutura. <em>Nunca dados.</em></h2>
+        <p>Do banco entra o desenho: nomes, descrições, tipos e ligações. O mapa fica no seu computador. Na conversa, o Claude vê só os nomes e as descrições que a Stella devolve para cada pedido.</p>
+      </div>
+    </div>
+    <svg class="cut draw rv" viewBox="0 0 1180 300" fill="none" stroke="#121212" stroke-width="1.5" role="img" aria-label="Corte do fluxo: o seu SQL Server entrega só o catálogo, com VIEW DEFINITION, para a pasta egghead no seu computador; da pasta, a Stella devolve à conversa só o que cada pedido precisa.">
+      <g font-family="JetBrains Mono, monospace" font-size="12" fill="#121212" stroke="none" letter-spacing=".5">
+        <text x="20" y="34">A · SEU SQL SERVER</text><text x="440" y="34">B · SEU COMPUTADOR</text><text x="860" y="34">C · CONVERSA COM O CLAUDE</text>
+      </g>
+      <path d="M40 80 h220 v160 h-220z"/><ellipse cx="150" cy="80" rx="110" ry="20"/><path d="M40 130c0 11 49 20 110 20s110-9 110-20M40 180c0 11 49 20 110 20s110-9 110-20"/>
+      <g stroke="#ff3b1f" stroke-width="1.2"><path d="M64 214h70M64 226h50"/><path d="M60 208l80 26M140 208l-80 26"/></g>
+      <g font-family="Inter Tight, sans-serif" font-size="13" fill="#5f5e57" stroke="none"><text x="152" y="270" text-anchor="middle">dados de negócio ficam aqui</text></g>
+      <path d="M262 150 H440" stroke="#1f3bff" stroke-width="2.4"/><path d="M430 142l12 8-12 8" stroke="#1f3bff" stroke-width="2.4"/>
+      <g font-family="JetBrains Mono, monospace" font-size="11.5" fill="#1f3bff" stroke="none"><text x="351" y="136" text-anchor="middle">3 consultas sys.*</text><text x="351" y="172" text-anchor="middle">VIEW DEFINITION</text></g>
+      <rect x="450" y="80" width="300" height="160"/><path d="M450 108h300"/>
+      <g font-family="JetBrains Mono, monospace" font-size="12.5" fill="#121212" stroke="none"><text x="466" y="99">egghead/punk_records.db</text>
+        <text x="466" y="136" fill="#0f8a4b">✓ nomes de tabela e coluna</text><text x="466" y="160" fill="#0f8a4b">✓ descrições e tipos</text><text x="466" y="184" fill="#0f8a4b">✓ chaves e ligações</text><text x="466" y="208" fill="#0f8a4b">✓ se a tabela tem linha (sim/não)</text></g>
+      <g font-family="Inter Tight, sans-serif" font-size="13" fill="#5f5e57" stroke="none"><text x="600" y="270" text-anchor="middle">fora do git (.gitignore)</text></g>
+      <path d="M752 150 H860" stroke="#1f3bff" stroke-width="2.4"/><path d="M850 142l12 8-12 8" stroke="#1f3bff" stroke-width="2.4"/>
+      <g font-family="JetBrains Mono, monospace" font-size="11.5" fill="#1f3bff" stroke="none"><text x="806" y="136" text-anchor="middle">Stella</text><text x="806" y="172" text-anchor="middle">por pedido</text></g>
+      <path d="M870 80h290v130h-200l-30 30v-30h-60z"/>
+      <g font-family="JetBrains Mono, monospace" font-size="12" fill="#121212" stroke="none"><text x="888" y="110">F_FUNCIONARIO, F_CARGO</text><text x="888" y="134">CODCARGO, VALORREMUNERACAO</text><text x="888" y="158">INNER JOIN … ON …CODCARGO</text><text x="888" y="190" fill="#5f5e57">só o que o pedido precisa</text></g>
+    </svg>
+    <div class="ledger rv">
+      <div>
+        <h3>Entra no mapa <span class="mono" style="color:var(--blue)">estrutura</span></h3>
+        <ul>
+          <li><span class="mono">01</span>Nomes de tabela e de coluna</li>
+          <li><span class="mono">02</span>Descrições de negócio (<code>MS_Description</code> ou o dicionário do sistema)</li>
+          <li><span class="mono">03</span>Tipos, tamanhos e chaves</li>
+          <li><span class="mono">04</span>As ligações entre as tabelas</li>
+          <li><span class="mono">05</span><span><em>Se</em> cada tabela tem alguma linha, nunca quantas</span></li>
+        </ul>
+      </div>
+      <div class="no">
+        <h3>Nunca entra <span class="mono" style="color:var(--red)">dados</span></h3>
+        <ul>
+          <li><span class="mono">✕</span>Nenhuma linha de cadastro</li>
+          <li><span class="mono">✕</span>Nenhum valor: salário, CPF, nome de pessoa</li>
+          <li><span class="mono">✕</span>Quantas linhas cada tabela tem</li>
+          <li><span class="mono">✕</span>Fórmulas e consultas que já existem no sistema</li>
+          <li><span class="mono">✕</span>O mapa inteiro na conversa: o Claude só vê o que a Stella devolve</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pecas">
+  <div class="wrap">
+    <div class="sec-h rv">
+      <div class="sec-n">§ 06<b>06</b></div>
+      <div>
+        <h2>Lista de peças. <em>Uma porta, nove satélites.</em></h2>
+        <p>A Stella é a única entrada. Em volta dela, cada peça faz uma coisa só. Passe o mouse ou toque numa peça.</p>
+      </div>
+    </div>
+    <div class="bom">
+      <svg class="exploded rv" id="exploded" viewBox="0 0 560 560" role="img" aria-label="Vista explodida do Vegapunk: a Stella no centro e nove peças numeradas em volta."></svg>
+      <table class="parts rv" id="parts"><thead><tr><th>Nº</th><th>Peça</th><th>O que faz</th><th>Onde</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</section>
+
+<section id="memory-card">
+  <div class="wrap mc">
+    <svg class="cart draw rv" viewBox="0 0 420 300" fill="none" stroke="#121212" stroke-width="1.5" role="img" aria-label="Desenho técnico de um cartão de memória com três relatórios salvos.">
+      <path d="M30 20h300l60 60v200H30z" fill="#f7f5ef"/><path d="M330 20v60h60"/>
+      <g stroke-width="1">
+        <rect x="56" y="60" width="240" height="44"/><rect x="56" y="116" width="240" height="44"/><rect x="56" y="172" width="240" height="44"/><rect x="56" y="228" width="240" height="30" stroke-dasharray="4 4"/>
+      </g>
+      <g font-family="JetBrains Mono, monospace" font-size="11.5" fill="#121212" stroke="none">
+        <text x="68" y="80">SLOT 1 · Funcionários por seção</text><text x="68" y="96" fill="#5f5e57">folha › cadastro · v3 ✓</text>
+        <text x="68" y="136">SLOT 2 · Adicional por tempo</text><text x="68" y="152" fill="#5f5e57">folha › fórmulas · v2 ✓</text>
+        <text x="68" y="192">SLOT 3 · Horas extras do mês</text><text x="68" y="208" fill="#5f5e57">ponto › apuração · v1 ✓</text>
+        <text x="68" y="248" fill="#5f5e57">+ novo save</text>
+      </g>
+      <g stroke="#1f3bff"><path d="M300 82h60M300 138h60M300 194h60"/></g>
+      <g font-family="Caveat, cursive" font-size="22" fill="#ff3b1f" stroke="none"><text x="320" y="128" transform="rotate(-6 320 128)">seu repo,</text><text x="322" y="150" transform="rotate(-6 322 150)">privado!</text></g>
+      <path d="M44 280h12M70 280h12M96 280h12M122 280h12M148 280h12M174 280h12M200 280h12" stroke-width="5"/>
+    </svg>
+    <div class="rv">
+      <div class="sec-n" style="display:inline-block;min-width:150px;margin-bottom:24px">§ 07</div>
+      <h2>Relatório pronto <em>vira um save.</em></h2>
+      <p style="font-size:19px;color:var(--ink2);margin-top:20px">Como o cartão de memória de um videogame: cada relatório fica num repositório <b>seu</b> no GitHub, privado por padrão, organizado em solução, categoria, seção e artigo. A ilustração ao lado usa títulos de exemplo.</p>
+      <ul>
+        <li><b>Prévia antes de salvar:</b> o artigo, a versão, o diff e a conferência no schema. Só envia com o seu "sim".</li>
+        <li><b>Versão com motivo:</b> cada mudança registra por que mudou.</li>
+        <li><b>Procura antes de escrever:</b> se já existe algo parecido no cartão, ele mostra.</li>
+        <li><b>Confere quando a base muda:</b> tabelas, colunas e JOINs contra o schema atual.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="resultados">
+  <div class="wrap">
+    <div class="sec-h rv">
+      <div class="sec-n">§ 08<b>08</b></div>
+      <div>
+        <h2>Ensaios. <em>Inclusive os que ainda não são bons.</em></h2>
+        <p>Medidos com pedidos que o motor nunca tinha visto, separados antes de qualquer ajuste.</p>
+      </div>
     </div>
     <div class="res">
-      <div class="bars rv" id="bars"></div>
+      <div class="chart rv" id="chart"></div>
       <aside>
-        <div class="card rv"><span class="big">100%</span><p>dos <b>JOINs de chave composta</b> entregues com prova. Na versão anterior, nenhum.</p></div>
-        <div class="card rv"><span class="big" style="color:var(--am)">62%</span><p>de <b>tabela certa entre as 3 primeiras</b> num ERP real. É o número mais difícil, e é por isso que o Vegapunk pergunta quando dois candidatos ficam próximos.</p></div>
-        <p style="font-size:13.5px;color:var(--faint)">No seu banco, os números dependem principalmente da qualidade das descrições do seu dicionário.</p>
+        <div class="paper rv"><span class="huge" style="color:var(--blue)">100%</span><p>dos <b>JOINs de chave composta</b> entregues com prova, nos pedidos de teste. Na versão anterior, nenhum.</p></div>
+        <div class="paper rv"><span class="huge" style="color:var(--red)">62%</span><p><b>Tabela certa entre as 3 primeiras</b>, num ERP real. É o número mais difícil, e é por isso que o Vegapunk pergunta quando dois candidatos ficam próximos.</p></div>
+        <p style="font-size:14px;color:var(--mute)">No seu banco, os números dependem principalmente da qualidade das descrições do seu dicionário.</p>
       </aside>
     </div>
   </div>
@@ -695,16 +669,15 @@ footer.site p{line-height:1.6}
 <section id="instalar">
   <div class="wrap inst">
     <div class="rv">
-      <span class="kicker">Instalar</span>
-      <h2>Três passos. Nada de pip.</h2>
-      <p style="color:var(--muted);font-size:18px;margin-top:14px">Os comandos rodam da pasta da skill. Depois, é pedir ao Claude qualquer coisa sobre o seu banco.</p>
-      <div class="req">
-        <div><svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg><span>Python 3.8+, só a biblioteca padrão</span></div>
-        <div><svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg><span><code>sqlcmd</code> ou o SSMS</span></div>
-        <div><svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg><span>Microsoft SQL Server 2016 a 2022</span></div>
-        <div><svg width="14" height="14" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg><span>Permissão <code>VIEW DEFINITION</code> no banco</span></div>
-      </div>
-      <p style="margin-top:22px;font-size:14px;color:var(--faint)">Mais de um banco, dicionário do ERP e pacotes de fórmulas: veja o <a href="https://github.com/tiagocardosobezerra/vegapunk#para-ir-além">README</a> e o <a href="https://github.com/tiagocardosobezerra/vegapunk/blob/main/COMO-INSTALAR.md">guia de instalação</a>.</p>
+      <div class="sec-n" style="display:inline-block;min-width:150px;margin-bottom:24px">§ 09</div>
+      <h2>Procedimento. <em>Três passos, nada de pip.</em></h2>
+      <ul class="req">
+        <li>Python 3.8+ <span class="mono">biblioteca padrão</span></li>
+        <li>sqlcmd ou SSMS <span class="mono">extração</span></li>
+        <li>SQL Server 2016 a 2022 <span class="mono">alvo</span></li>
+        <li>VIEW DEFINITION <span class="mono">permissão</span></li>
+      </ul>
+      <p style="margin-top:22px;font-size:14.5px;color:var(--mute)">Os comandos rodam da pasta da skill. Mais de um banco, dicionário do ERP e pacotes de fórmulas: veja o <a href="https://github.com/tiagocardosobezerra/vegapunk#para-ir-além">README</a> e o <a href="https://github.com/tiagocardosobezerra/vegapunk/blob/main/COMO-INSTALAR.md">guia de instalação</a>.</p>
     </div>
     <div class="rv">
       <div class="os" role="tablist" aria-label="Sistema operacional">
@@ -712,23 +685,25 @@ footer.site p{line-height:1.6}
         <button role="tab" aria-selected="false" data-os="nix">macOS e Linux</button>
       </div>
       <div class="cmd">
-        <header><span class="num">1</span><div><b>Instale a skill</b><br><small>para todos os projetos</small></div><button class="copy" type="button">Copiar</button></header>
+        <header><span class="n">1</span><div><b>Instale a skill</b><small>para todos os projetos</small></div><button class="copy" type="button">Copiar</button></header>
 <pre data-win="git clone https://github.com/tiagocardosobezerra/vegapunk.git $HOME\.claude\skills\vegapunk" data-nix="git clone https://github.com/tiagocardosobezerra/vegapunk.git ~/.claude/skills/vegapunk"></pre>
         <p>Só para o projeto atual, troque o destino por <code>.claude/skills/vegapunk</code>.</p>
       </div>
       <div class="cmd">
-        <header><span class="num">2</span><div><b>Extraia a estrutura do banco</b><br><small>troque SERVIDOR e SEU_BANCO</small></div><button class="copy" type="button">Copiar</button></header>
-<pre data-win="New-Item -ItemType Directory -Force egghead\extracao
+        <header><span class="n">2</span><div><b>Extraia a estrutura do banco</b><small>troque SERVIDOR e SEU_BANCO</small></div><button class="copy" type="button">Copiar</button></header>
+<pre data-win="cd $HOME\.claude\skills\vegapunk
+New-Item -ItemType Directory -Force egghead\extracao
 sqlcmd -S SERVIDOR -d SEU_BANCO -E -f 65001 -h -1 -y 8000 -i punk_records\extracao\tabelas.sql -o egghead\extracao\tabelas.csv
 sqlcmd -S SERVIDOR -d SEU_BANCO -E -f 65001 -h -1 -y 8000 -i punk_records\extracao\colunas.sql -o egghead\extracao\colunas.csv
-sqlcmd -S SERVIDOR -d SEU_BANCO -E -f 65001 -h -1 -y 8000 -i punk_records\extracao\relacionamentos.sql -o egghead\extracao\relacionamentos.csv" data-nix="mkdir -p egghead/extracao
+sqlcmd -S SERVIDOR -d SEU_BANCO -E -f 65001 -h -1 -y 8000 -i punk_records\extracao\relacionamentos.sql -o egghead\extracao\relacionamentos.csv" data-nix="cd ~/.claude/skills/vegapunk
+mkdir -p egghead/extracao
 sqlcmd -S SERVIDOR -d SEU_BANCO -E -f 65001 -h -1 -y 8000 -i punk_records/extracao/tabelas.sql -o egghead/extracao/tabelas.csv
 sqlcmd -S SERVIDOR -d SEU_BANCO -E -f 65001 -h -1 -y 8000 -i punk_records/extracao/colunas.sql -o egghead/extracao/colunas.csv
 sqlcmd -S SERVIDOR -d SEU_BANCO -E -f 65001 -h -1 -y 8000 -i punk_records/extracao/relacionamentos.sql -o egghead/extracao/relacionamentos.csv"></pre>
         <p><code>-E</code> usa a autenticação do Windows; com login SQL, use <code>-U usuario</code> (o <code>sqlcmd</code> pede a senha).</p>
       </div>
       <div class="cmd">
-        <header><span class="num">3</span><div><b>Importe e teste</b><br><small>tudo fica em egghead/, fora do git</small></div><button class="copy" type="button">Copiar</button></header>
+        <header><span class="n">3</span><div><b>Importe e teste</b><small>tudo fica em egghead/, fora do git</small></div><button class="copy" type="button">Copiar</button></header>
 <pre data-win="python satelites/york.py importar --dir egghead/extracao
 python satelites/york.py migrar aplicar
 python satelites/york.py enriquecer --dir egghead/extracao
@@ -741,249 +716,337 @@ python3 stella.py buscar --dominio schema &quot;salário dos funcionários por s
   </div>
 </section>
 
-<section id="limites" style="padding-top:24px">
+<section id="limites" style="padding-top:90px">
   <div class="wrap">
-    <div class="sec-head rv">
-      <span class="kicker" style="color:var(--am)">Limites</span>
-      <h2>O que o Vegapunk não é.</h2>
+    <div class="sec-h rv">
+      <div class="sec-n">§ 10<b>10</b></div>
+      <div><h2>Advertências. <em>O que ele não é.</em></h2></div>
     </div>
-    <div class="limits">
-      <div class="lm rv"><h3>Não lê os seus dados</h3><p>Ele não executa nada no seu banco. Quem roda as três consultas do catálogo é você, e o SQL final roda onde você quiser.</p></div>
-      <div class="lm rv"><h3>Não acerta sem descrição</h3><p>A busca casa o pedido com as descrições das colunas. Banco sem descrição, ou com descrição pobre, dá resultado pior.</p></div>
-      <div class="lm rv"><h3>Não decide sozinho na dúvida</h3><p>Com dois candidatos próximos ou um termo corrigido, ele para e pergunta antes de escrever o SQL.</p></div>
-      <div class="lm rv"><h3>Pensado em português</h3><p>Foi feito e medido com pedidos e dicionários em português. Comandos e arquivos também estão em português.</p></div>
-      <div class="lm rv"><h3>Só SQL Server</h3><p>As consultas de extração e as regras de T&#8209;SQL são para o Microsoft SQL Server, de 2016 a 2022.</p></div>
-      <div class="lm rv"><h3>Não traz o mapa de ninguém</h3><p>O repositório tem só o motor e dados fictícios de teste. O mapa é do seu banco, importado por você, com acesso legítimo a ele.</p></div>
+    <div class="stripe"></div>
+    <div class="warns">
+      <div class="wn rv"><span class="mono">Atenção</span><h3>Não lê os seus dados</h3><p>Ele não executa nada no seu banco. Quem roda as três consultas do catálogo é você; o SQL final roda onde você quiser.</p></div>
+      <div class="wn rv"><span class="mono">Atenção</span><h3>Não acerta sem descrição</h3><p>A busca casa o pedido com as descrições das colunas. Banco sem descrição, ou com descrição pobre, dá resultado pior.</p></div>
+      <div class="wn rv"><span class="mono">Atenção</span><h3>Não decide sozinho na dúvida</h3><p>Com dois candidatos próximos ou um termo corrigido, ele para e pergunta antes de escrever o SQL.</p></div>
+      <div class="wn rv"><span class="mono">Atenção</span><h3>Pensado em português</h3><p>Feito e medido com pedidos e dicionários em português. Comandos e arquivos também estão em português.</p></div>
+      <div class="wn rv"><span class="mono">Atenção</span><h3>Só SQL Server</h3><p>As consultas de extração e as regras de T&#8209;SQL são para o Microsoft SQL Server, de 2016 a 2022.</p></div>
+      <div class="wn rv"><span class="mono">Atenção</span><h3>Não traz o mapa de ninguém</h3><p>O repositório tem só o motor e dados fictícios de teste. O mapa é do seu banco, importado por você, com acesso legítimo a ele.</p></div>
     </div>
   </div>
 </section>
 
 <section class="final">
   <div class="wrap">
-    <h2>Qual consulta você vai pedir hoje?</h2>
-    <p>Instale, importe o mapa do seu banco e peça em português. O resto vem com nome de verdade.</p>
-    <div class="ctas">
-      <a class="btn btn-cy" href="#instalar">Instalar o Vegapunk</a>
+    <h2 class="rv">Pergunte.<br><em>Ele sabe onde está.</em></h2>
+    <p class="rv">Instale, importe o mapa do seu banco e peça em português. O resto vem com nome de verdade.</p>
+    <div class="ctas rv">
+      <a class="btn btn-ink" href="#instalar">Instalar o Vegapunk</a>
       <a class="btn btn-ghost" href="https://github.com/tiagocardosobezerra/vegapunk">Ver no GitHub</a>
     </div>
-    <p class="tagline"><b>Vegapunk</b>, não adivinha. sabe.</p>
   </div>
 </section>
+</main>
 
-<footer class="site">
+<footer>
   <div class="wrap">
-    <div>
-      <a class="logo" href="#topo" style="margin-bottom:12px"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0f1729" stroke="#2b3a5c"/><path d="M8.5 9.5 16 22.5" stroke="#22d3ee" stroke-width="2.6" stroke-linecap="round"/><path d="M23.5 9.5 16 22.5" stroke="#a78bfa" stroke-width="2.6" stroke-linecap="round"/><circle cx="8.5" cy="9.5" r="3" fill="#22d3ee"/><circle cx="23.5" cy="9.5" r="3" fill="#a78bfa"/><circle cx="16" cy="22.5" r="3.6" fill="#4ade80" stroke="#0f1729" stroke-width="1.4"/></svg><span>Vegapunk</span></a>
-      <p>Skill do Claude Code para Microsoft SQL Server. Licença MIT.</p>
-      <p style="margin-top:8px">Criado por <a href="https://github.com/tiagocardosobezerra">Tiago Cardoso Bezerra</a>. O nome é uma homenagem a Vegapunk, o engenheiro genial de One Piece. Projeto independente, sem ligação com os detentores da obra.</p>
-    </div>
-    <div>
-      <h4>Projeto</h4>
-      <ul>
-        <li><a href="https://github.com/tiagocardosobezerra/vegapunk">Código no GitHub</a></li>
-        <li><a href="https://github.com/tiagocardosobezerra/vegapunk/blob/main/README.en.md">README in English</a></li>
-        <li><a href="https://github.com/tiagocardosobezerra/vegapunk/blob/main/COMO-INSTALAR.md">Como instalar</a></li>
-        <li><a href="https://github.com/tiagocardosobezerra/vegapunk/blob/main/AVISO.md">Aviso sobre dados de terceiros</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4>Outras skills do autor</h4>
-      <ul>
-        <li><a href="https://tiagocardosobezerra.github.io/tribunal/">Tribunal</a></li>
-        <li><a href="https://github.com/tiagocardosobezerra/deidara">Deidara</a></li>
-        <li><a href="https://github.com/tiagocardosobezerra/senku">Senku</a></li>
-      </ul>
+    <div class="tb">
+      <div><span class="mono">Projeto</span><b style="font:400 34px/1 var(--sf)">Vegapunk</b><div style="margin-top:6px;color:var(--mute);font-size:14px">não adivinha. sabe.</div></div>
+      <div><span class="mono">Desenho nº</span><b>VP-001</b><span class="mono" style="margin-top:12px">Licença</span><b>MIT</b></div>
+      <div><span class="mono">Autor</span><a href="https://github.com/tiagocardosobezerra"><b>Tiago Cardoso Bezerra</b></a><span class="mono" style="margin-top:12px">Folha</span><b>1 / 1</b></div>
+      <div><span class="mono">Outras skills</span><ul><li><a href="https://tiagocardosobezerra.github.io/tribunal/">Tribunal</a></li><li><a href="https://github.com/tiagocardosobezerra/deidara">Deidara</a></li><li><a href="https://github.com/tiagocardosobezerra/senku">Senku</a></li></ul></div>
+      <div class="r2">
+        <a href="https://github.com/tiagocardosobezerra/vegapunk">Código no GitHub</a>
+        <a href="https://github.com/tiagocardosobezerra/vegapunk/blob/main/README.en.md">README in English</a>
+        <a href="https://github.com/tiagocardosobezerra/vegapunk/blob/main/AVISO.md">Aviso sobre dados de terceiros</a>
+        <span>O nome é uma homenagem a Vegapunk, o engenheiro genial de One Piece. Projeto independente, sem ligação com os detentores da obra.</span>
+      </div>
     </div>
   </div>
 </footer>
 
+<script src="dados.js"></script>
 <script>
 (function(){
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var nav = document.getElementById('nav');
-  addEventListener('scroll', function(){ nav.classList.toggle('scrolled', scrollY > 8); }, {passive:true});
-
-  /* revelar ao rolar */
-  var io = 'IntersectionObserver' in window ? new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
-  }, {threshold:.12}) : null;
-  document.querySelectorAll('.rv').forEach(function(el){ io ? io.observe(el) : el.classList.add('in'); });
-
+  'use strict';
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var MAPA = window.VP_MAPA, PED = window.VP_PEDIDOS;
+  var BYNAME = {}; MAPA.tabelas.forEach(function(t,i){ BYNAME[t[0]] = i; });
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function fmt(n){ return n.toFixed(2).replace('.',','); }
 
-  /* ---------- hero: pedido -> códigos -> tabelas -> SQL ---------- */
-  var codes = ['T000017','T000103','T000318','T000412','T000588','T000731','T000844','T000902','T001042','T001077','T001190','T001203','T001388','T001455','T001502','T001613','T001720','T001888','T002014','T002101','T002260','T002377','T002409','T002513'];
-  var hc = document.getElementById('hcodes');
-  codes.forEach(function(c){ var s = document.createElement('span'); s.textContent = c; hc.appendChild(s); });
-  var spans = hc.querySelectorAll('span');
-  var pedido = 'funcionários ativos com o nome da seção de cada um';
-  var ht = document.getElementById('htype'), hf = document.getElementById('hfound'), hs = document.getElementById('hsql'), st = document.getElementById('hstate');
-  var iA = codes.indexOf('T001042'), iB = codes.indexOf('T000318');
-  function finalState(){
-    ht.textContent = pedido; spans[iA].className = 'hit'; spans[iB].className = 'hit2';
-    hf.classList.add('on'); hs.classList.add('on'); st.textContent = 'pronto';
+  /* ---------- som do carimbo (WebAudio, sem arquivo; desligado por padrão) ---------- */
+  var som = false, ac = null;
+  function thump(){
+    if (!som) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      var t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(42, t+.14);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.7, t+.008); g.gain.exponentialRampToValueAtTime(.0001, t+.22);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t+.25);
+      var b = ac.createBuffer(1, ac.sampleRate*.08, ac.sampleRate), d = b.getChannelData(0);
+      for (var i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/d.length, 3);
+      var n = ac.createBufferSource(), ng = ac.createGain(); ng.gain.value = .25; n.buffer = b; n.connect(ng).connect(ac.destination); n.start(t);
+    } catch(e){}
   }
-  var timers = [];
-  function later(fn, t){ timers.push(setTimeout(fn, t)); }
-  function run(){
+  var sb = document.createElement('button'); sb.className = 'sound'; sb.type = 'button'; sb.setAttribute('aria-pressed','false'); sb.textContent = 'som do carimbo: desligado';
+  sb.addEventListener('click', function(){ som = !som; sb.setAttribute('aria-pressed', som); sb.textContent = 'som do carimbo: ' + (som ? 'ligado' : 'desligado'); if (som) thump(); });
+  document.querySelector('.hero-r .fig-head').style.position = 'relative';
+  document.querySelector('#labMap .fig-head').appendChild(sb);
+  sb.style.cssText = 'position:static;margin:0 10px 0 16px;color:#b6b3a8;border-color:#4a4944';
+
+
+  /* ---------- mapa (canvas) ---------- */
+  function Mapa(box, tema){
+    var cv = box.querySelector('canvas'), cx = cv.getContext('2d'), W = 0, H = 0, dpr = 1;
+    var st = { hot:{}, path:[], scan:-1, fade:0, labels:[], mouse:null };
+    var pad = {l:30, r:30, t: tema.top || 80, b: tema.bot || 40};
+    function size(){ var r = box.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio||1); W = r.width; H = r.height; cv.width = W*dpr; cv.height = H*dpr; layout(); draw(); }
+    var POS = [], BLOCKS = [];
+    function layout(){
+      var mods = {}; MAPA.tabelas.forEach(function(t,i){ (mods[t[0][0]] = mods[t[0][0]] || []).push(i); });
+      var keys = Object.keys(mods).filter(function(k){ return mods[k].length > 0; }).sort(function(a,b){ return mods[b].length - mods[a].length; });
+      var cols = W < 520 ? 1 : 2, rows = Math.ceil(keys.length / cols);
+      var gx = 22, gy = 34, bw = (W - pad.l - pad.r - gx*(cols-1)) / cols, bh = (H - pad.t - pad.b - gy*(rows-1)) / rows;
+      BLOCKS = []; POS = [];
+      keys.forEach(function(k, bi){
+        var c = bi % cols, r = Math.floor(bi / cols), x0 = pad.l + c*(bw+gx), y0 = pad.t + r*(bh+gy) + 14;
+        var list = mods[k].slice().sort(function(a,b){ var A = MAPA.tabelas[a], B = MAPA.tabelas[b]; var na = /AUX/.test(A[0]) ? 0 : 1, nb = /AUX/.test(B[0]) ? 0 : 1; return (nb-na) || (B[3]-A[3]) || (A[0] < B[0] ? -1 : 1); });
+        var n = list.length, nc = Math.max(4, Math.round(Math.sqrt(n * bw / Math.max(40, bh-14)))), nr = Math.ceil(n / nc);
+        var cw = bw / nc, chh = (bh - 14) / nr;
+        var cells = []; for (var q = 0; q < nc*nr; q++){ var cxx = x0 + (q % nc + .5) * cw, cyy = y0 + (Math.floor(q / nc) + .5) * chh; cells.push([cxx, cyy, Math.pow((cxx - (x0+bw/2))/bw, 2) + Math.pow((cyy - (y0+(bh-14)/2))/(bh-14), 2)]); }
+        cells.sort(function(a,b){ return a[2]-b[2]; });
+        list.forEach(function(ti, j){ POS[ti] = [cells[j][0], cells[j][1]]; });
+        BLOCKS.push([k, x0, y0 - 14, bw, bh, n]);
+      });
+    }
+    function P(i){ return POS[i]; }
+    function draw(){
+      cx.setTransform(dpr,0,0,dpr,0,0); cx.clearRect(0,0,W,H);
+      var dim = st.fade;
+      cx.lineWidth = 1;
+      MAPA.ligacoes.forEach(function(l){
+        var a = P(l[0]), b = P(l[1]);
+        cx.strokeStyle = tema.edge; cx.globalAlpha = .7 - dim*.5;
+        var mx = (a[0]+b[0])/2, my = (a[1]+b[1])/2, dx = b[0]-a[0], dy = b[1]-a[1];
+        cx.beginPath(); cx.moveTo(a[0],a[1]); cx.quadraticCurveTo(mx - dy*.18, my + dx*.18, b[0], b[1]); cx.stroke();
+      });
+      cx.globalAlpha = 1;
+      // caminho
+      if (st.path.length){
+        cx.strokeStyle = tema.path; cx.lineWidth = 3;
+        for (var k=0;k<st.path.length-1;k++){ var a = P(st.path[k]), b = P(st.path[k+1]), mx = (a[0]+b[0])/2, my = (a[1]+b[1])/2, dx = b[0]-a[0], dy = b[1]-a[1]; cx.beginPath(); cx.moveTo(a[0],a[1]); cx.quadraticCurveTo(mx - dy*.18, my + dx*.18, b[0], b[1]); cx.stroke(); }
+      }
+      MAPA.tabelas.forEach(function(t,i){
+        var p = P(i), s = 2 + Math.min(7, Math.sqrt(t[3])*1.1), h = st.hot[i];
+        var near = st.scan >= 0 && Math.abs(p[0] - st.scan) < 18;
+        cx.globalAlpha = h ? 1 : (1 - dim*.55);
+        var aux = /AUX/.test(t[0]); s = aux ? 4 : 5 + Math.min(6, Math.sqrt(t[3]));
+        if (h){ s = 9; }
+        cx.fillStyle = h ? tema.hot : (near ? tema.scanDot : tema.dot); cx.strokeStyle = cx.fillStyle; cx.lineWidth = 1;
+        if (aux && !h) cx.strokeRect(p[0]-s/2+.5, p[1]-s/2+.5, s-1, s-1); else cx.fillRect(p[0]-s/2, p[1]-s/2, s, s);
+      });
+      cx.globalAlpha = 1;
+      // blocos de módulo
+      var nomes = {F:'FOLHA', N:'NÚCLEO', S:'SELEÇÃO', T:'TURNO', R:'RESERVADO'};
+      cx.font = '500 10.5px JetBrains Mono, monospace';
+      BLOCKS.forEach(function(B){
+        cx.strokeStyle = tema.mod; cx.globalAlpha = .55; cx.lineWidth = 1; cx.setLineDash([2,3]); cx.strokeRect(B[1]-6, B[2]-4, B[3]+12, B[4]+8); cx.setLineDash([]); cx.globalAlpha = 1;
+        cx.fillStyle = tema.blkBg || tema.lblBg; var lb = B[0] + ' · ' + (nomes[B[0]]||'') + ' · ' + B[5]; var tw = cx.measureText(lb).width; cx.fillRect(B[1]-2, B[2]-11, tw+10, 14);
+        cx.fillStyle = tema.mod; cx.fillText(lb, B[1]+3, B[2]);
+      });
+      // varredura
+      if (st.scan >= 0){ cx.strokeStyle = tema.scan; cx.lineWidth = 1.5; cx.setLineDash([4,4]); cx.beginPath(); cx.moveTo(st.scan, pad.t-20); cx.lineTo(st.scan, H-10); cx.stroke(); cx.setLineDash([]); }
+      // destaques com linha de chamada
+      var used = [];
+      st.labels.slice().sort(function(a,b){ return P(a.i)[1] - P(b.i)[1]; }).forEach(function(L){
+        var p = P(L.i), r = 12;
+        cx.strokeStyle = tema.hot; cx.lineWidth = 2; cx.beginPath(); cx.arc(p[0], p[1], r, 0, Math.PI*2); cx.stroke();
+        cx.font = '700 12px JetBrains Mono, monospace'; var tw = cx.measureText(L.t).width + 14;
+        var left = p[0] > W*.55, bx = left ? pad.l - 8 : W - pad.r + 8 - tw, ly = Math.max(pad.t + 6, p[1] - 22);
+        used.forEach(function(u){ if (Math.abs(u - ly) < 36) ly = u + 36; }); used.push(ly);
+        var ex = left ? bx + tw : bx;
+        cx.lineWidth = 1; cx.beginPath(); cx.moveTo(p[0] + (left ? -r : r), p[1]); cx.lineTo(p[0] + (left ? -r-14 : r+14), ly); cx.lineTo(ex, ly); cx.stroke();
+        cx.fillStyle = tema.lblBg; cx.fillRect(bx, ly-11, tw, 19); cx.strokeRect(bx, ly-11, tw, 19);
+        cx.fillStyle = tema.lbl; cx.fillText(L.t, bx+7, ly+3);
+        if (L.s){ cx.font = '400 10.5px JetBrains Mono, monospace'; cx.fillStyle = tema.sub; cx.fillText(L.s, bx+2, ly+20); }
+      });
+      // mira do cursor
+      if (st.mouse && tema.cross){
+        cx.strokeStyle = tema.cross; cx.lineWidth = 1; cx.beginPath(); cx.moveTo(st.mouse[0],0); cx.lineTo(st.mouse[0],H); cx.moveTo(0,st.mouse[1]); cx.lineTo(W,st.mouse[1]); cx.stroke();
+      }
+    }
+    addEventListener('resize', size);
+    if (tema.cross){
+      box.addEventListener('mousemove', function(e){ var r = box.getBoundingClientRect(); st.mouse = [e.clientX-r.left, e.clientY-r.top]; var ro = document.getElementById('readout'); if (ro) ro.textContent = 'x ' + String(Math.round(st.mouse[0])).padStart(3,'0') + ' · y ' + String(Math.round(st.mouse[1])).padStart(3,'0'); draw(); });
+      box.addEventListener('mouseleave', function(){ st.mouse = null; draw(); });
+    }
+    size();
+    return { st: st, draw: draw, P: P, W: function(){ return W; }, reset: function(){ st.hot = {}; st.path = []; st.scan = -1; st.fade = 0; st.labels = []; draw(); } };
+  }
+
+  var temaClaro = { edge:'rgba(31,59,255,.22)', dot:'#1f3bff', scanDot:'#121212', hot:'#ff3b1f', path:'#ff3b1f', scan:'rgba(255,59,31,.8)', mod:'rgba(18,18,18,.55)', lbl:'#121212', lblBg:'#f7f5ef', sub:'#5f5e57', cross:'rgba(18,18,18,.18)', top:84, bot:30 };
+  var temaEscuro = { edge:'rgba(154,168,255,.2)', dot:'#9aa8ff', scanDot:'#eeebe3', hot:'#ff3b1f', path:'#ff3b1f', scan:'rgba(255,59,31,.8)', mod:'rgba(238,235,227,.45)', lbl:'#121212', lblBg:'#eeebe3', sub:'#b6b3a8', top:34, bot:14, blkBg:'#121212' };
+
+  function caminhoPrincipal(p){ var best = null; p.caminhos.forEach(function(c){ if (c.tabelas && (!best || c.tabelas.length > best.tabelas.length)) best = c; }); return best; }
+
+  /* ---------- hero: ciclo automático ---------- */
+  var hero = Mapa(document.getElementById('heroMap'), temaClaro);
+  var hTyped = document.querySelector('#heroMap .typed'), hStamp = document.getElementById('heroStamp');
+  var ordemHero = ['salario','deslig','sindicato','exame'], hi = 0, timers = [];
+  function later(f,t){ timers.push(setTimeout(f,t)); }
+  function heroRun(){
     timers.forEach(clearTimeout); timers = [];
-    ht.textContent = ''; hf.classList.remove('on'); hs.classList.remove('on'); st.textContent = 'aguardando';
-    spans.forEach(function(s){ s.className = ''; });
-    var t = 300;
-    for (var i = 1; i <= pedido.length; i++) (function(i){ later(function(){ ht.textContent = pedido.slice(0,i); }, t + i*34); })(i);
-    t += pedido.length*34 + 300;
-    later(function(){ st.textContent = 'buscando no mapa…'; }, t);
-    for (var k = 0; k < 14; k++) (function(k){
-      later(function(){ spans.forEach(function(s){ s.className=''; }); var r = (k*7+3) % codes.length; spans[r].className='scan'; spans[(r+5)%codes.length].className='scan'; spans[(r+11)%codes.length].className='scan'; }, t + k*110);
-    })(k);
-    t += 14*110;
-    later(function(){ spans.forEach(function(s){ s.className=''; }); spans[iA].className='hit'; st.textContent = '2 tabelas críticas'; }, t);
-    later(function(){ spans[iB].className='hit2'; }, t+350);
-    later(function(){ hf.classList.add('on'); st.textContent = 'JOIN provado'; }, t+900);
-    later(function(){ hs.classList.add('on'); st.textContent = 'pronto'; }, t+1700);
-    later(run, t+9000);
+    var p = PED.filter(function(x){ return x.id === ordemHero[hi % ordemHero.length]; })[0]; hi++;
+    hero.reset(); hStamp.classList.remove('on','blue'); hTyped.textContent = '';
+    var t = 200;
+    for (var i=1;i<=p.pedido.length;i++) (function(i){ later(function(){ hTyped.textContent = p.pedido.slice(0,i); }, t + i*38); })(i);
+    t += p.pedido.length*38 + 300;
+    var W = hero.W(), steps = 40;
+    for (var k=0;k<=steps;k++) (function(k){ later(function(){ hero.st.scan = 20 + (W-40)*k/steps; hero.st.fade = k/steps*.8; hero.draw(); }, t + k*28); })(k);
+    t += steps*28 + 100;
+    later(function(){ hero.st.scan = -1; p.detalhar.forEach(function(n){ hero.st.hot[BYNAME[n]] = 1; }); hero.st.labels = p.detalhar.map(function(n){ var c = p.criticas.filter(function(x){ return x[0]===n; })[0]; return { i: BYNAME[n], t: n, s: c ? 'pontuação ' + fmt(c[1]) : '' }; }); hero.draw(); }, t);
+    t += 700;
+    var cm = caminhoPrincipal(p);
+    later(function(){
+      if (cm){ hero.st.path = cm.tabelas.map(function(n){ return BYNAME[n]; }); hero.draw();
+        hStamp.innerHTML = 'JOIN provado<small>' + esc(cm.tabelas.join(' → ')) + '</small>'; hStamp.classList.remove('blue'); }
+      else { hStamp.innerHTML = 'Sem prova<small>não inventa: pergunta</small>'; }
+      var b = document.getElementById('heroMap').getBoundingClientRect();
+      hStamp.style.left = Math.max(12, b.width*.5 - 120) + 'px'; hStamp.style.top = (b.height - 118) + 'px';
+      hStamp.classList.add('on'); thump();
+    }, t);
+    later(heroRun, t + 4200);
   }
-  if (reduce) finalState(); else run();
+  if (reduce){ var p0 = PED[0]; p0.detalhar.forEach(function(n){ hero.st.hot[BYNAME[n]] = 1; }); hero.st.fade = .8; hero.st.labels = p0.detalhar.map(function(n){ return {i:BYNAME[n], t:n}; }); hero.st.path = caminhoPrincipal(p0).tabelas.map(function(n){ return BYNAME[n]; }); hero.draw(); hTyped.textContent = p0.pedido; }
+  else setTimeout(heroRun, 600);
 
-  /* ---------- demonstração com saídas reais (Sistema Aurora) ---------- */
-  var D = {
-    salario: {
-      pedido: 'salário dos colaboradores por cargo',
-      termos: 'salario, colaboradores, cargo, remuneracao, vencimento, funcionario',
-      modulo: 'F - Folha',
-      rank: [['F_FUNCIONARIO',100.39,'#, CODCARGO, VALORREMUNERACAO'],['F_CARGO',61.72,'#, CODCARGO, DESCRICAOCARGO'],['T_ABONO',39.08,'#'],['F_PROVISAO_DECIMO_TERCEIRO',32.87,'#, VALORPROVISAO'],['S_HISTORICO_VAGA',29.96,'CODCARGO']],
-      detalhar: 'F_FUNCIONARIO F_CARGO',
-      out: '<span class="cm">Caminho F_FUNCIONARIO -> F_CARGO:</span>\n    <span class="k">FROM</span> <span class="t">F_FUNCIONARIO</span>\n    <span class="k">INNER JOIN</span> <span class="t">F_CARGO</span> <span class="k">ON</span> F_FUNCIONARIO.CODCARGO = F_CARGO.CODCARGO\n\n### F_FUNCIONARIO   <span class="cm">PK: MATRICULA</span>\n  - CODCARGO [int NULL] — Codigo do cargo do colaborador\n  - NOME [varchar(100) NULL] — Nome do colaborador\n  - VALORREMUNERACAO [decimal(15,2) NULL] — Valor da\n    remuneracao mensal do colaborador\n<span class="ok">  FKs com agrupamento provado e JOIN pronto (77)</span>\n\n### F_CARGO   <span class="cm">PK: CODCARGO</span>\n  - CODCARGO [int NOT NULL] — Codigo do cargo\n  - DESCRICAOCARGO [varchar(100) NULL] — Descricao do cargo',
-      sql: '<span class="k">SELECT</span> c.<span class="t">DESCRICAOCARGO</span> <span class="k">AS</span> cargo,\n       <span class="k">COUNT</span>(*) <span class="k">AS</span> colaboradores,\n       <span class="k">SUM</span>(f.<span class="t">VALORREMUNERACAO</span>) <span class="k">AS</span> folha_mensal\n<span class="k">FROM</span> <span class="t">F_FUNCIONARIO</span> <span class="k">AS</span> f\n<span class="k">INNER JOIN</span> <span class="t">F_CARGO</span> <span class="k">AS</span> c <span class="k">ON</span> f.<span class="t">CODCARGO</span> = c.<span class="t">CODCARGO</span>\n<span class="k">GROUP BY</span> c.<span class="t">DESCRICAOCARGO</span>\n<span class="k">ORDER BY</span> folha_mensal <span class="k">DESC</span>;',
-      v: ['ok','JOIN provado pela FK FK_F_FUNCIONARIO_F_CARGO_CODCARGO. Todos os nomes do SQL vieram do detalhar.']
-    },
-    deslig: {
-      pedido: 'motivo do desligamento dos colaboradores',
-      termos: 'motivo, desligamento, colaboradores, deligamento, funcionario',
-      modulo: 'F - Folha',
-      rank: [['F_FUNCIONARIO',83.15,'#'],['F_DESLIGAMENTO',74.55,'#, CODMOTIVO, DATADESLIGAMENTO'],['F_MOTIVO_DESLIGAMENTO',54.74,'#, CODMOTIVO, DESCRICAOMOTIVO'],['F_TIPO_DESLIGAMENTO',42.06,'#, CODTIPO, DESCRICAOTIPO'],['T_ABONO',41.48,'#']],
-      detalhar: 'F_FUNCIONARIO F_DESLIGAMENTO F_MOTIVO_DESLIGAMENTO',
-      out: '<span class="cm">Caminho F_FUNCIONARIO -> F_MOTIVO_DESLIGAMENTO:</span>\n<span class="cm">  F_FUNCIONARIO -> F_DESLIGAMENTO -> F_MOTIVO_DESLIGAMENTO</span>\n    <span class="k">FROM</span> <span class="t">F_FUNCIONARIO</span>\n    <span class="k">INNER JOIN</span> <span class="t">F_DESLIGAMENTO</span>\n      <span class="k">ON</span> F_DESLIGAMENTO.MATRICULA = F_FUNCIONARIO.MATRICULA\n    <span class="k">INNER JOIN</span> <span class="t">F_MOTIVO_DESLIGAMENTO</span>\n      <span class="k">ON</span> F_DESLIGAMENTO.CODMOTIVO = F_MOTIVO_DESLIGAMENTO.CODMOTIVO\n\n### F_DESLIGAMENTO   <span class="cm">PK: MATRICULA</span>\n  - CODMOTIVO [int NULL] — Codigo do motivo de deligamento\n  - DATADESLIGAMENTO [datetime NULL] — Data de desligamento\n    do colaborador\n  - MATRICULA [int NOT NULL] — Matricula do colaborador',
-      sql: '<span class="k">SELECT</span> f.<span class="t">NOME</span>,\n       d.<span class="t">DATADESLIGAMENTO</span>,\n       m.<span class="t">DESCRICAOMOTIVO</span> <span class="k">AS</span> motivo\n<span class="k">FROM</span> <span class="t">F_FUNCIONARIO</span> <span class="k">AS</span> f\n<span class="k">INNER JOIN</span> <span class="t">F_DESLIGAMENTO</span> <span class="k">AS</span> d\n  <span class="k">ON</span> d.<span class="t">MATRICULA</span> = f.<span class="t">MATRICULA</span>\n<span class="k">INNER JOIN</span> <span class="t">F_MOTIVO_DESLIGAMENTO</span> <span class="k">AS</span> m\n  <span class="k">ON</span> d.<span class="t">CODMOTIVO</span> = m.<span class="t">CODMOTIVO</span>;',
-      v: ['ok','Caminho de dois saltos, os dois provados por FK. O termo "deligamento", grafado assim nas descrições do cadastro, entrou como sinônimo.']
-    },
-    exame: {
-      pedido: 'exames dos candidatos na seleção',
-      termos: 'exames, candidatos, selecao',
-      modulo: 'S - Selecao',
-      rank: [['S_EXAME',65.43,'#, DATAEXAME'],['S_BENEFICIO_VAGA',53.80,'CODCANDIDATO'],['S_CANDIDATO',49.78,'#, CODCANDIDATO, NOMECANDIDATO']],
-      detalhar: 'S_EXAME S_CANDIDATO',
-      out: '<span class="cm">Caminho S_EXAME -> S_CANDIDATO:</span> <span class="am">nenhum (ver avisos)</span>\n\n<span class="am">Avisos:\n  ! Sem caminho de FK de até 4 saltos entre: S_EXAME\n    e S_CANDIDATO. Não invente a ligação: confirme com\n    o usuário como essas tabelas se relacionam.</span>\n\n### S_EXAME   <span class="cm">PK: MATRICULA</span>\n  - # — Exames periodicos ocupacionais\n  - DATAEXAME [datetime NULL] — Data do exame periodico\n  - MATRICULA [int NOT NULL] — Matricula do colaborador\n\n### S_CANDIDATO   <span class="cm">PK: CODCANDIDATO</span>\n  - CODCANDIDATO [int NOT NULL] — Codigo do candidato\n  - NOMECANDIDATO [varchar(100) NULL] — Nome do candidato',
-      sql: null,
-      v: ['warn','Sem SQL, de propósito. O exame é do colaborador (chave MATRICULA), não do candidato, e não existe ligação provada entre as duas tabelas. O Claude pergunta a você em vez de inventar um JOIN.']
-    },
-    formula: {
-      formula: true,
-      bad: '<span class="cm">$ stella.py validar</span> "SOMA3(1, 2, 3)"\n\n<span class="no">INVÁLIDA</span> — contexto (todos)\n  ERRO [funcao_inexistente] (linha 1, col 1):\n  "SOMA3" não existe no dicionário de fórmulas\n  (parecidas: SOMA2). Não há suporte documentado\n  — não use.',
-      good: '<span class="cm">$ stella.py validar</span> "SOMA2(10, ARREDONDE(3.456, 2))"\n\n<span class="ok">VÁLIDA</span> — contexto (todos)\n  funções usadas: SOMA2 (BASE, publico),\n                  ARREDONDE (BASE, publico)',
-      v: ['bad','"SOMA3" parece plausível, mas não existe na documentação. A fórmula é recusada e a função parecida que existe é sugerida.']
-    }
+  /* ---------- laboratório ---------- */
+  var SQL = {
+    salario: '<span class="k">SELECT</span> c.<span class="t">DESCRICAOCARGO</span> <span class="k">AS</span> cargo,\n       <span class="k">COUNT</span>(*) <span class="k">AS</span> colaboradores,\n       <span class="k">SUM</span>(f.<span class="t">VALORREMUNERACAO</span>) <span class="k">AS</span> folha_mensal\n<span class="k">FROM</span> <span class="t">F_FUNCIONARIO</span> <span class="k">AS</span> f\n<span class="k">INNER JOIN</span> <span class="t">F_CARGO</span> <span class="k">AS</span> c\n  <span class="k">ON</span> f.<span class="t">CODCARGO</span> = c.<span class="t">CODCARGO</span>\n<span class="k">GROUP BY</span> c.<span class="t">DESCRICAOCARGO</span>\n<span class="k">ORDER BY</span> folha_mensal <span class="k">DESC</span>;',
+    deslig: '<span class="k">SELECT</span> f.<span class="t">NOME</span>, d.<span class="t">DATADESLIGAMENTO</span>,\n       m.<span class="t">DESCRICAOMOTIVO</span> <span class="k">AS</span> motivo\n<span class="k">FROM</span> <span class="t">F_FUNCIONARIO</span> <span class="k">AS</span> f\n<span class="k">INNER JOIN</span> <span class="t">F_DESLIGAMENTO</span> <span class="k">AS</span> d\n  <span class="k">ON</span> d.<span class="t">MATRICULA</span> = f.<span class="t">MATRICULA</span>\n<span class="k">INNER JOIN</span> <span class="t">F_MOTIVO_DESLIGAMENTO</span> <span class="k">AS</span> m\n  <span class="k">ON</span> d.<span class="t">CODMOTIVO</span> = m.<span class="t">CODMOTIVO</span>;',
+    horas: '<span class="k">SELECT</span> f.<span class="t">NOME</span>, s.<span class="t">DATAAPURACAO</span>\n<span class="k">FROM</span> <span class="t">F_FUNCIONARIO</span> <span class="k">AS</span> f\n<span class="k">INNER JOIN</span> <span class="t">T_SALDO_BANCO_HORAS</span> <span class="k">AS</span> s\n  <span class="k">ON</span> s.<span class="t">MATRICULA</span> = f.<span class="t">MATRICULA</span>;\n<span class="c">-- falta a coluna do saldo: ela não veio no detalhar.</span>\n<span class="c">-- O Claude pergunta em vez de inventar uma.</span>',
+    sindicato: '<span class="k">SELECT</span> f.<span class="t">NOME</span>, s.<span class="t">NOMESINDICATO</span>\n<span class="k">FROM</span> <span class="t">F_FUNCIONARIO</span> <span class="k">AS</span> f\n<span class="k">INNER JOIN</span> <span class="t">F_SINDICATO_OPCAO</span> <span class="k">AS</span> o\n  <span class="k">ON</span> o.<span class="t">MATRICULA</span> = f.<span class="t">MATRICULA</span>\n<span class="k">INNER JOIN</span> <span class="t">F_SINDICATO</span> <span class="k">AS</span> s\n  <span class="k">ON</span> o.<span class="t">CODSINDICATO</span> = s.<span class="t">CODSINDICATO</span>;',
+    unidade: '<span class="k">SELECT</span> e.<span class="t">RAZAOSOCIAL</span>, u.<span class="t">NOMEUNIDADE</span>\n<span class="k">FROM</span> <span class="t">N_EMPRESA</span> <span class="k">AS</span> e\n<span class="k">INNER JOIN</span> <span class="t">N_UNIDADE</span> <span class="k">AS</span> u\n  <span class="k">ON</span> u.<span class="t">CODEMPRESA</span> = e.<span class="t">CODEMPRESA</span>\n<span class="k">ORDER BY</span> e.<span class="t">RAZAOSOCIAL</span>, u.<span class="t">NOMEUNIDADE</span>;',
+    exame: ''
   };
-  var ICON = {
-    ok:'<svg width="18" height="18" viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" stroke="#4ade80" stroke-width="2" fill="none" stroke-linecap="round"/></svg>',
-    warn:'<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#fbbf24" stroke-width="1.8"><path d="M10 2.5 18 17H2z"/><path d="M10 8v4M10 14.5v.5"/></svg>',
-    bad:'<svg width="18" height="18" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" stroke="#f87171" stroke-width="2" stroke-linecap="round"/></svg>'
+  var NOTA = {
+    salario: ['JOIN direto', null],
+    deslig: ['dois saltos', null],
+    horas: ['coluna ausente', 'O caminho está provado, mas a tabela de saldo só tem MATRICULA e DATAAPURACAO. A coluna do saldo não existe no mapa, então ela não entra no SQL.'],
+    sindicato: ['tabela no meio', null],
+    unidade: ['outro módulo', null],
+    exame: ['sem prova', null]
   };
-  var pane = document.getElementById('pane');
-  function render(k){
-    var d = D[k], h = '';
-    if (d.formula){
-      h += '<div class="col"><div><p class="stage-l"><b>1</b> a função inventada</p><div class="term"><div class="tbar"><b>stella.py validar</b><span class="st no">recusada</span></div><pre>'+d.bad+'</pre></div></div></div>';
-      h += '<div class="col"><div><p class="stage-l"><b>2</b> só com o que está documentado</p><div class="term"><div class="tbar"><b>stella.py validar</b><span class="st ok">válida</span></div><pre>'+d.good+'</pre></div></div>';
-      h += '<div class="verdict-box '+d.v[0]+'">'+ICON[d.v[0]]+'<span>'+d.v[1]+'</span></div></div>';
-      pane.innerHTML = h; return;
-    }
-    var max = d.rank[0][1];
-    h += '<div class="col"><div><p class="stage-l"><b>1</b> buscar</p><div class="term"><div class="tbar"><b>stella.py buscar</b><span>"'+esc(d.pedido)+'"</span></div>';
-    h += '<div class="meta-line"><br><b>Termos:</b> '+esc(d.termos)+'<br><b>Módulo provável:</b> '+esc(d.modulo)+'</div><div class="rank">';
-    d.rank.forEach(function(r,i){
-      h += '<div class="rk"><span class="pos">'+(i+1)+'</span><span class="nm">'+r[0]+'<span class="bar"><i data-w="'+(r[1]/max*100).toFixed(1)+'"></i></span><small>'+esc(r[2])+'</small></span><span class="sc">'+r[1].toFixed(2).replace('.',',')+'</span></div>';
-    });
-    h += '</div></div></div>';
-    if (d.sql){
-      h += '<div><p class="stage-l"><b>3</b> SQL escrito pelo Claude</p><div class="term"><pre>'+d.sql+'</pre></div></div>';
-    }
-    h += '</div><div class="col"><div><p class="stage-l"><b>2</b> detalhar</p><div class="term"><div class="tbar"><b>stella.py detalhar</b><span>'+d.detalhar+'</span></div><pre>'+d.out+'</pre></div></div>';
-    h += '<div class="verdict-box '+d.v[0]+'">'+ICON[d.v[0]]+'<span>'+d.v[1]+'</span></div></div>';
-    pane.innerHTML = h;
-    requestAnimationFrame(function(){ setTimeout(function(){ pane.querySelectorAll('.rk .bar i').forEach(function(b){ b.style.width = b.getAttribute('data-w')+'%'; }); }, 60); });
-  }
-  var tabs = document.querySelectorAll('.tabs button');
-  tabs.forEach(function(b){ b.addEventListener('click', function(){ tabs.forEach(function(x){ x.setAttribute('aria-selected', x===b); }); render(b.getAttribute('data-k')); }); });
-  render('salario');
-
-  /* ---------- equipe em órbita ---------- */
-  var CREW = [
-    {id:'stella', n:'Stella', r:'a porta de entrada', ring:0, d:'Todo pedido entra por aqui (<code>stella.py</code>): buscar, detalhar, validar, compor e solucionar. É o que o Claude chama, e a única forma de ler o mapa.'},
-    {id:'punk', n:'Punk Records', r:'a base local', ring:1, a:-90, ab:'PR', d:'O mapa do seu banco (<code>egghead/punk_records.db</code>) e os pacotes de conhecimento de fórmulas. Fica só no seu computador, fora do git.'},
-    {id:'nomi', n:'Nomi Nomi no Mi', r:'o motor de busca', ring:1, a:30, ab:'NN', d:'Casa o seu pedido com as descrições das colunas, usa sinônimos e radicais, e pesa a importância de cada tabela pelas ligações dela.'},
-    {id:'york', n:'York', r:'a única porta de escrita', ring:1, a:150, ab:'Y', d:'Importa, migra e enriquece o mapa, e ingere a documentação de fórmulas. Nada mais escreve na base.'},
-    {id:'shaka', n:'Shaka', r:'as fórmulas', ring:2, a:-60, ab:'S', d:'Compõe, valida e explica fórmulas de sistema, só com funções e sintaxe documentadas.'},
-    {id:'atlas', n:'Atlas', r:'guarda do comportamento', ring:2, a:0, ab:'A', d:'Confere que o comportamento continua idêntico a cada mudança e que o isolamento está de pé: nada da sua instância sai na distribuição.'},
-    {id:'pyth', n:'Pythagoras', r:'guarda da qualidade', ring:2, a:60, ab:'P', d:'Mede a qualidade da busca e recalibra os pesos por módulo com os casos e as confirmações reais.'},
-    {id:'edison', n:'Edison', r:'os sinônimos', ring:2, a:120, ab:'E', d:'Sugere e aplica sinônimos revisados por você ("colaborador" é "funcionário"), nas duas direções.'},
-    {id:'lilith', n:'Lilith', r:'os casos sintéticos', ring:2, a:180, ab:'L', d:'Gera casos de teste a partir das descrições do seu próprio mapa, para calibrar a busca em escala.'},
-    {id:'mc', n:'Memory Card', r:'os seus relatórios', ring:2, a:240, ab:'MC', d:'Salva, versiona, busca e confere no schema os seus relatórios, num repositório seu no GitHub.'}
-  ];
-  var r1 = document.getElementById('r1'), r2 = document.getElementById('r2'), info = document.getElementById('crewInfo'), list = document.getElementById('crewList');
-  CREW.forEach(function(c){
-    if (c.ring){
-      var R = c.ring===1 ? 34 : 46, a = c.a*Math.PI/180;
-      var el = document.createElement('div'); el.className = 'sat';
-      el.style.left = (50 + R*Math.cos(a)) + '%'; el.style.top = (50 + R*Math.sin(a)) + '%';
-      el.innerHTML = '<button data-id="'+c.id+'" aria-pressed="false"><span class="o">'+c.ab+'</span><span>'+c.n+'</span></button>';
-      (c.ring===1 ? r1 : r2).appendChild(el);
-    }
-    var b = document.createElement('button'); b.type='button'; b.textContent = c.n; b.setAttribute('data-id', c.id); b.setAttribute('aria-pressed','false'); list.appendChild(b);
+  var lab = Mapa(document.getElementById('labCvs'), temaEscuro);
+  var chips = document.getElementById('chips'), rank = document.getElementById('rank'), cards = document.getElementById('cards'), warn = document.getElementById('warn'), sqlEl = document.getElementById('sql'), lStamp = document.getElementById('labStamp'), labMod = document.getElementById('labMod'), rcptN = document.getElementById('rcptN');
+  PED.forEach(function(p, i){
+    var b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-pressed', i===0); b.dataset.id = p.id;
+    b.innerHTML = '<small>' + NOTA[p.id][0] + '</small>' + esc(p.pedido); chips.appendChild(b);
   });
-  function pick(id){
-    var c = CREW.filter(function(x){ return x.id===id; })[0];
-    info.innerHTML = '<span class="role">'+c.r+'</span><h3>'+c.n+'</h3><p>'+c.d+'</p>';
-    document.querySelectorAll('[data-id]').forEach(function(b){ if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', b.getAttribute('data-id')===id); });
+  var lt = [];
+  function lat(f,t){ lt.push(setTimeout(f, reduce ? 0 : t)); }
+  function stepOn(n){ document.querySelectorAll('#labMap .steps span').forEach(function(s){ s.classList.toggle('on', +s.dataset.s <= n); }); }
+  function run(id){
+    lt.forEach(clearTimeout); lt = [];
+    var p = PED.filter(function(x){ return x.id === id; })[0];
+    chips.querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.id === id); });
+    lab.reset(); stepOn(1); labMod.textContent = 'módulo provável: ' + p.modulo;
+    rcptN.textContent = 'nº ' + String(100 + PED.indexOf(p)*37).padStart(3,'0');
+    var max = p.criticas[0][1];
+    rank.innerHTML = p.criticas.map(function(c, i){ var hot = p.detalhar.indexOf(c[0]) >= 0; return '<li class="'+(hot?'hot':'')+'"><span>'+(i+1)+'</span><span><b>'+c[0]+'</b><i style="--w:0%"></i></span><em>'+fmt(c[1])+'</em></li>'; }).join('');
+    rank.querySelectorAll('li').forEach(function(li, i){ lat(function(){ li.classList.add('on'); li.querySelector('i').style.setProperty('--w', (p.criticas[i][1]/max*100).toFixed(1)+'%'); }, 150 + i*110); });
+    var W = lab.W(), steps = 30;
+    for (var k=0;k<=steps;k++) (function(k){ lat(function(){ lab.st.scan = 20 + (W-40)*k/steps; lab.st.fade = k/steps*.8; lab.draw(); }, k*22); })(k);
+    cards.innerHTML = ''; warn.className = 'warn'; sqlEl.innerHTML = ''; lStamp.className = 'stamp';
+    lat(function(){
+      lab.st.scan = -1; stepOn(2);
+      p.detalhar.forEach(function(n){ lab.st.hot[BYNAME[n]] = 1; });
+      lab.st.labels = p.detalhar.map(function(n){ return { i: BYNAME[n], t: n }; });
+      var cm = caminhoPrincipal(p); if (cm) lab.st.path = cm.tabelas.map(function(n){ return BYNAME[n]; });
+      lab.draw();
+      var rel = {}; p.criticas.forEach(function(c){ c[2].forEach(function(col){ rel[c[0]+'.'+col] = 1; }); });
+      cards.innerHTML = p.detalhar.map(function(n, j){ var f = p.fichas[n]; var r = [-1.6, 1.1, -.6][j%3];
+        return '<div class="ficha" style="--r:'+r+'deg"><header><b>'+n+'</b><small>'+esc(f.desc)+'</small></header><ul>' +
+          f.colunas.map(function(c){ var pk = f.pk.indexOf(c[0]) >= 0, hit = rel[n+'.'+c[0]]; return '<li class="'+(pk?'pk ':'')+(hit?'hit':'')+'"><span title="'+esc(c[2])+'">'+c[0]+'</span><em>'+esc(c[1])+'</em></li>'; }).join('') + '</ul></div>'; }).join('');
+      cards.querySelectorAll('.ficha').forEach(function(el, j){ lat(function(){ el.classList.add('on'); }, 80 + j*160); });
+    }, steps*22 + 250);
+    lat(function(){
+      stepOn(3);
+      if (p.avisos.length){
+        warn.innerHTML = '<b>Aviso da Stella</b>' + esc(p.avisos[0]); warn.classList.add('on');
+        sqlEl.innerHTML = '<span class="c">-- Nenhum SQL.\n-- S_EXAME é do colaborador (chave MATRICULA),\n-- S_CANDIDATO é do candidato, e não há ligação\n-- provada entre as duas. O Claude pergunta a você.</span>';
+        lStamp.innerHTML = 'Sem prova<small>pergunte ao dono do banco</small>'; lStamp.className = 'stamp on';
+      } else {
+        if (NOTA[p.id][1]){ warn.innerHTML = '<b>Nota: coluna que não existe não entra</b>' + esc(NOTA[p.id][1]); warn.classList.add('on'); }
+        var full = SQL[p.id], plain = full.replace(/<[^>]+>/g,''), n = 0;
+        if (reduce){ sqlEl.innerHTML = full; }
+        else {
+          var tick = setInterval(function(){ n += 6; if (n >= plain.length){ clearInterval(tick); sqlEl.innerHTML = full; lStamp.innerHTML = 'Provado<small>JOIN por FK</small>'; lStamp.className = 'stamp on'; thump(); return; } sqlEl.textContent = plain.slice(0, n); }, 16);
+          lt.push(tick);
+        }
+        if (reduce){ lStamp.innerHTML = 'Provado<small>JOIN por FK</small>'; lStamp.className = 'stamp on'; }
+      }
+    }, steps*22 + 1000);
   }
-  document.getElementById('equipe').addEventListener('click', function(e){ var b = e.target.closest('button[data-id]'); if (b){ pick(b.getAttribute('data-id')); stopTour(); } });
-  var order = CREW.map(function(c){ return c.id; }), ti = 0, tour = null;
-  function stopTour(){ if (tour){ clearInterval(tour); tour = null; } }
-  pick('stella');
-  if (!reduce) tour = setInterval(function(){ ti = (ti+1) % order.length; pick(order[ti]); }, 4200);
+  chips.addEventListener('click', function(e){ var b = e.target.closest('button'); if (b) run(b.dataset.id); });
+  var labStarted = false;
+  var labIO = new IntersectionObserver(function(es){ if (es[0].isIntersecting && !labStarted){ labStarted = true; var m = location.hash.match(/lab=(\w+)/); run(m && PED.some(function(x){ return x.id === m[1]; }) ? m[1] : 'salario'); } }, {threshold:.25});
+  labIO.observe(document.getElementById('labMap'));
 
-  /* ---------- resultados ---------- */
-  var RES = [
-    ['Pedidos com várias partes (fórmula + tabela + cadastro) resolvidos',74,94],
-    ['Pedidos com fórmula que executa consulta resolvidos',70,90],
-    ['JOINs de chave composta entregues com prova',0,100],
-    ['Tabela certa entre as 3 primeiras, num ERP real',57,62],
-    ['Função certa entre as 3 primeiras, na busca de fórmulas',95,95]
+  /* ---------- lista de peças (vista explodida) ---------- */
+  var PECAS = [
+    ['Punk Records','A base local: o mapa do seu banco e os pacotes de conhecimento de fórmulas.','egghead/'],
+    ['Nomi Nomi no Mi','O motor de busca: casa o pedido com as descrições das colunas e pesa cada tabela pelas ligações.','nomi_nomi_no_mi/'],
+    ['York','A única porta de escrita: importa, migra, enriquece e ingere a documentação.','satelites/york.py'],
+    ['Shaka','Compõe, valida e explica fórmulas, só com o que está documentado.','satelites/shaka.py'],
+    ['Atlas','Guarda do comportamento: nada muda sem aviso, e nada da sua instância sai na distribuição.','satelites/atlas.py'],
+    ['Pythagoras','Guarda da qualidade: mede a busca e recalibra os pesos por módulo.','satelites/pythagoras.py'],
+    ['Edison','Sinônimos revisados por você ("colaborador" é "funcionário").','satelites/edison.py'],
+    ['Lilith','Casos sintéticos tirados do seu próprio mapa, para calibrar em escala.','satelites/lilith.py'],
+    ['Memory Card','Salva, versiona, busca e confere no schema os seus relatórios.','satelites/memory_card.py']
   ];
-  var bars = document.getElementById('bars'), bh = '';
-  RES.forEach(function(r){
-    bh += '<div class="br"><p>'+r[0]+'</p><div class="row old"><span>anterior</span><span class="track"><i data-w="'+r[1]+'"></i></span><b>'+r[1]+'%</b></div><div class="row new"><span>agora</span><span class="track"><i data-w="'+r[2]+'"></i></span><b>'+r[2]+'%</b></div></div>';
+  var ex = document.getElementById('exploded'), tb = document.querySelector('#parts tbody');
+  var s = '<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#121212" stroke-width=".8"/></pattern></defs>';
+  s += '<circle cx="280" cy="280" r="250" fill="none" stroke="rgba(18,18,18,.15)" stroke-dasharray="2 5"/><circle cx="280" cy="280" r="150" fill="none" stroke="rgba(18,18,18,.15)" stroke-dasharray="2 5"/>';
+  s += '<line x1="20" y1="280" x2="540" y2="280" stroke="rgba(31,59,255,.25)" stroke-dasharray="12 4 2 4"/><line x1="280" y1="20" x2="280" y2="540" stroke="rgba(31,59,255,.25)" stroke-dasharray="12 4 2 4"/>';
+  s += '<g><circle cx="280" cy="280" r="74" fill="#f7f5ef" stroke="#121212" stroke-width="2"/><circle cx="280" cy="280" r="60" fill="url(#hatch)" stroke="#121212"/><circle cx="280" cy="280" r="40" fill="#121212"/>' +
+       '<text x="280" y="278" text-anchor="middle" font-family="Instrument Serif, serif" font-size="26" fill="#eeebe3">Stella</text><text x="280" y="296" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#ff3b1f">stella.py</text></g>';
+  PECAS.forEach(function(pc, i){
+    var a = (-90 + i*40) * Math.PI/180, R = i%2 ? 205 : 190, x = 280 + R*Math.cos(a), y = 280 + R*Math.sin(a);
+    var lx = 280 + 78*Math.cos(a), ly = 280 + 78*Math.sin(a);
+    var shape = i % 3 === 0 ? '<circle class="body" cx="'+x+'" cy="'+y+'" r="24" fill="#f7f5ef" stroke="#121212" stroke-width="1.5"/>' : '<rect x="'+(x-26)+'" y="'+(y-18)+'" width="52" height="36" fill="#f7f5ef" stroke="#121212" stroke-width="1.5"/>';
+    var tx = x + (Math.cos(a) >= 0 ? 34 : -34), anc = Math.cos(a) >= 0 ? 'start' : 'end';
+    if (Math.abs(Math.cos(a)) < .2){ tx = x; anc = 'middle'; }
+    var ty = Math.abs(Math.cos(a)) < .2 ? (y < 280 ? y - 30 : y + 40) : y + 4;
+    s += '<g class="part" data-i="'+i+'" tabindex="0" role="button" aria-label="'+pc[0]+'"><line class="ld" x1="'+lx+'" y1="'+ly+'" x2="'+x+'" y2="'+y+'" stroke="#121212" stroke-dasharray="3 3"/>' + shape +
+      '<text class="num" x="'+x+'" y="'+(y+5)+'" text-anchor="middle" font-family="Instrument Serif, serif" font-size="20" fill="#121212">'+(i+1)+'</text>' +
+      '<text x="'+tx+'" y="'+ty+'" text-anchor="'+anc+'" font-family="JetBrains Mono, monospace" font-size="11" fill="#121212" letter-spacing=".5">'+pc[0].toUpperCase()+'</text></g>';
+    tb.insertAdjacentHTML('beforeend', '<tr data-i="'+i+'"><td>'+String(i+1).padStart(2,'0')+'</td><td>'+pc[0]+'</td><td>'+pc[1]+'</td><td>'+pc[2]+'</td></tr>');
   });
-  bars.innerHTML = bh;
-  function fillBars(){ bars.querySelectorAll('.track i').forEach(function(b){ b.style.width = b.getAttribute('data-w')+'%'; }); }
-  if (!('IntersectionObserver' in window) || reduce) fillBars();
-  else { var bo = new IntersectionObserver(function(es){ if (es[0].isIntersecting){ setTimeout(fillBars, 250); bo.disconnect(); } }, {threshold:.2}); bo.observe(bars); }
+  ex.innerHTML = s;
+  function pick(i){ document.querySelectorAll('#exploded .part, #parts tr[data-i]').forEach(function(el){ el.classList.toggle('on', el.dataset.i == i); }); }
+  document.getElementById('pecas').addEventListener('mouseover', function(e){ var el = e.target.closest('[data-i]'); if (el) pick(el.dataset.i); });
+  document.getElementById('pecas').addEventListener('click', function(e){ var el = e.target.closest('[data-i]'); if (el) pick(el.dataset.i); });
+  document.getElementById('pecas').addEventListener('focusin', function(e){ var el = e.target.closest('[data-i]'); if (el) pick(el.dataset.i); });
+  pick(0);
+
+  /* ---------- ensaios ---------- */
+  var RES = [['Pedidos com várias partes (fórmula + tabela + cadastro) resolvidos',74,94],['Pedidos com fórmula que executa consulta resolvidos',70,90],['JOINs de chave composta entregues com prova',0,100],['Tabela certa entre as 3 primeiras, num ERP real',57,62],['Função certa entre as 3 primeiras, na busca de fórmulas',95,95]];
+  var ch = document.getElementById('chart');
+  ch.innerHTML = RES.map(function(r, i){ return '<div class="bar"><p>'+r[0]+(i===3?' <span class="hand" style="font-size:23px;margin-left:8px;display:inline-block;transform:rotate(-3deg)">ainda difícil → por isso pergunta</span>':'')+'</p><div class="row old"><span>anterior</span><span class="tr"><i data-w="'+r[1]+'"></i></span><b>'+r[1]+'%</b></div><div class="row new"><span>agora</span><span class="tr"><i data-w="'+r[2]+'"'+(i===3?' style="background:var(--red)"':'')+'></i></span><b>'+r[2]+'%</b></div></div>'; }).join('');
+  function fill(){ ch.querySelectorAll('i[data-w]').forEach(function(b){ b.style.width = b.dataset.w + '%'; }); }
+
+  /* ---------- revelar ---------- */
+  var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); if (e.target.id === 'chart') setTimeout(fill, 200); io.unobserve(e.target); } }); }, {threshold:.15});
+  document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+  if (reduce) fill();
 
   /* ---------- instalar ---------- */
-  var osBtns = document.querySelectorAll('.os button');
-  function setOS(o){
-    osBtns.forEach(function(b){ b.setAttribute('aria-selected', b.getAttribute('data-os')===o); });
-    document.querySelectorAll('.cmd pre').forEach(function(p){ p.textContent = p.getAttribute('data-'+o); });
-  }
-  osBtns.forEach(function(b){ b.addEventListener('click', function(){ setOS(b.getAttribute('data-os')); }); });
+  var osB = document.querySelectorAll('.os button');
+  function setOS(o){ osB.forEach(function(b){ b.setAttribute('aria-selected', b.dataset.os === o); }); document.querySelectorAll('.cmd pre').forEach(function(p){ p.textContent = p.getAttribute('data-'+o); }); }
+  osB.forEach(function(b){ b.addEventListener('click', function(){ setOS(b.dataset.os); }); });
   setOS(/Mac|Linux|X11/.test(navigator.userAgent) && !/Windows/.test(navigator.userAgent) ? 'nix' : 'win');
-  document.querySelectorAll('.cmd .copy').forEach(function(b){
-    b.addEventListener('click', function(){
-      var t = b.closest('.cmd').querySelector('pre').textContent;
-      var done = function(){ b.textContent = 'Copiado'; setTimeout(function(){ b.textContent = 'Copiar'; }, 1600); };
-      if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, function(){});
-    });
-  });
+  document.querySelectorAll('.cmd .copy').forEach(function(b){ b.addEventListener('click', function(){ var t = b.closest('.cmd').querySelector('pre').textContent; if (navigator.clipboard) navigator.clipboard.writeText(t).then(function(){ b.textContent = 'Copiado'; setTimeout(function(){ b.textContent = 'Copiar'; }, 1500); }); }); });
 })();
 </script>
 </body>

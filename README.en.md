@@ -1,8 +1,8 @@
-<a href="https://tiagocardosobezerra.github.io/vegapunk/"><img width="100%" alt="Vegapunk: ask in plain language and get T-SQL with your database's real names: the real tables, columns and JOINs from your SQL Server. In the animation, the request finds tables T001042 and T000318, proves the JOIN through the composite key and becomes the query." src="assets/readme/hero-en.svg" /></a>
+<a href="https://tiagocardosobezerra.github.io/vegapunk/"><img width="100%" alt="Vegapunk doesn't guess. It knows. Ask in Portuguese and get T-SQL with your database’s real names. In the animation, a request sweeps the map of the fictional test database (192 tables, 246 links), highlights F_FUNCIONARIO and F_CARGO and stamps the proven JOIN." src="assets/readme/hero-en.svg" /></a>
 
 <p align="center">
   <a href="https://tiagocardosobezerra.github.io/vegapunk/"><strong>Project site</strong></a> (Portuguese) ·
-  <a href="https://tiagocardosobezerra.github.io/vegapunk/#demo"><strong>See the demo</strong></a> ·
+  <a href="https://tiagocardosobezerra.github.io/vegapunk/#laboratorio"><strong>See the lab</strong></a> ·
   <a href="#get-started-in-3-steps"><strong>Install</strong></a> ·
   <a href="#results"><strong>Results</strong></a>
 </p>
@@ -39,14 +39,14 @@ answers with what actually exists.
 
 ## In 30 seconds
 
-> **You:** salário dos colaboradores por cargo *(employee salary by job title)*
+> **You:** motivo do desligamento dos colaboradores *(reason each employee was let go)*
 
-Vegapunk searches your database map, details the columns and returns the proven JOIN. Claude writes the SQL with
+Vegapunk searches your database map, details the tables and returns the proven two-hop path. Claude writes the SQL with
 those names only:
 
-<img width="100%" alt="Real Vegapunk output on the fictional test database. The search finds F_FUNCIONARIO and F_CARGO among the critical tables, detail returns the columns and the JOIN proven by the FK, and Claude writes the SQL that sums pay by job title." src="assets/readme/demo-en.svg" />
+<img width="100%" alt="Lab: real (trimmed) Stella output on the fictional test database. Request (in Portuguese): reason each employee was let go. Search ranks the tables, detail returns the cards and the path F_FUNCIONARIO, F_DESLIGAMENTO, F_MOTIVO_DESLIGAMENTO, and step 3 shows an example SQL written with those names only." src="assets/readme/demo-en.svg" />
 
-<p align="center"><sub>Real Stella output (trimmed) on "Sistema Aurora", the 100% fictional database that ships with the tests. <a href="https://tiagocardosobezerra.github.io/vegapunk/#demo">See all four requests on the site</a>, including the one left without SQL for lack of proof.</sub></p>
+<p align="center"><sub>Real Stella output (trimmed) on "Sistema Aurora", the 100% fictional database that ships with the tests; the step 3 SQL is an example. <a href="https://tiagocardosobezerra.github.io/vegapunk/#laboratorio">See all six requests on the site</a>, including the one left without SQL for lack of proof.</sub></p>
 
 ## What it does for you
 
@@ -63,13 +63,13 @@ those names only:
 A wrong link doesn't throw an error: it runs and returns the wrong number. That's why Vegapunk only hands you a JOIN
 when it can show where it came from. When it can't, it writes no SQL and asks you.
 
-<img width="100%" alt="The proof rule. With proof: F_FUNCIONARIO and F_CARGO linked by the FK, JOIN delivered; proof can come from the database constraint, the system dictionary or the parent table key. Without proof: there is no FK path between S_EXAME and S_CANDIDATO, so no JOIN is made up." src="assets/readme/prova-en.svg" />
+<img width="100%" alt="JOINs only with proof. Proof comes from the database constraint, the system dictionary or the parent table key. With none of them, between S_EXAME and S_CANDIDATO for example, Vegapunk does not make up the link and asks." src="assets/readme/prova-en.svg" />
 
 No "I think the table is called EMPLOYEE". If a name did not come from your database, it does not go into the SQL.
 
 ## Results
 
-<img width="100%" alt="Results measured on requests the engine had never seen: multi-part requests from 74% to 94%; formulas that run a query from 70% to 90%; composite-key JOINs with proof from 0% to 100%; right table in the top 3 on a real ERP from 57% to 62%; right function in the top 3, 95% in both versions." src="assets/readme/resultados-en.svg" />
+<img width="100%" alt="Tests on requests the engine had never seen: multi-part from 74% to 94%; formulas that run a query from 70% to 90%; composite-key JOINs with proof from 0% to 100%; right table in the top 3 on a real ERP from 57% to 62%; right function in the top 3, 95% in both versions." src="assets/readme/resultados-en.svg" />
 
 <details>
 <summary><strong>The numbers as a table</strong></summary>
@@ -214,7 +214,7 @@ Then just ask Claude: "save this report to the Memory Card". It shows a preview 
 
 ## How it works inside
 
-<img width="100%" alt="Inside Vegapunk: Stella is the front door; around it orbit Punk Records (the local base), Nomi Nomi no Mi (the search engine), York (the only write path), Shaka (formulas), Atlas and Pythagoras (the guards), Edison and Lilith (calibration) and the Memory Card (your reports)." src="assets/readme/equipe-en.svg" />
+<img width="100%" alt="Vegapunk parts list, exploded view: Stella at the center, the only front door, and nine numbered parts around it: Punk Records, Nomi Nomi no Mi, York, Shaka, Atlas, Pythagoras, Edison, Lilith and Memory Card." src="assets/readme/equipe-en.svg" />
 
 | Piece | What it does |
 |---|---|
